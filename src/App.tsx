@@ -19,6 +19,10 @@ import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminProducts from './pages/admin/AdminProducts';
 import AdminOrders from './pages/admin/AdminOrders';
 import AdminSettings from './pages/admin/AdminSettings';
+import AdminCategories from './pages/admin/AdminCategories';
+import AdminCustomers from './pages/admin/AdminCustomers';
+import AdminReviews from './pages/admin/AdminReviews';
+import AdminCoupons from './pages/admin/AdminCoupons';
 
 function AdminGuard({ children }: { children: React.ReactNode }) {
   const { isAuthenticated } = useAdmin();
@@ -61,9 +65,13 @@ export default function App() {
                   <AdminLayout />
                 </AdminGuard>
               }>
-                <Route path="dashboard" element={<AdminDashboard />} />
+                <Route path="dashboard"  element={<AdminDashboard />} />
                 <Route path="productos"  element={<AdminProducts />} />
+                <Route path="categorias" element={<AdminCategories />} />
                 <Route path="pedidos"    element={<AdminOrders />} />
+                <Route path="clientes"   element={<AdminCustomers />} />
+                <Route path="resenas"    element={<AdminReviews />} />
+                <Route path="cupones"    element={<AdminCoupons />} />
                 <Route path="ajustes"    element={<AdminSettings />} />
               </Route>
 
