@@ -19,7 +19,7 @@ const emptyOrder: Omit<Order, 'id'> = {
 };
 
 export default function AdminOrders() {
-  const { orders, addOrder, updateOrderStatus, deleteOrder, products } = useAdmin();
+  const { orders, addOrder, updateOrder, updateOrderStatus, deleteOrder, products } = useAdmin();
   const [search, setSearch] = useState('');
   const [filterStatus, setFilterStatus] = useState<string>('Todos');
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
