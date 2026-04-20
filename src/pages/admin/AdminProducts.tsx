@@ -45,7 +45,7 @@ export default function AdminProducts() {
   const handleSave = () => {
     const specs = specsInput.split('\n').map(s => s.trim()).filter(Boolean);
     const finalForm = { ...form, specs };
-    if (modal === 'add') addProduct({ ...finalForm, id: 0 });
+    if (modal === 'add') addProduct(finalForm);
     else if (modal === 'edit' && selected) updateProduct({ ...finalForm, id: selected.id });
     setSaved(true);
     setTimeout(() => { setSaved(false); setModal(null); }, 1000);
