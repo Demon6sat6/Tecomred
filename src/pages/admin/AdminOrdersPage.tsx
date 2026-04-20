@@ -23,7 +23,7 @@ export default function AdminOrders() {
   const [search, setSearch] = useState('');
   const [filterStatus, setFilterStatus] = useState<string>('Todos');
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
-  const [modal, setModal] = useState<'add' | 'detail' | 'delete' | null>(null);
+  const [modal, setModal] = useState<'add' | 'detail' | 'edit' | 'delete' | null>(null);
   const [selected, setSelected] = useState<Order | null>(null);
   const [form, setForm] = useState<Omit<Order, 'id'>>(emptyOrder);
   const [saved, setSaved] = useState(false);
