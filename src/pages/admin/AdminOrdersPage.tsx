@@ -120,8 +120,7 @@ export default function AdminOrders() {
                     <button onClick={() => { setSelected(order); setModal('detail'); }}
                       className="text-sky-400 hover:text-sky-300 text-xs font-mono font-semibold transition-colors">{order.id}</button>
                     <p className="text-gray-600 text-[10px]">{order.items.length} item{order.items.length !== 1 ? 's' : ''}</p>
-                  </td>
-                  <td className="px-4 py-3">
+                  </td>                  <td className="px-4 py-3">
                     <p className="text-white text-xs font-semibold">{order.customer}</p>
                     <p className="text-gray-500 text-[10px]">{order.email}</p>
                   </td>
