@@ -111,6 +111,7 @@ export default function AdminCustomers() {
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center justify-end gap-1.5">
+                      <button onClick={() => openHistory(c)} className="p-1.5 rounded-lg hover:bg-indigo-500/15 text-gray-400 hover:text-indigo-400 transition-colors" title="Historial"><ShoppingBag className="w-3.5 h-3.5" /></button>
                       <button onClick={() => openEdit(c)} className="p-1.5 rounded-lg hover:bg-sky-500/15 text-gray-400 hover:text-sky-400 transition-colors"><Pencil className="w-3.5 h-3.5" /></button>
                       <button onClick={() => openDelete(c)} className="p-1.5 rounded-lg hover:bg-red-500/15 text-gray-400 hover:text-red-400 transition-colors"><Trash2 className="w-3.5 h-3.5" /></button>
                     </div>
