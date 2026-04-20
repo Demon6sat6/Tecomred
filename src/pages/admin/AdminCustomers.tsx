@@ -9,9 +9,9 @@ const emptyCustomer: Omit<Customer, 'id'> = {
 };
 
 export default function AdminCustomers() {
-  const { customers, addCustomer, updateCustomer, deleteCustomer } = useAdmin();
+  const { customers, addCustomer, updateCustomer, deleteCustomer, orders } = useAdmin();
   const [search, setSearch] = useState('');
-  const [modal, setModal] = useState<'add' | 'edit' | 'delete' | null>(null);
+  const [modal, setModal] = useState<'add' | 'edit' | 'delete' | 'history' | null>(null);
   const [selected, setSelected] = useState<Customer | null>(null);
   const [form, setForm] = useState<Omit<Customer, 'id'>>(emptyCustomer);
   const [saved, setSaved] = useState(false);
