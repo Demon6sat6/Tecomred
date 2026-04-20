@@ -257,6 +257,53 @@ export default function AdminOrders() {
         </div>
       )}
 
+      {/* EDIT ORDER MODAL */}
+      {modal === 'edit' && selected && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="glass-strong rounded-2xl w-full max-w-md shadow-2xl border border-white/10">
+            <div className="flex items-center justify-between p-5 border-b border-white/10">
+              <h3 className="text-white font-bold">Editar pedido <span className="font-mono text-sky-400">{selected.id}</span></h3>
+              <button onClick={() => setModal(null)} className="p-1.5 rounded-lg hover:bg-white/10 text-gray-400"><X className="w-5 h-5" /></button>
+            </div>
+            <div className="p-5 space-y-4">
+              {([
+                { label: 'Cliente',   key: 'customer', placeholder: 'Juan Pérez' },
+                { label: 'Email',     key: 'email',    placeholder: 'juan@email.com' },
+                { label: 'Teléfono', key: 'phone',    placeholder: '+1 234 567' },
+                { label: 'Ciudad',   key: 'city',     placeholder: 'Caracas' },
+                { label: 'Dirección', key: 'address',  placeholder: 'Av. Principal 123' },
+              ] as const).map(f => (
+                <div key={f.key}>
+                  <label className="block text-xs text-gray-400 mb-1.5 font-medium">{f.label}</label>
+                  <input value={(selected as any)[f.key]} placeholder={f.placeholder}
+                    onChange={e => setSelected(s => s ? { ...s, [f.key]: e.target.value } : s)}
+                    className="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-gray-200 text-sm focus:outline-none focus:border-sky-500/60" />
+                </div>
+              ))}
+              <div>
+                <label className="block text-xs text-gray-400 mb-1.5 font-medium">Estado</label>
+                <select value={selected.status} onChange={e => setSelected(s => s ? { ...s, status: e.target.value as Order['status'] } : s)}
+                  className="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-gray-200 text-sm focus:outline-none focus:border-sky-500/60">
+                  {allStatuses.map(s => <option key={s} value={s} className="bg-gray-900">{s}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs text-gray-400 mb-1.5 font-medium">Notas</label>
+                <textarea value={selected.notes} onChange={e => setSelected(s => s ? { ...s, notes: e.target.value } : s)}
+                  rows={2} className="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-gray-200 text-sm focus:outline-none focus:border-sky-500/60 resize-none" />
+              </div>
+            </div>
+            <div className="flex gap-3 p-5 border-t border-white/10">
+              <button onClick={() => setModal(null)} className="flex-1 py-2.5 rounded-xl bg-white/5 border border-white/10 text-gray-300 text-sm font-semibold hover:bg-white/10 transition-colors">Cancelar</button>
+              <button onClick={() => { updateOrder(selected); setModal(null); }}
+                className="flex-1 py-2.5 rounded-xl gradient-brand text-white text-sm font-bold hover:opacity-90 active:scale-95 transition-all">
+                Guardar cambios
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* DETAIL MODAL */}
       {modal === 'detail' && selected && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
