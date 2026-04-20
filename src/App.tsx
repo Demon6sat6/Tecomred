@@ -20,7 +20,6 @@ export default function App() {
       <ToastProvider>
         <CartProvider>
           <div className="min-h-screen flex flex-col">
-            <AnnouncementBar />
             <Navbar />
             <main className="flex-1">
               <Routes>
