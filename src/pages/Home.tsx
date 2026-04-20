@@ -4,7 +4,7 @@ import {
   Network, Cpu, HardDrive, Cable, Wifi, Server,
   CheckCircle,
 } from 'lucide-react';
-import { products } from '../data/products';
+import { useStore } from '../context/StoreContext';
 import ProductCard from '../components/ProductCard';
 import Testimonials from '../components/Testimonials';
 import { useScrollReveal } from '../hooks/useScrollReveal';
