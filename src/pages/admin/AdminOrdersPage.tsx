@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Search, X, ChevronDown, Plus, Trash2, Check } from 'lucide-react';
+import { Search, X, ChevronDown, Plus, Trash2, Check, Pencil } from 'lucide-react';
 import { useAdmin, type Order } from '../../context/AdminContext';
 
 const statusColors: Record<string, string> = {
