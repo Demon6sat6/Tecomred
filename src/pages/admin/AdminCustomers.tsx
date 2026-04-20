@@ -29,7 +29,8 @@ export default function AdminCustomers() {
       orders: c.orders, totalSpent: c.totalSpent, joined: c.joined, status: c.status });
     setModal('edit');
   };
-  const openDelete = (c: Customer) => { setSelected(c); setModal('delete'); };
+  const openDelete  = (c: Customer) => { setSelected(c); setModal('delete'); };
+  const openHistory = (c: Customer) => { setSelected(c); setModal('history'); };
 
   const handleSave = () => {
     if (modal === 'add') addCustomer(form);
