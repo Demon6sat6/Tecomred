@@ -17,7 +17,7 @@ import AdminLogin from './pages/admin/AdminLogin';
 import AdminLayout from './pages/admin/AdminLayout';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminProducts from './pages/admin/AdminProducts';
-import AdminOrders from './pages/admin/AdminOrders';
+import AdminOrders from './pages/admin/AdminOrdersPage';
 import AdminSettings from './pages/admin/AdminSettings';
 import AdminCategories from './pages/admin/AdminCategories';
 import AdminCustomers from './pages/admin/AdminCustomers';
