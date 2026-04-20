@@ -1,10 +1,12 @@
 import { useState, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { SlidersHorizontal, Search, X } from 'lucide-react';
-import { products, categories } from '../data/products';
+import { categories } from '../data/products';
+import { useStore } from '../context/StoreContext';
 import ProductCard from '../components/ProductCard';
 
 export default function Products() {
+  const { products } = useStore();
   const [searchParams, setSearchParams] = useSearchParams();
   const [showFilters, setShowFilters] = useState(false);
 
