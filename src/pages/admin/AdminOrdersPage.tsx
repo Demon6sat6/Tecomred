@@ -15,7 +15,7 @@ const allStatuses: Order['status'][] = ['Pendiente', 'Procesando', 'Enviado', 'E
 const emptyOrder: Omit<Order, 'id'> = {
   customer: '', email: '', phone: '',
   date: new Date().toLocaleDateString('es', { day: 'numeric', month: 'short', year: 'numeric' }),
-  total: 0, status: 'Pendiente', city: '', address: '', notes: '', items: [],
+  total: 0, discount: 0, couponCode: '', status: 'Pendiente', city: '', address: '', notes: '', items: [],
 };
 
 export default function AdminOrders() {
