@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { useStore } from '../context/StoreContext';
 import ProductCard from '../components/ProductCard';
+import BrandsBar from '../components/BrandsBar';
 import Testimonials from '../components/Testimonials';
 import { useScrollReveal } from '../hooks/useScrollReveal';
 import { useCountUp } from '../hooks/useCountUp';
