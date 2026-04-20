@@ -5,6 +5,7 @@ import {
 } from 'lucide-react';
 import { useStore } from '../context/StoreContext';
 import { reviews } from '../data/reviews';
+import { useCart } from '../context/CartContext';
 import { useToast } from '../context/ToastContext';
 import ProductCard from '../components/ProductCard';
 import { useState } from 'react';
