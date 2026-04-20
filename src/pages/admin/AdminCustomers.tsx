@@ -134,9 +134,6 @@ export default function AdminCustomers() {
               <button onClick={() => setModal(null)} className="p-1.5 rounded-lg hover:bg-white/10 text-gray-400"><X className="w-5 h-5" /></button>
             </div>
             <div className="p-5 space-y-4">
-              <div className="grid grid-cols-2 gap-3">
-                <F label="Nombre completo *" name="name"  value={form.name}  placeholder="Juan Pérez" className="col-span-2" />
-              </div>
               <F label="Nombre completo *" name="name"  value={form.name}  placeholder="Juan Pérez" />
               <div className="grid grid-cols-2 gap-3">
                 <F label="Email *"    name="email"  value={form.email}  type="email" placeholder="juan@email.com" />
