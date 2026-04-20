@@ -179,6 +179,71 @@ export default function AdminCustomers() {
           </div>
         </div>
       )}
+
+      {/* History Modal */}
+      {modal === 'history' && selected && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="glass-strong rounded-2xl w-full max-w-lg max-h-[85vh] overflow-y-auto shadow-2xl border border-white/10">
+            <div className="flex items-center justify-between p-5 border-b border-white/10">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full gradient-brand flex items-center justify-center text-white text-sm font-bold">
+                  {selected.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
+                </div>
+                <div>
+                  <h3 className="text-white font-bold">{selected.name}</h3>
+                  <p className="text-gray-500 text-xs">{selected.email}</p>
+                </div>
+              </div>
+              <button onClick={() => setModal(null)} className="p-1.5 rounded-lg hover:bg-white/10 text-gray-400"><X className="w-5 h-5" /></button>
+            </div>
+            <div className="p-5">
+              {/* Stats */}
+              <div className="grid grid-cols-3 gap-3 mb-5">
+                {[
+                  { label: 'Pedidos', value: selected.orders },
+                  { label: 'Total gastado', value: `$${selected.totalSpent.toFixed(2)}` },
+                  { label: 'Cliente desde', value: selected.joined },
+                ].map(s => (
+                  <div key={s.label} className="glass rounded-xl p-3 text-center">
+                    <p className="text-white font-bold text-sm">{s.value}</p>
+                    <p className="text-gray-500 text-xs">{s.label}</p>
+                  </div>
+                ))}
+              </div>
+              {/* Orders */}
+              <h4 className="text-gray-400 text-xs uppercase tracking-wider font-semibold mb-3">Historial de pedidos</h4>
+              {(() => {
+                const customerOrders = orders.filter(o => o.email === selected.email);
+                return customerOrders.length > 0 ? (
+                  <div className="space-y-2">
+                    {customerOrders.map(o => (
+                      <div key={o.id} className="flex items-center justify-between p-3 glass rounded-xl">
+                        <div>
+                          <p className="text-white text-xs font-mono font-semibold">{o.id}</p>
+                          <p className="text-gray-500 text-[10px]">{o.date} · {o.items.length} item{o.items.length !== 1 ? 's' : ''}</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-white text-xs font-bold">${o.total.toFixed(2)}</p>
+                          <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${
+                            o.status === 'Entregado' ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/20' :
+                            o.status === 'Cancelado' ? 'bg-red-500/15 text-red-400 border-red-500/20' :
+                            'bg-sky-500/15 text-sky-400 border-sky-500/20'
+                          }`}>{o.status}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-gray-500 text-sm">
+                    <ShoppingBag className="w-8 h-8 mx-auto mb-2 text-gray-700" />
+                    No hay pedidos registrados para este cliente.
+                  </div>
+                );
+              })()}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
