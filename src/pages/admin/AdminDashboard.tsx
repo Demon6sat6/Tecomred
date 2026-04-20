@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import {
-  DollarSign, Package, ShoppingBag, TrendingUp,
+  DollarSign, Package, ShoppingBag,
   ArrowRight, ArrowUpRight, AlertTriangle,
 } from 'lucide-react';
 import { useAdmin } from '../../context/AdminContext';
