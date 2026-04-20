@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, Pencil, Trash2, Search, X, Check, User } from 'lucide-react';
+import { Plus, Pencil, Trash2, Search, X, Check, User, ShoppingBag, ChevronRight } from 'lucide-react';
 import { useAdmin, type Customer } from '../../context/AdminContext';
 
 const emptyCustomer: Omit<Customer, 'id'> = {
