@@ -3,7 +3,7 @@ import {
   ShoppingCart, Star, ArrowLeft, Check, Shield, Truck,
   Package, AlertTriangle, ThumbsUp, BadgeCheck, ChevronLeft, ChevronRight,
 } from 'lucide-react';
-import { products } from '../data/products';
+import { useStore } from '../context/StoreContext';
 import { reviews } from '../data/reviews';
 import { useToast } from '../context/ToastContext';
 import ProductCard from '../components/ProductCard';
@@ -40,6 +40,7 @@ function StarRating({ rating, size = 'sm' }: { rating: number; size?: 'sm' | 'md
 
 export default function ProductDetail() {
   const { id } = useParams();
+  const { products } = useStore();
   const { addToCart } = useCart();
   const { showToast } = useToast();
   const [added, setAdded] = useState(false);
