@@ -49,6 +49,7 @@ function SectionReveal({ children, className = '' }: { children: React.ReactNode
 }
 
 export default function Home() {
+  const { products } = useStore();
   const featured = products.filter(p => p.badge === 'Popular' || p.badge === 'Oferta').slice(0, 4);
   const newProducts = products.filter(p => p.badge === 'Nuevo').slice(0, 3);
 
