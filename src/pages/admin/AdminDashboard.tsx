@@ -25,6 +25,7 @@ function getLast7Days() {
 
 export default function AdminDashboard() {
   const { products, orders, customers } = useAdmin();
+  const { activeNow, visitsToday, visitsThisWeek } = useAnalytics();
 
   const totalRevenue  = orders.filter(o => o.status !== 'Cancelado').reduce((s, o) => s + o.total, 0);
   const totalOrders   = orders.length;
