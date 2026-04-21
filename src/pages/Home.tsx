@@ -151,10 +151,10 @@ export default function Home() {
       {/* ── STATS ── */}
       <SectionReveal className="py-8 px-4 border-y border-white/5">
         <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6">
-          <AnimatedStat value={500}   suffix="+"  label="Productos en stock" />
-          <AnimatedStat value={2000}  suffix="+"  label="Clientes satisfechos" />
-          <AnimatedStat value={10}    suffix=" años" label="De experiencia" />
-          <AnimatedStat value={24}    suffix="/7" label="Soporte técnico" />
+          <AnimatedStat value={Number(settings.stat1Value)} suffix={settings.stat1Suffix} label={settings.stat1Label} />
+          <AnimatedStat value={Number(settings.stat2Value)} suffix={settings.stat2Suffix} label={settings.stat2Label} />
+          <AnimatedStat value={Number(settings.stat3Value)} suffix={settings.stat3Suffix} label={settings.stat3Label} />
+          <AnimatedStat value={Number(settings.stat4Value)} suffix={settings.stat4Suffix} label={settings.stat4Label} />
         </div>
       </SectionReveal>
 
