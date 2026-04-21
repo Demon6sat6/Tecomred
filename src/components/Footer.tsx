@@ -1,7 +1,9 @@
 import { Link } from 'react-router-dom';
 import { Wifi, Mail, Phone, MapPin, Share2, MessageCircle, Globe, ArrowRight } from 'lucide-react';
+import { useAdmin } from '../context/AdminContext';
 
 export default function Footer() {
+  const { settings } = useAdmin();
   return (
     <footer className="bg-gray-900/80 border-t border-white/8 mt-12 sm:mt-20">
       {/* Newsletter strip */}
