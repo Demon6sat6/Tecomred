@@ -1,6 +1,7 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { Search, X, ChevronDown, Plus, Trash2, Check, Pencil } from 'lucide-react';
 import { useAdmin, type Order } from '../../context/AdminContext';
+import { useCurrency } from '../../hooks/useCurrency';
 
 const statusColors: Record<string, string> = {
   Pendiente:  'bg-yellow-500/15 text-yellow-400 border-yellow-500/20',
@@ -20,6 +21,7 @@ const emptyOrder: Omit<Order, 'id'> = {
 
 export default function AdminOrders() {
   const { orders, addOrder, updateOrder, updateOrderStatus, deleteOrder, products } = useAdmin();
+  const { formatShort } = useCurrency();
   const [search, setSearch] = useState('');
   const [filterStatus, setFilterStatus] = useState<string>('Todos');
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
@@ -94,7 +96,7 @@ export default function AdminOrders() {
         </div>
         <div className="glass rounded-xl px-4 py-2 text-sm">
           <span className="text-gray-400">Ingresos filtrados: </span>
-          <span className="text-white font-bold">${totalRevenue.toFixed(2)}</span>
+          <span className="text-white font-bold">{formatShort(totalRevenue)}</span>
         </div>
       </div>
 
@@ -126,7 +128,7 @@ export default function AdminOrders() {
                   </td>
                   <td className="px-4 py-3 hidden md:table-cell"><span className="text-gray-400 text-xs">{order.city}</span></td>
                   <td className="px-4 py-3 hidden sm:table-cell"><span className="text-gray-400 text-xs">{order.date}</span></td>
-                  <td className="px-4 py-3 text-right"><span className="text-white text-xs font-bold">${order.total.toFixed(2)}</span></td>
+                  <td className="px-4 py-3 text-right"><span className="text-white text-xs font-bold">{formatShort(order.total)}</span></td>
                   <td className="px-4 py-3">
                     <div className="relative flex justify-center">
                       <button onClick={() => setOpenDropdown(openDropdown === order.id ? null : order.id)}
@@ -177,9 +179,9 @@ export default function AdminOrders() {
               <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold">Datos del cliente</p>
               <div className="grid grid-cols-2 gap-3">
                 {([
-                  { label: 'Nombre *', key: 'customer', placeholder: 'Juan Pérez' },
+                  { label: 'Nombre *', key: 'customer', placeholder: 'Juan PÃ©rez' },
                   { label: 'Email *',  key: 'email',    placeholder: 'juan@email.com' },
-                  { label: 'Teléfono', key: 'phone',    placeholder: '+1 234 567' },
+                  { label: 'TelÃ©fono', key: 'phone',    placeholder: '+1 234 567' },
                   { label: 'Ciudad',   key: 'city',     placeholder: 'Lima' },
                 ] as const).map(f => (
                   <div key={f.key}>
@@ -190,7 +192,7 @@ export default function AdminOrders() {
                   </div>
                 ))}
                 <div className="col-span-2">
-                  <label className="block text-xs text-gray-400 mb-1.5 font-medium">Dirección</label>
+                  <label className="block text-xs text-gray-400 mb-1.5 font-medium">DirecciÃ³n</label>
                   <input value={form.address} placeholder="Av. Principal 123"
                     onChange={e => setForm(f => ({ ...f, address: e.target.value }))}
                     className="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-gray-200 text-sm focus:outline-none focus:border-sky-500/60" />
@@ -208,7 +210,7 @@ export default function AdminOrders() {
                 <select value={itemProductId} onChange={e => setItemProductId(e.target.value)}
                   className="flex-1 px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-gray-200 text-sm focus:outline-none focus:border-sky-500/60">
                   <option value="" className="bg-gray-900">Seleccionar producto...</option>
-                  {products.map(p => <option key={p.id} value={p.id} className="bg-gray-900">{p.name} — ${p.price}</option>)}
+                  {products.map(p => <option key={p.id} value={p.id} className="bg-gray-900">{p.name} â€” ${p.price}</option>)}
                 </select>
                 <input type="number" min={1} value={itemQty} onChange={e => setItemQty(+e.target.value)}
                   className="w-16 px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-gray-200 text-sm focus:outline-none focus:border-sky-500/60 text-center" />
@@ -223,7 +225,7 @@ export default function AdminOrders() {
                     <div key={idx} className="flex items-center justify-between p-3 bg-white/3 rounded-xl">
                       <div className="flex-1 min-w-0">
                         <p className="text-white text-xs font-medium truncate">{item.name}</p>
-                        <p className="text-gray-500 text-[10px]">x{item.qty} · ${item.price.toFixed(2)} c/u</p>
+                        <p className="text-gray-500 text-[10px]">x{item.qty} Â· ${item.price.toFixed(2)} c/u</p>
                       </div>
                       <div className="flex items-center gap-3">
                         <span className="text-white text-xs font-bold">${(item.price * item.qty).toFixed(2)}</span>
@@ -235,7 +237,7 @@ export default function AdminOrders() {
                   ))}
                   <div className="flex justify-between pt-2 border-t border-white/10 font-bold">
                     <span className="text-gray-400 text-sm">Total</span>
-                    <span className="gradient-text text-lg">${form.total.toFixed(2)}</span>
+                    <span className="gradient-text text-lg">{formatShort(form.total)}</span>
                   </div>
                 </div>
               )}
@@ -267,11 +269,11 @@ export default function AdminOrders() {
             </div>
             <div className="p-5 space-y-4">
               {([
-                { label: 'Cliente',   key: 'customer', placeholder: 'Juan Pérez' },
+                { label: 'Cliente',   key: 'customer', placeholder: 'Juan PÃ©rez' },
                 { label: 'Email',     key: 'email',    placeholder: 'juan@email.com' },
-                { label: 'Teléfono', key: 'phone',    placeholder: '+1 234 567' },
-                { label: 'Ciudad',   key: 'city',     placeholder: 'Caracas' },
-                { label: 'Dirección', key: 'address',  placeholder: 'Av. Principal 123' },
+                { label: 'TelÃ©fono', key: 'phone',    placeholder: '+1 234 567' },
+                { label: 'Ciudad',   key: 'city',     placeholder: 'Lima' },
+                { label: 'DirecciÃ³n', key: 'address',  placeholder: 'Av. Principal 123' },
               ] as const).map(f => (
                 <div key={f.key}>
                   <label className="block text-xs text-gray-400 mb-1.5 font-medium">{f.label}</label>
@@ -317,9 +319,9 @@ export default function AdminOrders() {
                 {[
                   { label: 'Cliente',   value: selected.customer },
                   { label: 'Email',     value: selected.email },
-                  { label: 'Telefono',  value: selected.phone || '—' },
+                  { label: 'Telefono',  value: selected.phone || 'â€”' },
                   { label: 'Ciudad',    value: selected.city },
-                  { label: 'Direccion', value: selected.address || '—' },
+                  { label: 'Direccion', value: selected.address || 'â€”' },
                   { label: 'Fecha',     value: selected.date },
                 ].map(({ label, value }) => (
                   <div key={label}>
@@ -345,7 +347,7 @@ export default function AdminOrders() {
                   ))}
                   <div className="flex justify-between font-bold pt-2 border-t border-white/10">
                     <span className="text-white">Total</span>
-                    <span className="gradient-text text-lg">${selected.total.toFixed(2)}</span>
+                    <span className="gradient-text text-lg">{formatShort(selected.total)}</span>
                   </div>
                 </div>
               </div>
@@ -373,3 +375,4 @@ export default function AdminOrders() {
     </div>
   );
 }
+

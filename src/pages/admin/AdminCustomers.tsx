@@ -1,6 +1,7 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { Plus, Pencil, Trash2, Search, X, Check, User, ShoppingBag } from 'lucide-react';
 import { useAdmin, type Customer } from '../../context/AdminContext';
+import { useCurrency } from '../../hooks/useCurrency';
 
 const emptyCustomer: Omit<Customer, 'id'> = {
   name: '', email: '', phone: '', city: '',
@@ -10,6 +11,7 @@ const emptyCustomer: Omit<Customer, 'id'> = {
 
 export default function AdminCustomers() {
   const { customers, addCustomer, updateCustomer, deleteCustomer, orders } = useAdmin();
+  const { formatShort } = useCurrency();
   const [search, setSearch] = useState('');
   const [modal, setModal] = useState<'add' | 'edit' | 'delete' | 'history' | null>(null);
   const [selected, setSelected] = useState<Customer | null>(null);
@@ -101,7 +103,7 @@ export default function AdminCustomers() {
                   </td>
                   <td className="px-4 py-3 hidden md:table-cell"><span className="text-gray-400 text-xs">{c.city}</span></td>
                   <td className="px-4 py-3 text-right hidden sm:table-cell"><span className="text-white text-xs font-semibold">{c.orders}</span></td>
-                  <td className="px-4 py-3 text-right"><span className="text-white text-xs font-bold">${c.totalSpent.toFixed(2)}</span></td>
+                  <td className="px-4 py-3 text-right"><span className="text-white text-xs font-bold">{formatShort(c.totalSpent)}</span></td>
                   <td className="px-4 py-3 text-center">
                     <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
                       c.status === 'Activo'
@@ -136,10 +138,10 @@ export default function AdminCustomers() {
               <button onClick={() => setModal(null)} className="p-1.5 rounded-lg hover:bg-white/10 text-gray-400"><X className="w-5 h-5" /></button>
             </div>
             <div className="p-5 space-y-4">
-              <F label="Nombre completo *" name="name"  value={form.name}  placeholder="Juan Pérez" />
+              <F label="Nombre completo *" name="name"  value={form.name}  placeholder="Juan PÃ©rez" />
               <div className="grid grid-cols-2 gap-3">
                 <F label="Email *"    name="email"  value={form.email}  type="email" placeholder="juan@email.com" />
-                <F label="Teléfono"   name="phone"  value={form.phone}  placeholder="+1 234 567" />
+                <F label="TelÃ©fono"   name="phone"  value={form.phone}  placeholder="+1 234 567" />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <F label="Ciudad"     name="city"   value={form.city}   placeholder="Caracas" />
@@ -170,8 +172,8 @@ export default function AdminCustomers() {
             <div className="w-14 h-14 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center mx-auto mb-4">
               <Trash2 className="w-7 h-7 text-red-400" />
             </div>
-            <h3 className="text-white font-bold text-lg mb-2">¿Eliminar cliente?</h3>
-            <p className="text-gray-400 text-sm mb-6">Se eliminará <span className="text-white font-semibold">"{selected.name}"</span> permanentemente.</p>
+            <h3 className="text-white font-bold text-lg mb-2">Â¿Eliminar cliente?</h3>
+            <p className="text-gray-400 text-sm mb-6">Se eliminarÃ¡ <span className="text-white font-semibold">"{selected.name}"</span> permanentemente.</p>
             <div className="flex gap-3">
               <button onClick={() => setModal(null)} className="flex-1 py-2.5 rounded-xl bg-white/5 border border-white/10 text-gray-300 text-sm font-semibold hover:bg-white/10 transition-colors">Cancelar</button>
               <button onClick={() => { deleteCustomer(selected.id); setModal(null); }} className="flex-1 py-2.5 rounded-xl bg-red-500 text-white text-sm font-bold hover:bg-red-600 active:scale-95 transition-all">Eliminar</button>
@@ -201,7 +203,7 @@ export default function AdminCustomers() {
               <div className="grid grid-cols-3 gap-3 mb-5">
                 {[
                   { label: 'Pedidos', value: selected.orders },
-                  { label: 'Total gastado', value: `$${selected.totalSpent.toFixed(2)}` },
+                  { label: 'Total gastado', value: `${formatShort(selected.totalSpent)}` },
                   { label: 'Cliente desde', value: selected.joined },
                 ].map(s => (
                   <div key={s.label} className="glass rounded-xl p-3 text-center">
@@ -220,10 +222,10 @@ export default function AdminCustomers() {
                       <div key={o.id} className="flex items-center justify-between p-3 glass rounded-xl">
                         <div>
                           <p className="text-white text-xs font-mono font-semibold">{o.id}</p>
-                          <p className="text-gray-500 text-[10px]">{o.date} · {o.items.length} item{o.items.length !== 1 ? 's' : ''}</p>
+                          <p className="text-gray-500 text-[10px]">{o.date} Â· {o.items.length} item{o.items.length !== 1 ? 's' : ''}</p>
                         </div>
                         <div className="text-right">
-                          <p className="text-white text-xs font-bold">${o.total.toFixed(2)}</p>
+                          <p className="text-white text-xs font-bold">{formatShort(o.total)}</p>
                           <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${
                             o.status === 'Entregado' ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/20' :
                             o.status === 'Cancelado' ? 'bg-red-500/15 text-red-400 border-red-500/20' :
@@ -247,3 +249,4 @@ export default function AdminCustomers() {
     </div>
   );
 }
+

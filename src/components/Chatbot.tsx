@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+﻿import { useState, useRef, useEffect } from 'react';
 import { MessageCircle, X, Send, Bot, User, Package, Truck, CreditCard, Headphones, ExternalLink, ShoppingCart, Star } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { products } from '../data/products';
@@ -17,22 +17,22 @@ interface Message {
 const quickReplies = [
   { 
     icon: Package, 
-    text: '¿Tienen stock?', 
+    text: 'Â¿Tienen stock?', 
     action: 'stock'
   },
   { 
     icon: Truck, 
-    text: 'Tiempos de envío', 
+    text: 'Tiempos de envÃ­o', 
     action: 'envio'
   },
   { 
     icon: CreditCard, 
-    text: 'Métodos de pago', 
+    text: 'MÃ©todos de pago', 
     action: 'pago'
   },
   { 
     icon: Headphones, 
-    text: 'Soporte técnico', 
+    text: 'Soporte tÃ©cnico', 
     action: 'soporte'
   },
 ];
@@ -42,7 +42,7 @@ export default function Chatbot() {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 1,
-      text: '¡Hola! 👋 Soy el asistente virtual de TecomRed. ¿En qué puedo ayudarte hoy?',
+      text: 'Â¡Hola! ðŸ‘‹ Soy el asistente virtual de TecomRed. Â¿En quÃ© puedo ayudarte hoy?',
       sender: 'bot',
       timestamp: new Date(),
       type: 'text',
@@ -93,7 +93,7 @@ export default function Chatbot() {
       switch (reply.action) {
         case 'stock':
           addBotMessage({
-            text: 'Todos nuestros productos tienen stock disponible. Te muestro algunos de nuestros productos más populares:',
+            text: 'Todos nuestros productos tienen stock disponible. Te muestro algunos de nuestros productos mÃ¡s populares:',
           });
           setTimeout(() => {
             const popularProducts = products.filter(p => p.badge === 'Popular' || p.badge === 'Oferta').slice(0, 3);
@@ -108,12 +108,12 @@ export default function Chatbot() {
           addBotMessage({
             type: 'card',
             data: {
-              title: '🚚 Información de Envío',
+              title: 'ðŸšš InformaciÃ³n de EnvÃ­o',
               items: [
-                { label: 'Envío estándar', value: '24-48 horas' },
-                { label: 'Envío express', value: '12-24 horas' },
-                { label: 'Envío gratis', value: 'Compras +$100' },
-                { label: 'Cobertura', value: 'Todo el país' },
+                { label: 'EnvÃ­o estÃ¡ndar', value: '24-48 horas' },
+                { label: 'EnvÃ­o express', value: '12-24 horas' },
+                { label: 'EnvÃ­o gratis', value: 'Compras +S/ 300' },
+                { label: 'Cobertura', value: 'Todo el paÃ­s' },
               ],
               footer: 'Rastreo en tiempo real incluido',
             },
@@ -124,7 +124,7 @@ export default function Chatbot() {
           addBotMessage({
             type: 'card',
             data: {
-              title: '💳 Métodos de Pago',
+              title: 'ðŸ’³ MÃ©todos de Pago',
               items: [
                 { label: 'Tarjetas', value: 'Visa, Mastercard, Amex' },
                 { label: 'Transferencia', value: 'Bancaria directa' },
@@ -140,14 +140,14 @@ export default function Chatbot() {
           addBotMessage({
             type: 'card',
             data: {
-              title: '🎧 Soporte Técnico',
+              title: 'ðŸŽ§ Soporte TÃ©cnico',
               items: [
-                { label: 'Teléfono', value: '+1 (234) 567-890' },
-                { label: 'Email', value: 'soporte@tecomred.com' },
+                { label: 'TelÃ©fono', value: '+51 1 234-5678' },
+                { label: 'Email', value: 'soporte@tecomred.pe' },
                 { label: 'Horario', value: 'Lun-Vie 8am-6pm' },
                 { label: 'Emergencias', value: '24/7 disponible' },
               ],
-              footer: 'Asesoría técnica especializada incluida',
+              footer: 'AsesorÃ­a tÃ©cnica especializada incluida',
             },
           });
           break;
@@ -178,10 +178,10 @@ export default function Chatbot() {
       setIsTyping(false);
       const lowerMessage = messageText.toLowerCase();
 
-      // Búsqueda de productos
+      // BÃºsqueda de productos
       if (lowerMessage.includes('switch') || lowerMessage.includes('switches')) {
         addBotMessage({
-          text: 'Encontré estos switches para ti:',
+          text: 'EncontrÃ© estos switches para ti:',
         });
         setTimeout(() => {
           const switchProducts = products.filter(p => p.category === 'Switches');
@@ -236,7 +236,7 @@ export default function Chatbot() {
         }, 500);
       } else if (lowerMessage.includes('producto') || lowerMessage.includes('catalogo') || lowerMessage.includes('ver')) {
         addBotMessage({
-          text: 'Te muestro algunos de nuestros productos más populares:',
+          text: 'Te muestro algunos de nuestros productos mÃ¡s populares:',
         });
         setTimeout(() => {
           const popularProducts = products.filter(p => p.badge === 'Popular').slice(0, 3);
@@ -247,7 +247,7 @@ export default function Chatbot() {
         }, 500);
       } else if (lowerMessage.includes('oferta') || lowerMessage.includes('descuento') || lowerMessage.includes('promocion')) {
         addBotMessage({
-          text: '🔥 ¡Tenemos estas ofertas especiales para ti!',
+          text: 'ðŸ”¥ Â¡Tenemos estas ofertas especiales para ti!',
         });
         setTimeout(() => {
           const offerProducts = products.filter(p => p.badge === 'Oferta');
@@ -258,7 +258,7 @@ export default function Chatbot() {
         }, 500);
       } else if (lowerMessage.includes('nuevo') || lowerMessage.includes('novedad')) {
         addBotMessage({
-          text: '✨ Estos son nuestros productos más recientes:',
+          text: 'âœ¨ Estos son nuestros productos mÃ¡s recientes:',
         });
         setTimeout(() => {
           const newProducts = products.filter(p => p.badge === 'Nuevo');
@@ -269,11 +269,11 @@ export default function Chatbot() {
         }, 500);
       } else if (lowerMessage.includes('hola') || lowerMessage.includes('buenos') || lowerMessage.includes('buenas')) {
         addBotMessage({
-          text: '¡Hola! 👋 ¿En qué puedo ayudarte? Puedo mostrarte productos, información de envío, métodos de pago o soporte técnico.',
+          text: 'Â¡Hola! ðŸ‘‹ Â¿En quÃ© puedo ayudarte? Puedo mostrarte productos, informaciÃ³n de envÃ­o, mÃ©todos de pago o soporte tÃ©cnico.',
         });
       } else if (lowerMessage.includes('precio') || lowerMessage.includes('costo') || lowerMessage.includes('cuanto')) {
         addBotMessage({
-          text: 'Nuestros precios son muy competitivos. ¿Qué producto te interesa? Puedo mostrarte opciones por categoría.',
+          text: 'Nuestros precios son muy competitivos. Â¿QuÃ© producto te interesa? Puedo mostrarte opciones por categorÃ­a.',
           type: 'buttons',
           data: {
             buttons: [
@@ -285,11 +285,11 @@ export default function Chatbot() {
         });
       } else if (lowerMessage.includes('gracias')) {
         addBotMessage({
-          text: '¡De nada! 😊 Estoy aquí para ayudarte. ¿Necesitas algo más?',
+          text: 'Â¡De nada! ðŸ˜Š Estoy aquÃ­ para ayudarte. Â¿Necesitas algo mÃ¡s?',
         });
       } else {
         addBotMessage({
-          text: 'Puedo ayudarte con:\n\n• Ver productos por categoría\n• Información de stock\n• Tiempos de envío\n• Métodos de pago\n• Soporte técnico\n\n¿Qué te gustaría saber?',
+          text: 'Puedo ayudarte con:\n\nâ€¢ Ver productos por categorÃ­a\nâ€¢ InformaciÃ³n de stock\nâ€¢ Tiempos de envÃ­o\nâ€¢ MÃ©todos de pago\nâ€¢ Soporte tÃ©cnico\n\nÂ¿QuÃ© te gustarÃ­a saber?',
         });
       }
     }, 800 + Math.random() * 400);
@@ -301,7 +301,7 @@ export default function Chatbot() {
     
     setTimeout(() => {
       addBotMessage({
-        text: `✅ ${product.name} agregado al carrito. ¿Quieres ver más productos similares?`,
+        text: `âœ… ${product.name} agregado al carrito. Â¿Quieres ver mÃ¡s productos similares?`,
       });
     }, 300);
   };
@@ -329,7 +329,7 @@ export default function Chatbot() {
           <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full border-2 border-gray-950 animate-pulse" />
           
           <div className="absolute bottom-full right-0 mb-2 px-3 py-1.5 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none shadow-xl">
-            ¿Necesitas ayuda?
+            Â¿Necesitas ayuda?
           </div>
         </button>
       )}
@@ -347,7 +347,7 @@ export default function Chatbot() {
                 <h3 className="text-white font-bold text-sm sm:text-base">Asistente TecomRed</h3>
                 <p className="text-white/70 text-xs flex items-center gap-1">
                   <span className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
-                  En línea
+                  En lÃ­nea
                 </p>
               </div>
             </div>
@@ -431,7 +431,7 @@ export default function Chatbot() {
                       onClick={() => setIsOpen(false)}
                       className="block text-center py-2 text-xs text-sky-400 hover:text-sky-300 transition-colors"
                     >
-                      Ver todos los productos →
+                      Ver todos los productos â†’
                     </Link>
                   </div>
                 )}
@@ -488,7 +488,7 @@ export default function Chatbot() {
           {/* Quick replies */}
           {messages.length <= 2 && (
             <div className="px-3 sm:px-4 py-2 border-t border-white/10 bg-gray-950/30">
-              <p className="text-xs text-gray-500 mb-2">Respuestas rápidas:</p>
+              <p className="text-xs text-gray-500 mb-2">Respuestas rÃ¡pidas:</p>
               <div className="grid grid-cols-2 gap-2">
                 {quickReplies.map((reply, i) => {
                   const Icon = reply.icon;
@@ -535,3 +535,4 @@ export default function Chatbot() {
     </>
   );
 }
+
