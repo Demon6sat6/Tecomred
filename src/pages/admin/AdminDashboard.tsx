@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { useAdmin } from '../../context/AdminContext';
 import { useAnalytics } from '../../context/AnalyticsContext';
+import { useCurrency } from '../../hooks/useCurrency';
 
 const statusColors: Record<string, string> = {
   Pendiente:  'bg-yellow-500/15 text-yellow-400 border-yellow-500/20',
@@ -27,6 +28,7 @@ function getLast7Days() {
 export default function AdminDashboard() {
   const { products, orders, customers } = useAdmin();
   const { activeNow, visitsToday, visitsThisWeek } = useAnalytics();
+  const { formatShort } = useCurrency();
 
   const totalRevenue  = orders.filter(o => o.status !== 'Cancelado').reduce((s, o) => s + o.total, 0);
   const totalOrders   = orders.length;
@@ -87,7 +89,7 @@ export default function AdminDashboard() {
   };
 
   const stats = [
-    { label: 'Ingresos totales', value: `$${totalRevenue.toLocaleString('es', { minimumFractionDigits: 2 })}`, icon: DollarSign, color: 'text-emerald-400', bg: 'bg-emerald-500/10', change: '+12.5%' },
+    { label: 'Ingresos totales', value: formatShort(totalRevenue), icon: DollarSign, color: 'text-emerald-400', bg: 'bg-emerald-500/10', change: '+12.5%' },
     { label: 'Pedidos',          value: totalOrders,      icon: ShoppingBag, color: 'text-sky-400',    bg: 'bg-sky-500/10',    change: '+8.2%' },
     { label: 'Productos',        value: totalProducts,    icon: Package,     color: 'text-indigo-400', bg: 'bg-indigo-500/10', change: `${totalProducts}` },
     { label: 'Clientes',         value: customers.length, icon: Users,       color: 'text-purple-400', bg: 'bg-purple-500/10', change: `${customers.filter(c => c.status === 'Activo').length} activos` },

@@ -180,7 +180,7 @@ export default function AdminOrders() {
                   { label: 'Nombre *', key: 'customer', placeholder: 'Juan Pérez' },
                   { label: 'Email *',  key: 'email',    placeholder: 'juan@email.com' },
                   { label: 'Teléfono', key: 'phone',    placeholder: '+1 234 567' },
-                  { label: 'Ciudad',   key: 'city',     placeholder: 'Caracas' },
+                  { label: 'Ciudad',   key: 'city',     placeholder: 'Lima' },
                 ] as const).map(f => (
                   <div key={f.key}>
                     <label className="block text-xs text-gray-400 mb-1.5 font-medium">{f.label}</label>
