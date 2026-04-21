@@ -60,6 +60,19 @@ export interface StoreSettings {
   adminUser: string;
   adminPass: string;
   gaId: string;
+  // Hero stats
+  stat1Value: string;
+  stat1Suffix: string;
+  stat1Label: string;
+  stat2Value: string;
+  stat2Suffix: string;
+  stat2Label: string;
+  stat3Value: string;
+  stat3Suffix: string;
+  stat3Label: string;
+  stat4Value: string;
+  stat4Suffix: string;
+  stat4Label: string;
 }
 
 interface AdminContextType {
