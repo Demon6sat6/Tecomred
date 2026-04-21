@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Check, Store, Mail, Phone, MapPin, Globe, Save, Lock, Eye, EyeOff, AlertCircle } from 'lucide-react';
+import { Check, Store, Mail, Phone, MapPin, Globe, Save, Lock, Eye, EyeOff, AlertCircle, BarChart2 } from 'lucide-react';
 import { useAdmin, type StoreSettings } from '../../context/AdminContext';
 
 export default function AdminSettings() {
