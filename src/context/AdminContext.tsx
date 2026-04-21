@@ -129,6 +129,10 @@ const defaultSettings: StoreSettings = {
   adminUser: 'admin',
   adminPass: 'tecomred2026',
   gaId: '',
+  stat1Value: '500',  stat1Suffix: '+',     stat1Label: 'Productos en stock',
+  stat2Value: '2000', stat2Suffix: '+',     stat2Label: 'Clientes satisfechos',
+  stat3Value: '10',   stat3Suffix: ' años', stat3Label: 'De experiencia',
+  stat4Value: '24',   stat4Suffix: '/7',    stat4Label: 'Soporte técnico',
 };
 
 const initialOrders: Order[] = [
