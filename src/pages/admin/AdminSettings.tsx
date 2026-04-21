@@ -86,7 +86,7 @@ export default function AdminSettings() {
               <label className="block text-sm text-gray-400 mb-1.5 font-medium">Moneda</label>
               <select value={form.currency} onChange={e => setForm(s => ({ ...s, currency: e.target.value }))}
                 className="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-gray-200 text-sm focus:outline-none focus:border-sky-500/60">
-                {['USD','EUR','VES','COP','MXN','ARS'].map(c => <option key={c} value={c} className="bg-gray-900">{c}</option>)}
+                {['PEN','USD', 'EUR', 'COP', 'MXN', 'ARS'].map(c => <option key={c} value={c} className="bg-gray-900">{c}</option>)}
               </select>
             </div>
             <div>
