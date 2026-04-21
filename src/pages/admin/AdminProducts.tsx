@@ -12,6 +12,7 @@ const emptyProduct: Omit<Product, 'id'> = {
 
 export default function AdminProducts() {
   const { products, addProduct, updateProduct, deleteProduct } = useAdmin();
+  const { formatShort } = useCurrency();
   const [search, setSearch] = useState('');
   const [filterCat, setFilterCat] = useState('Todos');
   const [modal, setModal] = useState<'add' | 'edit' | 'delete' | null>(null);
