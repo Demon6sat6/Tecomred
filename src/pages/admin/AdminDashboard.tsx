@@ -2,9 +2,10 @@ import { Link } from 'react-router-dom';
 import {
   DollarSign, Package, ShoppingBag, Users,
   ArrowRight, ArrowUpRight, AlertTriangle, Download,
-  TrendingUp,
+  TrendingUp, Eye,
 } from 'lucide-react';
 import { useAdmin } from '../../context/AdminContext';
+import { useAnalytics } from '../../context/AnalyticsContext';
 
 const statusColors: Record<string, string> = {
   Pendiente:  'bg-yellow-500/15 text-yellow-400 border-yellow-500/20',
