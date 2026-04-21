@@ -115,6 +115,7 @@ const defaultSettings: StoreSettings = {
   allowReviews: true,
   adminUser: 'admin',
   adminPass: 'tecomred2026',
+  gaId: '',
 };
 
 const initialOrders: Order[] = [
