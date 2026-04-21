@@ -59,6 +59,7 @@ export interface StoreSettings {
   allowReviews: boolean;
   adminUser: string;
   adminPass: string;
+  gaId: string;
 }
 
 interface AdminContextType {
