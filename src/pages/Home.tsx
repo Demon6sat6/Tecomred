@@ -5,6 +5,7 @@ import {
   CheckCircle,
 } from 'lucide-react';
 import { useStore } from '../context/StoreContext';
+import { useAdmin } from '../context/AdminContext';
 import ProductCard from '../components/ProductCard';
 import BrandsBar from '../components/BrandsBar';
 import Testimonials from '../components/Testimonials';
