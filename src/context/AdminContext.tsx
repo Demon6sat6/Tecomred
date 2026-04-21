@@ -156,10 +156,10 @@ const initialCustomers: Customer[] = [
 ];
 
 const initialCoupons: Coupon[] = [
-  { id: 1, code: 'BIENVENIDO10', type: 'porcentaje', value: 10, minOrder: 50,  uses: 45, maxUses: 100, expiry: '2026-12-31', active: true },
-  { id: 2, code: 'REDES25',      type: 'porcentaje', value: 25, minOrder: 200, uses: 12, maxUses: 50,  expiry: '2026-06-30', active: true },
-  { id: 3, code: 'DESCUENTO20',  type: 'fijo',       value: 20, minOrder: 100, uses: 89, maxUses: 200, expiry: '2026-05-31', active: false },
-  { id: 4, code: 'TECH50',       type: 'fijo',       value: 50, minOrder: 300, uses: 3,  maxUses: 20,  expiry: '2026-08-15', active: true },
+  { id: 1, code: 'BIENVENIDO10', type: 'porcentaje', value: 10, minOrder: 200,  uses: 45, maxUses: 100, expiry: '2026-12-31', active: true },
+  { id: 2, code: 'REDES25',      type: 'porcentaje', value: 25, minOrder: 750,  uses: 12, maxUses: 50,  expiry: '2026-06-30', active: true },
+  { id: 3, code: 'DESCUENTO75',  type: 'fijo',       value: 75, minOrder: 375,  uses: 89, maxUses: 200, expiry: '2026-05-31', active: false },
+  { id: 4, code: 'TECH200',      type: 'fijo',       value: 200, minOrder: 1125, uses: 3, maxUses: 20,  expiry: '2026-08-15', active: true },
 ];
 
 // Add approved field to reviews
