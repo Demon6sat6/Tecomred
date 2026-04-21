@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { Mail, Phone, MapPin, Clock, Send, Check } from 'lucide-react';
+import { useAdmin } from '../context/AdminContext';
 
 export default function Contact() {
+  const { settings } = useAdmin();
   const [sent, setSent] = useState(false);
   const [form, setForm] = useState({ nombre: '', email: '', asunto: '', mensaje: '' });
 
@@ -17,10 +19,10 @@ export default function Contact() {
   };
 
   const contactInfo = [
-    { icon: MapPin, label: 'Dirección', value: 'Av. Tecnología 123, Ciudad' },
-    { icon: Phone, label: 'Teléfono', value: '+1 (234) 567-890' },
-    { icon: Mail, label: 'Email', value: 'info@tecomred.com' },
-    { icon: Clock, label: 'Horario', value: 'Lun–Vie 8am–6pm' },
+    { icon: MapPin, label: 'Dirección', value: settings.storeAddress },
+    { icon: Phone,  label: 'Teléfono',  value: settings.storePhone },
+    { icon: Mail,   label: 'Email',     value: settings.storeEmail },
+    { icon: Clock,  label: 'Horario',   value: 'Lun–Vie 9am–6pm (Lima, GMT-5)' },
   ];
 
   return (

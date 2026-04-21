@@ -1,7 +1,8 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Check, CreditCard, Truck, ArrowLeft, AlertCircle, Package, Clock, MapPin, Tag, X } from 'lucide-react';
 import { useCart } from '../context/CartContext';
+import { useCurrency } from '../hooks/useCurrency';
 import { useAdmin } from '../context/AdminContext';
 
 type Step = 'envio' | 'pago' | 'confirmacion';
@@ -27,6 +28,7 @@ function Field({ label, name, value, onChange, placeholder, type = 'text', error
 export default function Checkout() {
   const { items, totalPrice, clearCart } = useCart();
   const { addOrder, applyCoupon, incrementCouponUse } = useAdmin();
+  const { formatShort } = useCurrency();
 
   const [step, setStep] = useState<Step>('envio');
   const [errors, setErrors] = useState<FormErrors>({});
@@ -53,7 +55,7 @@ export default function Checkout() {
         </div>
         <h2 className="text-2xl font-bold text-white mb-2">No hay productos en el carrito</h2>
         <p className="text-gray-400 mb-6">Agrega productos antes de continuar.</p>
-        <Link to="/productos" className="inline-flex items-center gap-2 px-6 py-3 rounded-xl gradient-brand text-white font-semibold hover:opacity-90 transition-opacity">Ver catálogo</Link>
+        <Link to="/productos" className="inline-flex items-center gap-2 px-6 py-3 rounded-xl gradient-brand text-white font-semibold hover:opacity-90 transition-opacity">Ver catÃ¡logo</Link>
       </div>
     );
   }
@@ -85,9 +87,9 @@ export default function Checkout() {
     if (!form.nombre.trim())    e.nombre    = 'El nombre es requerido';
     if (!form.apellido.trim())  e.apellido  = 'El apellido es requerido';
     if (!form.email.trim())     e.email     = 'El correo es requerido';
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) e.email = 'Correo inválido';
-    if (!form.telefono.trim())  e.telefono  = 'El teléfono es requerido';
-    if (!form.direccion.trim()) e.direccion = 'La dirección es requerida';
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) e.email = 'Correo invÃ¡lido';
+    if (!form.telefono.trim())  e.telefono  = 'El telÃ©fono es requerido';
+    if (!form.direccion.trim()) e.direccion = 'La direcciÃ³n es requerida';
     if (!form.ciudad.trim())    e.ciudad    = 'La ciudad es requerida';
     setErrors(e);
     return Object.keys(e).length === 0;
@@ -96,9 +98,9 @@ export default function Checkout() {
   const validatePayment = (): boolean => {
     const e: FormErrors = {};
     if (!form.cardName.trim())  e.cardName   = 'El nombre es requerido';
-    if (form.cardNumber.replace(/\s/g, '').length < 16) e.cardNumber = 'Número de tarjeta inválido (16 dígitos)';
+    if (form.cardNumber.replace(/\s/g, '').length < 16) e.cardNumber = 'NÃºmero de tarjeta invÃ¡lido (16 dÃ­gitos)';
     if (!/^\d{2}\/\d{2}$/.test(form.cardExpiry)) e.cardExpiry = 'Formato MM/AA requerido';
-    if (form.cardCvv.length < 3) e.cardCvv   = 'CVV inválido (3-4 dígitos)';
+    if (form.cardCvv.length < 3) e.cardCvv   = 'CVV invÃ¡lido (3-4 dÃ­gitos)';
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -133,9 +135,9 @@ export default function Checkout() {
   };
 
   const steps = [
-    { id: 'envio',        label: 'Envío',        icon: Truck },
+    { id: 'envio',        label: 'EnvÃ­o',        icon: Truck },
     { id: 'pago',         label: 'Pago',         icon: CreditCard },
-    { id: 'confirmacion', label: 'Confirmación', icon: Check },
+    { id: 'confirmacion', label: 'ConfirmaciÃ³n', icon: Check },
   ];
 
   const estimatedDate = new Date();
@@ -183,11 +185,11 @@ export default function Checkout() {
             </div>
             <div className="absolute inset-0 rounded-full bg-emerald-500/5 animate-ping" />
           </div>
-          <h2 className="text-3xl font-extrabold text-white mb-2">¡Pedido confirmado!</h2>
+          <h2 className="text-3xl font-extrabold text-white mb-2">Â¡Pedido confirmado!</h2>
           <p className="text-gray-400 mb-6">Gracias por tu compra en TecomRed.</p>
           <div className="glass rounded-2xl p-6 text-left space-y-4 mb-8">
             <div className="flex items-center justify-between pb-4 border-b border-white/10">
-              <span className="text-gray-400 text-sm">Número de orden</span>
+              <span className="text-gray-400 text-sm">NÃºmero de orden</span>
               <span className="text-white font-bold font-mono">{orderNumber}</span>
             </div>
             <div className="flex items-center gap-3">
@@ -204,7 +206,7 @@ export default function Checkout() {
                 <MapPin className="w-5 h-5 text-sky-400" />
               </div>
               <div>
-                <p className="text-white text-sm font-semibold">Dirección de entrega</p>
+                <p className="text-white text-sm font-semibold">DirecciÃ³n de entrega</p>
                 <p className="text-gray-400 text-xs">{form.direccion}, {form.ciudad}</p>
               </div>
             </div>
@@ -213,24 +215,24 @@ export default function Checkout() {
               {items.map(({ product, quantity }) => (
                 <div key={product.id} className="flex items-center gap-3">
                   <img src={product.image} alt={product.name} className="w-10 h-10 rounded-lg object-cover shrink-0" />
-                  <span className="text-gray-300 text-xs flex-1 truncate">{product.name} ×{quantity}</span>
+                  <span className="text-gray-300 text-xs flex-1 truncate">{product.name} Ã—{quantity}</span>
                   <span className="text-white text-xs font-semibold shrink-0">${(product.price * quantity).toFixed(2)}</span>
                 </div>
               ))}
               {appliedCoupon && (
                 <div className="flex justify-between text-sm text-emerald-400">
-                  <span>Cupón {appliedCoupon.code}</span>
-                  <span>-${appliedCoupon.discount.toFixed(2)}</span>
+                  <span>CupÃ³n {appliedCoupon.code}</span>
+                  <span>-{formatShort(appliedCoupon.discount)}</span>
                 </div>
               )}
               <div className="flex justify-between pt-3 border-t border-white/10 font-bold">
                 <span className="text-white">Total pagado</span>
-                <span className="gradient-text text-lg">${finalTotal.toFixed(2)}</span>
+                <span className="gradient-text text-lg">{formatShort(finalTotal)}</span>
               </div>
             </div>
           </div>
           <p className="text-gray-500 text-sm mb-6">
-            Recibirás un correo en <span className="text-gray-300">{form.email}</span>
+            RecibirÃ¡s un correo en <span className="text-gray-300">{form.email}</span>
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Link to="/" className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl gradient-brand text-white font-semibold hover:opacity-90 active:scale-95 transition-all">Volver al inicio</Link>
@@ -244,21 +246,21 @@ export default function Checkout() {
             {step === 'envio' && (
               <div className="glass rounded-2xl p-5 sm:p-6">
                 <h2 className="text-white font-bold text-lg mb-6 flex items-center gap-2">
-                  <Truck className="w-5 h-5 text-sky-400" /> Información de envío
+                  <Truck className="w-5 h-5 text-sky-400" /> InformaciÃ³n de envÃ­o
                 </h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <Field name="nombre"    label="Nombre *"             value={form.nombre}    onChange={handleChange} placeholder="Juan"              error={errors.nombre} />
-                  <Field name="apellido"  label="Apellido *"           value={form.apellido}  onChange={handleChange} placeholder="Pérez"             error={errors.apellido} />
-                  <Field name="email"     label="Correo electrónico *" value={form.email}     onChange={handleChange} placeholder="juan@email.com"    type="email" error={errors.email} />
-                  <Field name="telefono"  label="Teléfono *"           value={form.telefono}  onChange={handleChange} placeholder="+1 234 567 890"    type="tel" error={errors.telefono} />
-                  <Field name="direccion" label="Dirección *"          value={form.direccion} onChange={handleChange} placeholder="Av. Principal 123" error={errors.direccion} className="sm:col-span-2" />
+                  <Field name="apellido"  label="Apellido *"           value={form.apellido}  onChange={handleChange} placeholder="PÃ©rez"             error={errors.apellido} />
+                  <Field name="email"     label="Correo electrÃ³nico *" value={form.email}     onChange={handleChange} placeholder="juan@email.com"    type="email" error={errors.email} />
+                  <Field name="telefono"  label="TelÃ©fono *"           value={form.telefono}  onChange={handleChange} placeholder="+1 234 567 890"    type="tel" error={errors.telefono} />
+                  <Field name="direccion" label="DirecciÃ³n *"          value={form.direccion} onChange={handleChange} placeholder="Av. Principal 123" error={errors.direccion} className="sm:col-span-2" />
                   <Field name="ciudad"    label="Ciudad *"             value={form.ciudad}    onChange={handleChange} placeholder="Caracas"           error={errors.ciudad} />
-                  <Field name="codigo"    label="Código postal"        value={form.codigo}    onChange={handleChange} placeholder="1010" />
+                  <Field name="codigo"    label="CÃ³digo postal"        value={form.codigo}    onChange={handleChange} placeholder="1010" />
                   <div>
-                    <label className="block text-sm text-gray-400 mb-1.5 font-medium">País</label>
+                    <label className="block text-sm text-gray-400 mb-1.5 font-medium">PaÃ­s</label>
                     <select name="pais" value={form.pais} onChange={e => setForm(f => ({ ...f, pais: e.target.value }))}
                       className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-gray-200 focus:outline-none focus:border-sky-500/60 text-sm">
-                      {['Venezuela','Colombia','México','Argentina','Chile','Perú','Ecuador'].map(p => (
+                      {['Venezuela','Colombia','MÃ©xico','Argentina','Chile','PerÃº','Ecuador'].map(p => (
                         <option key={p} value={p} className="bg-gray-900">{p}</option>
                       ))}
                     </select>
@@ -266,7 +268,7 @@ export default function Checkout() {
                 </div>
                 <button onClick={handleNextShipping}
                   className="mt-6 w-full py-3 rounded-xl gradient-brand text-white font-bold hover:opacity-90 active:scale-95 transition-all shadow-lg shadow-sky-500/20">
-                  Continuar al pago →
+                  Continuar al pago â†’
                 </button>
               </div>
             )}
@@ -275,7 +277,7 @@ export default function Checkout() {
             {step === 'pago' && (
               <div className="glass rounded-2xl p-5 sm:p-6">
                 <h2 className="text-white font-bold text-lg mb-6 flex items-center gap-2">
-                  <CreditCard className="w-5 h-5 text-sky-400" /> Información de pago
+                  <CreditCard className="w-5 h-5 text-sky-400" /> InformaciÃ³n de pago
                 </h2>
                 {/* Card preview */}
                 <div className="relative h-40 rounded-2xl gradient-brand p-5 mb-6 overflow-hidden shadow-xl shadow-sky-500/20">
@@ -288,7 +290,7 @@ export default function Checkout() {
                       <div className="w-10 h-7 bg-yellow-400/80 rounded-md" />
                       <span className="text-white/60 text-xs font-mono">VISA</span>
                     </div>
-                    <p className="text-white font-mono text-lg tracking-widest mb-3">{form.cardNumber || '•••• •••• •••• ••••'}</p>
+                    <p className="text-white font-mono text-lg tracking-widest mb-3">{form.cardNumber || 'â€¢â€¢â€¢â€¢ â€¢â€¢â€¢â€¢ â€¢â€¢â€¢â€¢ â€¢â€¢â€¢â€¢'}</p>
                     <div className="flex justify-between">
                       <span className="text-white/70 text-xs">{form.cardName || 'NOMBRE APELLIDO'}</span>
                       <span className="text-white/70 text-xs">{form.cardExpiry || 'MM/AA'}</span>
@@ -297,7 +299,7 @@ export default function Checkout() {
                 </div>
                 <div className="space-y-4">
                   <Field name="cardName"   label="Nombre en la tarjeta *" value={form.cardName}   onChange={handleChange} placeholder="JUAN PEREZ"          error={errors.cardName} />
-                  <Field name="cardNumber" label="Número de tarjeta *"    value={form.cardNumber} onChange={handleChange} placeholder="1234 5678 9012 3456" error={errors.cardNumber} />
+                  <Field name="cardNumber" label="NÃºmero de tarjeta *"    value={form.cardNumber} onChange={handleChange} placeholder="1234 5678 9012 3456" error={errors.cardNumber} />
                   <div className="grid grid-cols-2 gap-4">
                     <Field name="cardExpiry" label="Vencimiento *" value={form.cardExpiry} onChange={handleChange} placeholder="MM/AA" error={errors.cardExpiry} />
                     <Field name="cardCvv"    label="CVV *"         value={form.cardCvv}    onChange={handleChange} placeholder="123"   error={errors.cardCvv} />
@@ -305,16 +307,16 @@ export default function Checkout() {
                 </div>
                 <div className="flex items-center gap-2 mt-4 p-3 bg-emerald-500/5 border border-emerald-500/20 rounded-xl">
                   <Check className="w-4 h-4 text-emerald-400 shrink-0" />
-                  <p className="text-emerald-400 text-xs">Pago 100% seguro. Tus datos están encriptados.</p>
+                  <p className="text-emerald-400 text-xs">Pago 100% seguro. Tus datos estÃ¡n encriptados.</p>
                 </div>
                 <div className="flex gap-3 mt-6">
                   <button onClick={() => { setErrors({}); setStep('envio'); }}
                     className="px-5 py-3 rounded-xl bg-white/5 border border-white/10 text-gray-300 font-semibold hover:bg-white/10 transition-colors">
-                    ← Atrás
+                    â† AtrÃ¡s
                   </button>
                   <button onClick={handleOrder}
                     className="flex-1 py-3 rounded-xl gradient-brand text-white font-bold hover:opacity-90 active:scale-95 transition-all shadow-lg shadow-sky-500/20">
-                    Confirmar pedido — ${finalTotal.toFixed(2)}
+                    Confirmar pedido â€” {formatShort(finalTotal)}
                   </button>
                 </div>
               </div>
@@ -330,7 +332,7 @@ export default function Checkout() {
                   <img src={product.image} alt={product.name} className="w-12 h-12 rounded-lg object-cover shrink-0" />
                   <div className="flex-1 min-w-0">
                     <p className="text-xs text-gray-300 truncate font-medium">{product.name}</p>
-                    <p className="text-xs text-gray-500">×{quantity}</p>
+                    <p className="text-xs text-gray-500">Ã—{quantity}</p>
                   </div>
                   <span className="text-sm text-gray-300 shrink-0 font-semibold">${(product.price * quantity).toFixed(2)}</span>
                 </div>
@@ -340,13 +342,13 @@ export default function Checkout() {
             {/* Coupon input */}
             <div className="border-t border-white/10 pt-4">
               <label className="block text-xs text-gray-400 mb-2 font-medium flex items-center gap-1.5">
-                <Tag className="w-3.5 h-3.5" /> Cupón de descuento
+                <Tag className="w-3.5 h-3.5" /> CupÃ³n de descuento
               </label>
               {appliedCoupon ? (
                 <div className="flex items-center justify-between p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl">
                   <div>
                     <p className="text-emerald-400 text-xs font-bold">{appliedCoupon.code}</p>
-                    <p className="text-emerald-400 text-xs">-${appliedCoupon.discount.toFixed(2)}</p>
+                    <p className="text-emerald-400 text-xs">-{formatShort(appliedCoupon.discount)}</p>
                   </div>
                   <button onClick={removeCoupon} className="p-1 rounded-lg hover:bg-white/10 text-gray-400 hover:text-white transition-colors">
                     <X className="w-4 h-4" />
@@ -374,21 +376,21 @@ export default function Checkout() {
             <div className="border-t border-white/10 pt-3 space-y-2">
               <div className="flex justify-between text-sm">
                 <span className="text-gray-400">Subtotal</span>
-                <span className="text-gray-300">${totalPrice.toFixed(2)}</span>
+                <span className="text-gray-300">{formatShort(totalPrice)}</span>
               </div>
               {appliedCoupon && (
                 <div className="flex justify-between text-sm">
                   <span className="text-emerald-400">Descuento</span>
-                  <span className="text-emerald-400 font-semibold">-${appliedCoupon.discount.toFixed(2)}</span>
+                  <span className="text-emerald-400 font-semibold">-{formatShort(appliedCoupon.discount)}</span>
                 </div>
               )}
               <div className="flex justify-between text-sm">
-                <span className="text-gray-400">Envío</span>
+                <span className="text-gray-400">EnvÃ­o</span>
                 <span className="text-emerald-400 font-semibold">Gratis</span>
               </div>
               <div className="flex justify-between font-bold pt-2 border-t border-white/10">
                 <span className="text-white">Total</span>
-                <span className="gradient-text text-lg">${finalTotal.toFixed(2)}</span>
+                <span className="gradient-text text-lg">{formatShort(finalTotal)}</span>
               </div>
             </div>
           </div>
@@ -397,3 +399,5 @@ export default function Checkout() {
     </div>
   );
 }
+
+
