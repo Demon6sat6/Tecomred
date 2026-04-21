@@ -88,9 +88,11 @@ export default function AdminDashboard() {
 
   const stats = [
     { label: 'Ingresos totales', value: `$${totalRevenue.toLocaleString('es', { minimumFractionDigits: 2 })}`, icon: DollarSign, color: 'text-emerald-400', bg: 'bg-emerald-500/10', change: '+12.5%' },
-    { label: 'Pedidos',          value: totalOrders,   icon: ShoppingBag, color: 'text-sky-400',    bg: 'bg-sky-500/10',    change: '+8.2%' },
-    { label: 'Productos',        value: totalProducts, icon: Package,     color: 'text-indigo-400', bg: 'bg-indigo-500/10', change: `${totalProducts}` },
-    { label: 'Clientes',         value: customers.length, icon: Users,   color: 'text-purple-400', bg: 'bg-purple-500/10', change: `${customers.filter(c => c.status === 'Activo').length} activos` },
+    { label: 'Pedidos',          value: totalOrders,      icon: ShoppingBag, color: 'text-sky-400',    bg: 'bg-sky-500/10',    change: '+8.2%' },
+    { label: 'Productos',        value: totalProducts,    icon: Package,     color: 'text-indigo-400', bg: 'bg-indigo-500/10', change: `${totalProducts}` },
+    { label: 'Clientes',         value: customers.length, icon: Users,       color: 'text-purple-400', bg: 'bg-purple-500/10', change: `${customers.filter(c => c.status === 'Activo').length} activos` },
+    { label: 'Activos ahora',    value: activeNow,        icon: Eye,         color: 'text-emerald-400', bg: 'bg-emerald-500/10', change: `${visitsToday} hoy`, live: true },
+    { label: 'Visitas semana',   value: visitsThisWeek,   icon: TrendingUp,  color: 'text-sky-400',    bg: 'bg-sky-500/10',    change: 'últimos 7 días' },
   ];
 
   return (
