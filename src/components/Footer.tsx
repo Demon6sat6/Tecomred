@@ -99,18 +99,18 @@ export default function Footer() {
             <ul className="space-y-2 sm:space-y-3">
               <li className="flex items-start gap-2 sm:gap-3">
                 <MapPin className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-sky-400 mt-0.5 shrink-0" />
-                <span className="text-gray-400 text-xs sm:text-sm">Av. Tecnología 123, Ciudad</span>
+                <span className="text-gray-400 text-xs sm:text-sm">{settings.storeAddress}</span>
               </li>
               <li className="flex items-center gap-2 sm:gap-3">
                 <Phone className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-sky-400 shrink-0" />
-                <a href="tel:+1234567890" className="text-gray-400 hover:text-sky-400 text-xs sm:text-sm transition-colors">
-                  +1 (234) 567-890
+                <a href={`tel:${settings.storePhone}`} className="text-gray-400 hover:text-sky-400 text-xs sm:text-sm transition-colors">
+                  {settings.storePhone}
                 </a>
               </li>
               <li className="flex items-center gap-2 sm:gap-3">
                 <Mail className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-sky-400 shrink-0" />
-                <a href="mailto:info@tecomred.com" className="text-gray-400 hover:text-sky-400 text-xs sm:text-sm transition-colors break-all">
-                  info@tecomred.com
+                <a href={`mailto:${settings.storeEmail}`} className="text-gray-400 hover:text-sky-400 text-xs sm:text-sm transition-colors break-all">
+                  {settings.storeEmail}
                 </a>
               </li>
             </ul>
