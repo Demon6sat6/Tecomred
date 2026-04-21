@@ -21,7 +21,7 @@ export default function AdminAnalytics() {
 
   const [gaInput, setGaInput] = useState(settings.gaId ?? '');
   const [gaSaved, setGaSaved] = useState(false);
-  const [tick, setTick] = useState(0);
+  const [, setTick] = useState(0);
 
   // Re-render every 5s to update "active now" in real time
   useEffect(() => {
