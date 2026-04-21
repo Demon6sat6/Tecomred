@@ -1,4 +1,4 @@
-import { useParams, Link } from 'react-router-dom';
+﻿import { useParams, Link } from 'react-router-dom';
 import {
   ShoppingCart, Star, ArrowLeft, Check, Shield, Truck,
   Package, AlertTriangle, ThumbsUp, BadgeCheck, ChevronLeft, ChevronRight,
@@ -56,9 +56,9 @@ export default function ProductDetail() {
   if (!product) {
     return (
       <div className="max-w-7xl mx-auto px-4 py-20 text-center">
-        <div className="text-7xl mb-4">😕</div>
+        <div className="text-7xl mb-4">ðŸ˜•</div>
         <h2 className="text-2xl font-bold text-white mb-2">Producto no encontrado</h2>
-        <Link to="/productos" className="text-sky-400 hover:text-sky-300">← Volver al catálogo</Link>
+        <Link to="/productos" className="text-sky-400 hover:text-sky-300">â† Volver al catÃ¡logo</Link>
       </div>
     );
   }
@@ -112,7 +112,7 @@ export default function ProductDetail() {
 
   const tabs: { id: Tab; label: string; count?: number }[] = [
     { id: 'specs',   label: 'Especificaciones' },
-    { id: 'reviews', label: 'Reseñas', count: productReviews.length },
+    { id: 'reviews', label: 'ReseÃ±as', count: productReviews.length },
     { id: 'bundle',  label: 'Comprado junto con' },
   ];
 
@@ -132,13 +132,13 @@ export default function ProductDetail() {
       </nav>
 
       <Link to="/productos" className="inline-flex items-center gap-1.5 text-sky-400 hover:text-sky-300 text-sm mb-6 transition-colors">
-        <ArrowLeft className="w-4 h-4" /> Volver al catálogo
+        <ArrowLeft className="w-4 h-4" /> Volver al catÃ¡logo
       </Link>
 
-      {/* ── MAIN PRODUCT SECTION ── */}
+      {/* â”€â”€ MAIN PRODUCT SECTION â”€â”€ */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 mb-12">
 
-        {/* ── IMAGE GALLERY ── */}
+        {/* â”€â”€ IMAGE GALLERY â”€â”€ */}
         <div className="space-y-3">
           {/* Main image */}
           <div className="relative glass rounded-2xl overflow-hidden aspect-square bg-gray-900 group">
@@ -194,7 +194,7 @@ export default function ProductDetail() {
           </div>
         </div>
 
-        {/* ── PRODUCT INFO ── */}
+        {/* â”€â”€ PRODUCT INFO â”€â”€ */}
         <div className="flex flex-col">
           <p className="text-sky-400 text-xs font-bold uppercase tracking-widest mb-2">{product.category}</p>
           <h1 className="text-2xl sm:text-3xl font-extrabold text-white mb-3 leading-tight">{product.name}</h1>
@@ -204,7 +204,7 @@ export default function ProductDetail() {
             <StarRating rating={avgRating} size="md" />
             <span className="text-white font-bold">{avgRating.toFixed(1)}</span>
             <span className="text-gray-400 text-sm">
-              ({productReviews.length > 0 ? productReviews.length : product.reviews} reseñas)
+              ({productReviews.length > 0 ? productReviews.length : product.reviews} reseÃ±as)
             </span>
             {productReviews.filter(r => r.verified).length > 0 && (
               <span className="flex items-center gap-1 text-xs text-emerald-400">
@@ -216,11 +216,11 @@ export default function ProductDetail() {
 
           {/* Price */}
           <div className="flex items-end gap-3 mb-5 pb-5 border-b border-white/10">
-            <span className="text-4xl sm:text-5xl font-extrabold text-white">${product.price.toFixed(2)}</span>
+            <span className="text-4xl sm:text-5xl font-extrabold text-white">{formatShort(product.price)}</span>
             {product.originalPrice && (
               <div className="flex flex-col mb-1">
-                <span className="text-sm text-gray-500 line-through">${product.originalPrice.toFixed(2)}</span>
-                <span className="text-xs text-red-400 font-bold">Ahorras ${(product.originalPrice - product.price).toFixed(2)}</span>
+                <span className="text-sm text-gray-500 line-through">{formatShort(product.originalPrice!)}</span>
+                <span className="text-xs text-red-400 font-bold">Ahorras {formatShort(product.originalPrice! - product.price)}</span>
               </div>
             )}
           </div>
@@ -239,7 +239,7 @@ export default function ProductDetail() {
               <div className="flex items-center gap-2 px-4 py-2.5 bg-yellow-500/10 border border-yellow-500/20 rounded-xl">
                 <AlertTriangle className="w-4 h-4 text-yellow-400 animate-pulse" />
                 <span className="text-yellow-400 text-sm font-semibold">
-                  ¡Solo quedan {product.stock} unidades! — Compra pronto
+                  Â¡Solo quedan {product.stock} unidades! â€” Compra pronto
                 </span>
               </div>
             ) : (
@@ -258,7 +258,7 @@ export default function ProductDetail() {
                   onClick={() => setQty(q => Math.max(1, q - 1))}
                   className="w-11 h-11 flex items-center justify-center text-gray-300 hover:text-white hover:bg-white/10 transition-colors text-xl font-bold"
                 >
-                  −
+                  âˆ’
                 </button>
                 <span className="w-10 text-center text-white font-bold text-lg">{qty}</span>
                 <button
@@ -277,7 +277,7 @@ export default function ProductDetail() {
                 }`}
               >
                 {added
-                  ? <><Check className="w-5 h-5" /> ¡Agregado al carrito!</>
+                  ? <><Check className="w-5 h-5" /> Â¡Agregado al carrito!</>
                   : <><ShoppingCart className="w-5 h-5" /> Agregar al carrito</>
                 }
               </button>
@@ -287,10 +287,10 @@ export default function ProductDetail() {
           {/* Trust badges */}
           <div className="grid grid-cols-2 gap-2 mt-auto">
             {[
-              { icon: Shield, text: 'Garantía oficial del fabricante' },
-              { icon: Truck,  text: 'Envío gratis en pedidos +$100' },
+              { icon: Shield, text: 'GarantÃ­a oficial del fabricante' },
+              { icon: Truck,  text: 'EnvÃ­o gratis en pedidos +$100' },
               { icon: BadgeCheck, text: 'Producto 100% original' },
-              { icon: Package,    text: 'Devolución en 30 días' },
+              { icon: Package,    text: 'DevoluciÃ³n en 30 dÃ­as' },
             ].map(({ icon: Icon, text }) => (
               <div key={text} className="flex items-center gap-2 px-3 py-2 glass rounded-xl">
                 <Icon className="w-4 h-4 text-sky-400 shrink-0" />
@@ -301,7 +301,7 @@ export default function ProductDetail() {
         </div>
       </div>
 
-      {/* ── TABS ── */}
+      {/* â”€â”€ TABS â”€â”€ */}
       <div className="mb-12">
         {/* Tab headers */}
         <div className="flex gap-1 border-b border-white/10 mb-6 overflow-x-auto">
@@ -327,7 +327,7 @@ export default function ProductDetail() {
           ))}
         </div>
 
-        {/* ── SPECS TAB ── */}
+        {/* â”€â”€ SPECS TAB â”€â”€ */}
         {activeTab === 'specs' && (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {product.specs.map((spec, i) => {
@@ -347,7 +347,7 @@ export default function ProductDetail() {
           </div>
         )}
 
-        {/* ── REVIEWS TAB ── */}
+        {/* â”€â”€ REVIEWS TAB â”€â”€ */}
         {activeTab === 'reviews' && (
           <div className="space-y-6">
             {productReviews.length > 0 ? (
@@ -359,7 +359,7 @@ export default function ProductDetail() {
                     <span className="text-6xl font-extrabold gradient-text">{avgRating.toFixed(1)}</span>
                     <StarRating rating={avgRating} size="lg" />
                     <p className="text-gray-400 text-sm mt-2">
-                      Basado en {productReviews.length} reseña{productReviews.length !== 1 ? 's' : ''}
+                      Basado en {productReviews.length} reseÃ±a{productReviews.length !== 1 ? 's' : ''}
                     </p>
                   </div>
                   {/* Distribution */}
@@ -406,7 +406,7 @@ export default function ProductDetail() {
                       <h4 className="text-white font-semibold text-sm mb-1">{review.title}</h4>
                       <p className="text-gray-400 text-sm leading-relaxed">{review.body}</p>
                       <button className="flex items-center gap-1.5 mt-3 text-xs text-gray-500 hover:text-gray-300 transition-colors">
-                        <ThumbsUp className="w-3.5 h-3.5" /> Útil
+                        <ThumbsUp className="w-3.5 h-3.5" /> Ãštil
                       </button>
                     </div>
                   ))}
@@ -415,18 +415,18 @@ export default function ProductDetail() {
             ) : (
               <div className="text-center py-16 glass rounded-2xl">
                 <Star className="w-12 h-12 text-gray-700 mx-auto mb-3" />
-                <p className="text-gray-400 font-medium">Aún no hay reseñas para este producto.</p>
-                <p className="text-gray-600 text-sm mt-1">¡Sé el primero en opinar!</p>
+                <p className="text-gray-400 font-medium">AÃºn no hay reseÃ±as para este producto.</p>
+                <p className="text-gray-600 text-sm mt-1">Â¡SÃ© el primero en opinar!</p>
               </div>
             )}
           </div>
         )}
 
-        {/* ── BUNDLE TAB ── */}
+        {/* â”€â”€ BUNDLE TAB â”€â”€ */}
         {activeTab === 'bundle' && (
           <div>
             <p className="text-gray-400 text-sm mb-5">
-              Los clientes que compraron <span className="text-white font-semibold">{product.name}</span> también compraron:
+              Los clientes que compraron <span className="text-white font-semibold">{product.name}</span> tambiÃ©n compraron:
             </p>
             {bundleProducts.length > 0 ? (
               <>
@@ -442,7 +442,7 @@ export default function ProductDetail() {
                         >
                           {bp.name}
                         </Link>
-                        <p className="text-white font-bold text-sm mt-1">${bp.price.toFixed(2)}</p>
+                        <p className="text-white font-bold text-sm mt-1">{formatShort(bp.price)}</p>
                       </div>
                     </div>
                   ))}
@@ -452,7 +452,7 @@ export default function ProductDetail() {
                   <div>
                     <p className="text-gray-400 text-sm">Total del bundle ({bundleProducts.length + 1} productos):</p>
                     <p className="text-2xl font-extrabold gradient-text">
-                      ${(product.price + bundleProducts.reduce((s, p) => s + p.price, 0)).toFixed(2)}
+                      {formatShort(product.price + bundleProducts.reduce((s, p) => s + p.price, 0))}
                     </p>
                   </div>
                   <button
@@ -468,19 +468,19 @@ export default function ProductDetail() {
                 </div>
               </>
             ) : (
-              <p className="text-gray-500 text-sm">No hay sugerencias disponibles para esta categoría.</p>
+              <p className="text-gray-500 text-sm">No hay sugerencias disponibles para esta categorÃ­a.</p>
             )}
           </div>
         )}
       </div>
 
-      {/* ── RELATED PRODUCTS ── */}
+      {/* â”€â”€ RELATED PRODUCTS â”€â”€ */}
       {related.length > 0 && (
         <div>
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl sm:text-2xl font-bold text-white">Productos relacionados</h2>
             <Link to={`/productos?categoria=${encodeURIComponent(product.category)}`} className="text-sky-400 hover:text-sky-300 text-sm transition-colors">
-              Ver todos →
+              Ver todos â†’
             </Link>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
@@ -491,3 +491,4 @@ export default function ProductDetail() {
     </div>
   );
 }
+

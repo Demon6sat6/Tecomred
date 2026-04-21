@@ -2,9 +2,9 @@ import { useState } from 'react';
 import { X, Truck, Tag, Phone } from 'lucide-react';
 
 const messages = [
-  { icon: Truck, text: '🚚 Envío gratis en pedidos mayores a $100' },
+  { icon: Truck, text: '🚚 Envío gratis en pedidos mayores a S/ 300' },
   { icon: Tag,   text: '🔥 Hasta 25% de descuento en productos seleccionados' },
-  { icon: Phone, text: '📞 Soporte técnico especializado: +1 (234) 567-890' },
+  { icon: Phone, text: '📞 Soporte técnico especializado: +51 1 234-5678' },
 ];
 
 export default function AnnouncementBar() {
