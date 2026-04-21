@@ -45,6 +45,7 @@ export default function ProductDetail() {
   const { products } = useStore();
   const { addToCart } = useCart();
   const { showToast } = useToast();
+  const { formatShort } = useCurrency();
   const [added, setAdded] = useState(false);
   const [qty, setQty] = useState(1);
   const [activeTab, setActiveTab] = useState<Tab>('specs');
