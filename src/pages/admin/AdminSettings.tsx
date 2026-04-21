@@ -113,6 +113,61 @@ export default function AdminSettings() {
           <Toggle label="Permitir reseñas"         desc="Los clientes pueden dejar reseñas en los productos" name="allowReviews"   value={form.allowReviews} />
         </div>
 
+        {/* Stats del Home */}
+        <div className="glass rounded-2xl p-5 space-y-4">
+          <h3 className="text-white font-bold flex items-center gap-2">
+            <BarChart2 className="w-4 h-4 text-sky-400" /> Estadísticas del Home
+          </h3>
+          <p className="text-gray-500 text-xs">Edita los 4 números que aparecen en la sección de estadísticas de la página principal.</p>
+          <div className="space-y-3">
+            {([
+              { v: 'stat1Value', s: 'stat1Suffix', l: 'stat1Label', preview: `${form.stat1Value}${form.stat1Suffix}` },
+              { v: 'stat2Value', s: 'stat2Suffix', l: 'stat2Label', preview: `${form.stat2Value}${form.stat2Suffix}` },
+              { v: 'stat3Value', s: 'stat3Suffix', l: 'stat3Label', preview: `${form.stat3Value}${form.stat3Suffix}` },
+              { v: 'stat4Value', s: 'stat4Suffix', l: 'stat4Label', preview: `${form.stat4Value}${form.stat4Suffix}` },
+            ] as const).map((stat, i) => (
+              <div key={i} className="glass rounded-xl p-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="w-6 h-6 rounded-lg gradient-brand flex items-center justify-center text-white text-xs font-bold shrink-0">{i + 1}</span>
+                  <span className="text-sky-400 font-bold text-sm">{stat.preview}</span>
+                  <span className="text-gray-500 text-xs">— {(form as any)[stat.l]}</span>
+                </div>
+                <div className="grid grid-cols-3 gap-2">
+                  <div>
+                    <label className="block text-xs text-gray-500 mb-1">Número</label>
+                    <input
+                      type="number"
+                      value={(form as any)[stat.v]}
+                      onChange={e => setForm(f => ({ ...f, [stat.v]: e.target.value }))}
+                      className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-gray-200 text-sm focus:outline-none focus:border-sky-500/60"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-gray-500 mb-1">Sufijo</label>
+                    <input
+                      type="text"
+                      value={(form as any)[stat.s]}
+                      onChange={e => setForm(f => ({ ...f, [stat.s]: e.target.value }))}
+                      placeholder="+ / años / /7"
+                      className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-gray-200 text-sm focus:outline-none focus:border-sky-500/60"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-gray-500 mb-1">Etiqueta</label>
+                    <input
+                      type="text"
+                      value={(form as any)[stat.l]}
+                      onChange={e => setForm(f => ({ ...f, [stat.l]: e.target.value }))}
+                      placeholder="Descripción"
+                      className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-gray-200 text-sm focus:outline-none focus:border-sky-500/60"
+                    />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
         <button type="submit"
           className={`flex items-center gap-2 px-6 py-3 rounded-xl text-white font-bold transition-all active:scale-95 shadow-lg ${saved ? 'bg-emerald-500 shadow-emerald-500/20' : 'gradient-brand shadow-sky-500/20 hover:opacity-90'}`}>
           {saved ? <><Check className="w-5 h-5" /> Guardado</> : <><Save className="w-5 h-5" /> Guardar cambios</>}
