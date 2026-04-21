@@ -4,6 +4,7 @@ import { ShoppingCart, Star, Eye, Check } from 'lucide-react';
 import type { Product } from '../types';
 import { useCart } from '../context/CartContext';
 import { useToast } from '../context/ToastContext';
+import { useCurrency } from '../hooks/useCurrency';
 
 interface Props {
   product: Product;
