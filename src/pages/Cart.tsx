@@ -1,12 +1,15 @@
 import { Link } from 'react-router-dom';
 import { Trash2, Plus, Minus, ShoppingBag, ArrowRight, Truck, Tag } from 'lucide-react';
 import { useCart } from '../context/CartContext';
-
-const FREE_SHIPPING_THRESHOLD = 100;
+import { useCurrency } from '../hooks/useCurrency';
+import { useAdmin } from '../context/AdminContext';
 
 export default function Cart() {
   const { items, removeFromCart, updateQuantity, totalPrice, totalItems, clearCart } = useCart();
+  const { formatShort } = useCurrency();
+  const { settings } = useAdmin();
 
+  const FREE_SHIPPING_THRESHOLD = Number(settings.freeShippingMin) || 300;
   const remaining = Math.max(0, FREE_SHIPPING_THRESHOLD - totalPrice);
   const progress  = Math.min(100, (totalPrice / FREE_SHIPPING_THRESHOLD) * 100);
 
