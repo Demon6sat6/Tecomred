@@ -20,6 +20,7 @@ const badgeColors: Record<string, string> = {
 export default function ProductCard({ product }: Props) {
   const { addToCart } = useCart();
   const { showToast } = useToast();
+  const { formatShort } = useCurrency();
   const [imgLoaded, setImgLoaded] = useState(false);
   const [justAdded, setJustAdded] = useState(false);
 
