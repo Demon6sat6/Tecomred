@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Plus, Pencil, Trash2, Search, X, Check, AlertTriangle } from 'lucide-react';
 import { useAdmin } from '../../context/AdminContext';
+import { useCurrency } from '../../hooks/useCurrency';
 import type { Product } from '../../types';
 import { categories } from '../../data/products';
 
