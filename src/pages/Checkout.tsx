@@ -189,7 +189,7 @@ export default function Checkout() {
           <p className="text-gray-400 mb-6">Gracias por tu compra en TecomRed.</p>
           <div className="glass rounded-2xl p-6 text-left space-y-4 mb-8">
             <div className="flex items-center justify-between pb-4 border-b border-white/10">
-              <span className="text-gray-400 text-sm">NÃºmero de orden</span>
+              <span className="text-gray-400 text-sm">Número de orden</span>
               <span className="text-white font-bold font-mono">{orderNumber}</span>
             </div>
             <div className="flex items-center gap-3">
