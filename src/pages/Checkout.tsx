@@ -43,7 +43,7 @@ export default function Checkout() {
 
   const [form, setForm] = useState({
     nombre: '', apellido: '', email: '', telefono: '',
-    direccion: '', ciudad: '', pais: 'Venezuela', codigo: '',
+    direccion: '', ciudad: '', pais: 'Lima', codigo: '',
     cardName: '', cardNumber: '', cardExpiry: '', cardCvv: '',
   });
 
@@ -55,7 +55,7 @@ export default function Checkout() {
         </div>
         <h2 className="text-2xl font-bold text-white mb-2">No hay productos en el carrito</h2>
         <p className="text-gray-400 mb-6">Agrega productos antes de continuar.</p>
-        <Link to="/productos" className="inline-flex items-center gap-2 px-6 py-3 rounded-xl gradient-brand text-white font-semibold hover:opacity-90 transition-opacity">Ver catÃ¡logo</Link>
+        <Link to="/productos" className="inline-flex items-center gap-2 px-6 py-3 rounded-xl gradient-brand text-white font-semibold hover:opacity-90 transition-opacity">Ver catálogo</Link>
       </div>
     );
   }

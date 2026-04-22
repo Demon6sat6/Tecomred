@@ -19,13 +19,13 @@ export default function Cart() {
         <div className="w-24 h-24 rounded-full gradient-brand flex items-center justify-center mx-auto mb-6">
           <ShoppingBag className="w-12 h-12 text-white" />
         </div>
-        <h2 className="text-2xl font-bold text-white mb-2">Tu carrito estÃ¡ vacÃ­o</h2>
+        <h2 className="text-2xl font-bold text-white mb-2">Tu carrito está vacío</h2>
         <p className="text-gray-400 mb-8">Agrega productos para comenzar tu compra.</p>
         <Link
           to="/productos"
           className="inline-flex items-center gap-2 px-6 py-3 rounded-xl gradient-brand text-white font-semibold hover:opacity-90 transition-opacity"
         >
-          Ver catÃ¡logo <ArrowRight className="w-5 h-5" />
+          Ver catálogo <ArrowRight className="w-5 h-5" />
         </Link>
       </div>
     );
@@ -60,11 +60,11 @@ export default function Cart() {
             <div className="flex items-center gap-2 mb-2">
               <Truck className={`w-4 h-4 shrink-0 ${remaining === 0 ? 'text-emerald-400' : 'text-gray-400'}`} />
               {remaining === 0 ? (
-                <p className="text-emerald-400 text-sm font-semibold">ðŸŽ‰ Â¡Tienes envÃ­o gratis!</p>
+                <p className="text-emerald-400 text-sm font-semibold">🎉 ¡Tienes envío gratis!</p>
               ) : (
                 <p className="text-gray-300 text-sm">
-                  Agrega <span className="text-white font-bold">{formatShort(remaining)}</span> mÃ¡s para{' '}
-                  <span className="text-sky-400 font-semibold">envÃ­o gratis</span>
+                  Agrega <span className="text-white font-bold">{formatShort(remaining)}</span> más para{' '}
+                  <span className="text-sky-400 font-semibold">envío gratis</span>
                 </p>
               )}
             </div>
@@ -142,7 +142,7 @@ export default function Cart() {
             <div className="space-y-2 sm:space-y-3 mb-4 sm:mb-6 max-h-48 overflow-y-auto">
               {items.map(({ product, quantity }) => (
                 <div key={product.id} className="flex justify-between text-xs sm:text-sm gap-2">
-                  <span className="text-gray-400 truncate">{product.name} Ã—{quantity}</span>
+                  <span className="text-gray-400 truncate">{product.name} ×{quantity}</span>
                   <span className="text-gray-300 shrink-0 font-medium">{formatShort(product.price * quantity)}</span>
                 </div>
               ))}
@@ -154,9 +154,9 @@ export default function Cart() {
                 <span className="text-gray-300">{formatShort(totalPrice)}</span>
               </div>
               <div className="flex justify-between text-xs sm:text-sm">
-                <span className="text-gray-400">EnvÃ­o</span>
+                <span className="text-gray-400">Envío</span>
                 <span className="text-emerald-400 font-medium">
-                  {remaining === 0 ? 'Gratis ðŸŽ‰' : `$${(5).toFixed(2)}`}
+                  {remaining === 0 ? 'Gratis 🎉' : `$${(5).toFixed(2)}`}
                 </span>
               </div>
               <div className="flex justify-between text-base sm:text-lg font-bold pt-2 border-t border-white/10">
