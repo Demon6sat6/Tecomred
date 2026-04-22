@@ -3,6 +3,7 @@ import { MessageCircle, X, Send, Bot, User, Package, Truck, CreditCard, Headphon
 import { Link } from 'react-router-dom';
 import { products } from '../data/products';
 import { useCart } from '../context/CartContext';
+import { useCurrency } from '../hooks/useCurrency';
 import { useToast } from '../context/ToastContext';
 
 interface Message {
@@ -52,6 +53,7 @@ export default function Chatbot() {
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { addToCart } = useCart();
+  const { formatShort } = useCurrency();
   const { showToast } = useToast();
 
   const scrollToBottom = () => {
@@ -404,7 +406,7 @@ export default function Chatbot() {
                             <span className="text-xs text-gray-400">{product.rating}</span>
                           </div>
                           <div className="flex items-center justify-between gap-2">
-                            <span className="text-sm font-bold text-white">${product.price.toFixed(2)}</span>
+                            <span className="text-sm font-bold text-white">{formatShort(product.price)}</span>
                             <div className="flex gap-1">
                               <Link
                                 to={`/producto/${product.id}`}
@@ -535,4 +537,5 @@ export default function Chatbot() {
     </>
   );
 }
+
 

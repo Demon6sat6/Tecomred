@@ -225,10 +225,10 @@ export default function AdminOrders() {
                     <div key={idx} className="flex items-center justify-between p-3 bg-white/3 rounded-xl">
                       <div className="flex-1 min-w-0">
                         <p className="text-white text-xs font-medium truncate">{item.name}</p>
-                        <p className="text-gray-500 text-[10px]">x{item.qty} Â· ${item.price.toFixed(2)} c/u</p>
+                        <p className="text-gray-500 text-[10px]">x{item.qty} Â· {formatShort(item.price)} c/u</p>
                       </div>
                       <div className="flex items-center gap-3">
-                        <span className="text-white text-xs font-bold">${(item.price * item.qty).toFixed(2)}</span>
+                        <span className="text-white text-xs font-bold">{formatShort(item.price * item.qty)}</span>
                         <button onClick={() => removeItem(idx)} className="p-1 rounded hover:bg-red-500/15 text-gray-500 hover:text-red-400 transition-colors">
                           <X className="w-3.5 h-3.5" />
                         </button>
@@ -342,7 +342,7 @@ export default function AdminOrders() {
                   {selected.items.map((item, i) => (
                     <div key={i} className="flex justify-between text-sm">
                       <span className="text-gray-300 truncate flex-1">{item.name} x{item.qty}</span>
-                      <span className="text-white font-semibold ml-3">${(item.price * item.qty).toFixed(2)}</span>
+                      <span className="text-white font-semibold ml-3">{formatShort(item.price * item.qty)}</span>
                     </div>
                   ))}
                   <div className="flex justify-between font-bold pt-2 border-t border-white/10">
@@ -375,4 +375,5 @@ export default function AdminOrders() {
     </div>
   );
 }
+
 

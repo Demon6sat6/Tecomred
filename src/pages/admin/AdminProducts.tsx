@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { Plus, Pencil, Trash2, Search, X, Check, AlertTriangle } from 'lucide-react';
 import { useAdmin } from '../../context/AdminContext';
 import { useCurrency } from '../../hooks/useCurrency';
@@ -105,7 +105,7 @@ export default function AdminProducts() {
             <thead className="border-b border-white/8">
               <tr>
                 <th className="text-left text-gray-500 text-xs font-semibold px-4 py-3">Producto</th>
-                <th className="text-left text-gray-500 text-xs font-semibold px-4 py-3 hidden md:table-cell">Categoría</th>
+                <th className="text-left text-gray-500 text-xs font-semibold px-4 py-3 hidden md:table-cell">CategorÃ­a</th>
                 <th className="text-right text-gray-500 text-xs font-semibold px-4 py-3">Precio</th>
                 <th className="text-right text-gray-500 text-xs font-semibold px-4 py-3">Stock</th>
                 <th className="text-left text-gray-500 text-xs font-semibold px-4 py-3 hidden sm:table-cell">Badge</th>
@@ -128,7 +128,7 @@ export default function AdminProducts() {
                     <span className="text-gray-400 text-xs">{p.category}</span>
                   </td>
                   <td className="px-4 py-3 text-right">
-                    <span className="text-white text-xs font-bold">${p.price.toFixed(2)}</span>
+                    <span className="text-white text-xs font-bold">{formatShort(p.price)}</span>
                   </td>
                   <td className="px-4 py-3 text-right">
                     <span className={`text-xs font-bold flex items-center justify-end gap-1 ${
@@ -143,7 +143,7 @@ export default function AdminProducts() {
                       <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-sky-500/15 text-sky-400 border border-sky-500/20">
                         {p.badge}
                       </span>
-                    ) : <span className="text-gray-700 text-xs">—</span>}
+                    ) : <span className="text-gray-700 text-xs">â€”</span>}
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center justify-end gap-1.5">
@@ -193,7 +193,7 @@ export default function AdminProducts() {
               {/* Category + Badge */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs text-gray-400 mb-1.5 font-medium">Categoría</label>
+                  <label className="block text-xs text-gray-400 mb-1.5 font-medium">CategorÃ­a</label>
                   <select value={form.category} onChange={e => setForm(f => ({ ...f, category: e.target.value }))}
                     className="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-gray-200 text-sm focus:outline-none focus:border-sky-500/60">
                     {categories.filter(c => c !== 'Todos').map(c => <option key={c} value={c} className="bg-gray-900">{c}</option>)}
@@ -234,13 +234,13 @@ export default function AdminProducts() {
               </div>
               {/* Description */}
               <div>
-                <label className="block text-xs text-gray-400 mb-1.5 font-medium">Descripción</label>
+                <label className="block text-xs text-gray-400 mb-1.5 font-medium">DescripciÃ³n</label>
                 <textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
                   rows={3} className="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-gray-200 text-sm focus:outline-none focus:border-sky-500/60 resize-none" />
               </div>
               {/* Specs */}
               <div>
-                <label className="block text-xs text-gray-400 mb-1.5 font-medium">Especificaciones (una por línea)</label>
+                <label className="block text-xs text-gray-400 mb-1.5 font-medium">Especificaciones (una por lÃ­nea)</label>
                 <textarea value={specsInput} onChange={e => setSpecsInput(e.target.value)}
                   rows={4} placeholder="24 puertos GbE&#10;PoE+ 370W&#10;..."
                   className="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-gray-200 text-sm focus:outline-none focus:border-sky-500/60 resize-none font-mono" />
@@ -267,9 +267,9 @@ export default function AdminProducts() {
             <div className="w-14 h-14 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center mx-auto mb-4">
               <Trash2 className="w-7 h-7 text-red-400" />
             </div>
-            <h3 className="text-white font-bold text-lg mb-2">¿Eliminar producto?</h3>
+            <h3 className="text-white font-bold text-lg mb-2">Â¿Eliminar producto?</h3>
             <p className="text-gray-400 text-sm mb-6">
-              Se eliminará <span className="text-white font-semibold">"{selected.name}"</span> permanentemente.
+              Se eliminarÃ¡ <span className="text-white font-semibold">"{selected.name}"</span> permanentemente.
             </p>
             <div className="flex gap-3">
               <button onClick={() => setModal(null)}
@@ -287,3 +287,4 @@ export default function AdminProducts() {
     </div>
   );
 }
+
