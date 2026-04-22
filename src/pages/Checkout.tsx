@@ -221,7 +221,7 @@ export default function Checkout() {
               ))}
               {appliedCoupon && (
                 <div className="flex justify-between text-sm text-emerald-400">
-                  <span>CupÃ³n {appliedCoupon.code}</span>
+                  <span>Cupón {appliedCoupon.code}</span>
                   <span>-{formatShort(appliedCoupon.discount)}</span>
                 </div>
               )}
@@ -232,7 +232,7 @@ export default function Checkout() {
             </div>
           </div>
           <p className="text-gray-500 text-sm mb-6">
-            RecibirÃ¡s un correo en <span className="text-gray-300">{form.email}</span>
+            Recibirás un correo en <span className="text-gray-300">{form.email}</span>
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Link to="/" className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl gradient-brand text-white font-semibold hover:opacity-90 active:scale-95 transition-all">Volver al inicio</Link>
@@ -246,14 +246,14 @@ export default function Checkout() {
             {step === 'envio' && (
               <div className="glass rounded-2xl p-5 sm:p-6">
                 <h2 className="text-white font-bold text-lg mb-6 flex items-center gap-2">
-                  <Truck className="w-5 h-5 text-sky-400" /> InformaciÃ³n de envÃ­o
+                  <Truck className="w-5 h-5 text-sky-400" /> Información de envío
                 </h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <Field name="nombre"    label="Nombre *"             value={form.nombre}    onChange={handleChange} placeholder="Juan"              error={errors.nombre} />
-                  <Field name="apellido"  label="Apellido *"           value={form.apellido}  onChange={handleChange} placeholder="PÃ©rez"             error={errors.apellido} />
-                  <Field name="email"     label="Correo electrÃ³nico *" value={form.email}     onChange={handleChange} placeholder="juan@email.com"    type="email" error={errors.email} />
-                  <Field name="telefono"  label="TelÃ©fono *"           value={form.telefono}  onChange={handleChange} placeholder="+1 234 567 890"    type="tel" error={errors.telefono} />
-                  <Field name="direccion" label="DirecciÃ³n *"          value={form.direccion} onChange={handleChange} placeholder="Av. Principal 123" error={errors.direccion} className="sm:col-span-2" />
+                  <Field name="apellido"  label="Apellido *"           value={form.apellido}  onChange={handleChange} placeholder="Pérez"             error={errors.apellido} />
+                  <Field name="email"     label="Correo electrónico *" value={form.email}     onChange={handleChange} placeholder="juan@email.com"    type="email" error={errors.email} />
+                  <Field name="telefono"  label="Teléfono *"           value={form.telefono}  onChange={handleChange} placeholder="+1 234 567 890"    type="tel" error={errors.telefono} />
+                  <Field name="direccion" label="Dirección *"          value={form.direccion} onChange={handleChange} placeholder="Av. Principal 123" error={errors.direccion} className="sm:col-span-2" />
                   <Field name="ciudad"    label="Ciudad *"             value={form.ciudad}    onChange={handleChange} placeholder="Caracas"           error={errors.ciudad} />
                   <Field name="codigo"    label="CÃ³digo postal"        value={form.codigo}    onChange={handleChange} placeholder="1010" />
                   <div>
