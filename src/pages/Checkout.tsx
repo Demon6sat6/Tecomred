@@ -215,7 +215,7 @@ export default function Checkout() {
               {items.map(({ product, quantity }) => (
                 <div key={product.id} className="flex items-center gap-3">
                   <img src={product.image} alt={product.name} className="w-10 h-10 rounded-lg object-cover shrink-0" />
-                  <span className="text-gray-300 text-xs flex-1 truncate">{product.name} Ã—{quantity}</span>
+                  <span className="text-gray-300 text-xs flex-1 truncate">{product.name} ×{quantity}</span>
                   <span className="text-white text-xs font-semibold shrink-0">{formatShort(product.price * quantity)}</span>
                 </div>
               ))}
