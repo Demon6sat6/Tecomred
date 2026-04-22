@@ -216,7 +216,7 @@ export default function Checkout() {
                 <div key={product.id} className="flex items-center gap-3">
                   <img src={product.image} alt={product.name} className="w-10 h-10 rounded-lg object-cover shrink-0" />
                   <span className="text-gray-300 text-xs flex-1 truncate">{product.name} Ã—{quantity}</span>
-                  <span className="text-white text-xs font-semibold shrink-0">${(product.price * quantity).toFixed(2)}</span>
+                  <span className="text-white text-xs font-semibold shrink-0">{formatShort(product.price * quantity)}</span>
                 </div>
               ))}
               {appliedCoupon && (
@@ -334,7 +334,7 @@ export default function Checkout() {
                     <p className="text-xs text-gray-300 truncate font-medium">{product.name}</p>
                     <p className="text-xs text-gray-500">Ã—{quantity}</p>
                   </div>
-                  <span className="text-sm text-gray-300 shrink-0 font-semibold">${(product.price * quantity).toFixed(2)}</span>
+                  <span className="text-sm text-gray-300 shrink-0 font-semibold">{formatShort(product.price * quantity)}</span>
                 </div>
               ))}
             </div>
@@ -399,5 +399,6 @@ export default function Checkout() {
     </div>
   );
 }
+
 
 

@@ -1,12 +1,14 @@
-import { useState, useMemo } from 'react';
+﻿import { useState, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { SlidersHorizontal, Search, X } from 'lucide-react';
 import { categories } from '../data/products';
 import { useStore } from '../context/StoreContext';
+import { useCurrency } from '../hooks/useCurrency';
 import ProductCard from '../components/ProductCard';
 
 export default function Products() {
   const { products } = useStore();
+  const { symbol } = useCurrency();
   const [searchParams, setSearchParams] = useSearchParams();
   const [showFilters, setShowFilters] = useState(false);
 
@@ -63,7 +65,7 @@ export default function Products() {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-white mb-2">Catálogo de Productos</h1>
+        <h1 className="text-3xl font-bold text-white mb-2">CatÃ¡logo de Productos</h1>
         <p className="text-gray-400">
           {filtered.length} producto{filtered.length !== 1 ? 's' : ''} encontrado{filtered.length !== 1 ? 's' : ''}
           {selectedCategory !== 'Todos' && ` en ${selectedCategory}`}
@@ -97,7 +99,7 @@ export default function Products() {
                   type="text"
                   value={localSearch}
                   onChange={e => setLocalSearch(e.target.value)}
-                  placeholder="Nombre, categoría..."
+                  placeholder="Nombre, categorÃ­a..."
                   className="w-full pl-9 pr-3 py-2 bg-white/5 border border-white/10 rounded-lg text-sm text-gray-200 placeholder-gray-500 focus:outline-none focus:border-sky-500"
                 />
                 {localSearch && (
@@ -110,7 +112,7 @@ export default function Products() {
 
             {/* Categories */}
             <div>
-              <label className="text-sm text-gray-400 mb-2 block">Categoría</label>
+              <label className="text-sm text-gray-400 mb-2 block">CategorÃ­a</label>
               <div className="space-y-1">
                 {categories.map(cat => (
                   <button
@@ -131,7 +133,7 @@ export default function Products() {
             {/* Price Range */}
             <div>
               <label className="text-sm text-gray-400 mb-2 block">
-                Precio: ${priceRange[0]} — ${priceRange[1]}
+                Precio: ${priceRange[0]} â€” ${priceRange[1]}
               </label>
               <input
                 type="range"
@@ -205,9 +207,9 @@ export default function Products() {
             </div>
           ) : (
             <div className="text-center py-20">
-              <div className="text-6xl mb-4">🔍</div>
+              <div className="text-6xl mb-4">ðŸ”</div>
               <h3 className="text-xl font-semibold text-white mb-2">Sin resultados</h3>
-              <p className="text-gray-400">Intenta con otros filtros o términos de búsqueda.</p>
+              <p className="text-gray-400">Intenta con otros filtros o tÃ©rminos de bÃºsqueda.</p>
             </div>
           )}
         </div>
@@ -215,3 +217,4 @@ export default function Products() {
     </div>
   );
 }
+

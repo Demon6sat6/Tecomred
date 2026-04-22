@@ -1,8 +1,12 @@
 import { useState } from 'react';
 import { X, Truck, Tag } from 'lucide-react';
+import { useAdmin } from '../context/AdminContext';
+import { useCurrency } from '../hooks/useCurrency';
 
 export default function TopBanner() {
   const [visible, setVisible] = useState(true);
+  const { settings } = useAdmin();
+  const { formatShort } = useCurrency();
 
   if (!visible) return null;
 
@@ -11,12 +15,12 @@ export default function TopBanner() {
       <div className="max-w-7xl mx-auto flex items-center justify-center gap-6 flex-wrap">
         <div className="flex items-center gap-2 font-medium">
           <Truck className="w-4 h-4 shrink-0" />
-          <span>Envío gratis en pedidos mayores a <strong>$100</strong></span>
+          <span>Envío gratis en pedidos mayores a <strong>{formatShort(Number(settings.freeShippingMin))}</strong></span>
         </div>
         <span className="hidden sm:block text-white/40">|</span>
         <div className="flex items-center gap-2 font-medium">
           <Tag className="w-4 h-4 shrink-0" />
-          <span>Usa el código <strong>TECOM10</strong> y obtén 10% de descuento</span>
+          <span>Usa el código <strong>BIENVENIDO10</strong> y obtén 10% de descuento</span>
         </div>
       </div>
       <button

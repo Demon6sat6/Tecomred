@@ -1,9 +1,11 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { Check, Store, Mail, Phone, MapPin, Globe, Save, Lock, Eye, EyeOff, AlertCircle, BarChart2 } from 'lucide-react';
 import { useAdmin, type StoreSettings } from '../../context/AdminContext';
+import { useCurrency } from '../../hooks/useCurrency';
 
 export default function AdminSettings() {
   const { settings, saveSettings, logout } = useAdmin();
+  const { symbol } = useCurrency();
   const [saved, setSaved] = useState(false);
   const [form, setForm] = useState<StoreSettings>({ ...settings });
 
@@ -24,9 +26,9 @@ export default function AdminSettings() {
 
   const handleChangePass = () => {
     setPassError('');
-    if (passForm.current !== settings.adminPass) { setPassError('Contraseña actual incorrecta'); return; }
-    if (passForm.newPass.length < 6) { setPassError('La nueva contraseña debe tener al menos 6 caracteres'); return; }
-    if (passForm.newPass !== passForm.confirm) { setPassError('Las contraseñas no coinciden'); return; }
+    if (passForm.current !== settings.adminPass) { setPassError('ContraseÃ±a actual incorrecta'); return; }
+    if (passForm.newPass.length < 6) { setPassError('La nueva contraseÃ±a debe tener al menos 6 caracteres'); return; }
+    if (passForm.newPass !== passForm.confirm) { setPassError('Las contraseÃ±as no coinciden'); return; }
     saveSettings({ ...form, adminUser: passForm.current !== '' ? form.adminUser : form.adminUser, adminPass: passForm.newPass });
     setPassSaved(true);
     setPassForm({ current: '', newPass: '', confirm: '' });
@@ -64,17 +66,17 @@ export default function AdminSettings() {
     <div className="space-y-6 max-w-2xl">
       <div>
         <h2 className="text-xl sm:text-2xl font-extrabold text-white">Ajustes</h2>
-        <p className="text-gray-500 text-sm">Configuración general de la tienda</p>
+        <p className="text-gray-500 text-sm">ConfiguraciÃ³n general de la tienda</p>
       </div>
 
       <form onSubmit={handleSave} className="space-y-5">
         {/* Store info */}
         <div className="glass rounded-2xl p-5 space-y-4">
-          <h3 className="text-white font-bold flex items-center gap-2"><Store className="w-4 h-4 text-sky-400" /> Información de la tienda</h3>
+          <h3 className="text-white font-bold flex items-center gap-2"><Store className="w-4 h-4 text-sky-400" /> InformaciÃ³n de la tienda</h3>
           <InputField label="Nombre de la tienda" name="storeName"    value={form.storeName}    icon={Store} />
-          <InputField label="Correo electrónico"  name="storeEmail"   value={form.storeEmail}   icon={Mail} />
-          <InputField label="Teléfono"            name="storePhone"   value={form.storePhone}   icon={Phone} />
-          <InputField label="Dirección"           name="storeAddress" value={form.storeAddress} icon={MapPin} />
+          <InputField label="Correo electrÃ³nico"  name="storeEmail"   value={form.storeEmail}   icon={Mail} />
+          <InputField label="TelÃ©fono"            name="storePhone"   value={form.storePhone}   icon={Phone} />
+          <InputField label="DirecciÃ³n"           name="storeAddress" value={form.storeAddress} icon={MapPin} />
           <InputField label="Sitio web"           name="storeWebsite" value={form.storeWebsite} icon={Globe} />
         </div>
 
@@ -90,9 +92,9 @@ export default function AdminSettings() {
               </select>
             </div>
             <div>
-              <label className="block text-sm text-gray-400 mb-1.5 font-medium">Envío gratis desde</label>
+              <label className="block text-sm text-gray-400 mb-1.5 font-medium">EnvÃ­o gratis desde</label>
               <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">$</span>
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">{symbol}</span>
                 <input type="number" value={form.freeShippingMin} onChange={e => setForm(s => ({ ...s, freeShippingMin: e.target.value }))}
                   className="w-full pl-7 pr-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-gray-200 text-sm focus:outline-none focus:border-sky-500/60" />
               </div>
@@ -108,17 +110,17 @@ export default function AdminSettings() {
         {/* Toggles */}
         <div className="glass rounded-2xl p-5">
           <h3 className="text-white font-bold mb-3">Opciones</h3>
-          <Toggle label="Modo mantenimiento"       desc="La tienda mostrará una página de mantenimiento"    name="maintenanceMode" value={form.maintenanceMode} />
-          <Toggle label="Mostrar productos agotados" desc="Los productos sin stock seguirán visibles"       name="showOutOfStock"  value={form.showOutOfStock} />
-          <Toggle label="Permitir reseñas"         desc="Los clientes pueden dejar reseñas en los productos" name="allowReviews"   value={form.allowReviews} />
+          <Toggle label="Modo mantenimiento"       desc="La tienda mostrarÃ¡ una pÃ¡gina de mantenimiento"    name="maintenanceMode" value={form.maintenanceMode} />
+          <Toggle label="Mostrar productos agotados" desc="Los productos sin stock seguirÃ¡n visibles"       name="showOutOfStock"  value={form.showOutOfStock} />
+          <Toggle label="Permitir reseÃ±as"         desc="Los clientes pueden dejar reseÃ±as en los productos" name="allowReviews"   value={form.allowReviews} />
         </div>
 
         {/* Stats del Home */}
         <div className="glass rounded-2xl p-5 space-y-4">
           <h3 className="text-white font-bold flex items-center gap-2">
-            <BarChart2 className="w-4 h-4 text-sky-400" /> Estadísticas del Home
+            <BarChart2 className="w-4 h-4 text-sky-400" /> EstadÃ­sticas del Home
           </h3>
-          <p className="text-gray-500 text-xs">Edita los 4 números que aparecen en la sección de estadísticas de la página principal.</p>
+          <p className="text-gray-500 text-xs">Edita los 4 nÃºmeros que aparecen en la secciÃ³n de estadÃ­sticas de la pÃ¡gina principal.</p>
           <div className="space-y-3">
             {([
               { v: 'stat1Value', s: 'stat1Suffix', l: 'stat1Label', preview: `${form.stat1Value}${form.stat1Suffix}` },
@@ -130,11 +132,11 @@ export default function AdminSettings() {
                 <div className="flex items-center gap-2 mb-3">
                   <span className="w-6 h-6 rounded-lg gradient-brand flex items-center justify-center text-white text-xs font-bold shrink-0">{i + 1}</span>
                   <span className="text-sky-400 font-bold text-sm">{stat.preview}</span>
-                  <span className="text-gray-500 text-xs">— {(form as any)[stat.l]}</span>
+                  <span className="text-gray-500 text-xs">â€” {(form as any)[stat.l]}</span>
                 </div>
                 <div className="grid grid-cols-3 gap-2">
                   <div>
-                    <label className="block text-xs text-gray-500 mb-1">Número</label>
+                    <label className="block text-xs text-gray-500 mb-1">NÃºmero</label>
                     <input
                       type="number"
                       value={(form as any)[stat.v]}
@@ -148,7 +150,7 @@ export default function AdminSettings() {
                       type="text"
                       value={(form as any)[stat.s]}
                       onChange={e => setForm(f => ({ ...f, [stat.s]: e.target.value }))}
-                      placeholder="+ / años / /7"
+                      placeholder="+ / aÃ±os / /7"
                       className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-gray-200 text-sm focus:outline-none focus:border-sky-500/60"
                     />
                   </div>
@@ -158,7 +160,7 @@ export default function AdminSettings() {
                       type="text"
                       value={(form as any)[stat.l]}
                       onChange={e => setForm(f => ({ ...f, [stat.l]: e.target.value }))}
-                      placeholder="Descripción"
+                      placeholder="DescripciÃ³n"
                       className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-gray-200 text-sm focus:outline-none focus:border-sky-500/60"
                     />
                   </div>
@@ -180,7 +182,7 @@ export default function AdminSettings() {
           <h3 className="text-white font-bold flex items-center gap-2"><Lock className="w-4 h-4 text-sky-400" /> Seguridad</h3>
           <button onClick={() => setShowPassSection(s => !s)}
             className="text-xs text-sky-400 hover:text-sky-300 transition-colors">
-            {showPassSection ? 'Cancelar' : 'Cambiar contraseña'}
+            {showPassSection ? 'Cancelar' : 'Cambiar contraseÃ±a'}
           </button>
         </div>
 
@@ -190,7 +192,7 @@ export default function AdminSettings() {
           </div>
           <div>
             <p className="text-white text-sm font-medium">Usuario: <span className="font-mono text-sky-400">{settings.adminUser}</span></p>
-            <p className="text-gray-500 text-xs">Contraseña protegida</p>
+            <p className="text-gray-500 text-xs">ContraseÃ±a protegida</p>
           </div>
         </div>
 
@@ -205,12 +207,12 @@ export default function AdminSettings() {
             {passSaved && (
               <div className="flex items-center gap-2 p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl">
                 <Check className="w-4 h-4 text-emerald-400 shrink-0" />
-                <p className="text-emerald-400 text-xs">Contraseña actualizada correctamente</p>
+                <p className="text-emerald-400 text-xs">ContraseÃ±a actualizada correctamente</p>
               </div>
             )}
             {[
-              { label: 'Contraseña actual', key: 'current', show: showCurrent, toggle: () => setShowCurrent(s => !s) },
-              { label: 'Nueva contraseña',  key: 'newPass',  show: showNew,     toggle: () => setShowNew(s => !s) },
+              { label: 'ContraseÃ±a actual', key: 'current', show: showCurrent, toggle: () => setShowCurrent(s => !s) },
+              { label: 'Nueva contraseÃ±a',  key: 'newPass',  show: showNew,     toggle: () => setShowNew(s => !s) },
               { label: 'Confirmar nueva',   key: 'confirm',  show: showNew,     toggle: () => setShowNew(s => !s) },
             ].map(f => (
               <div key={f.key}>
@@ -229,7 +231,7 @@ export default function AdminSettings() {
             ))}
             <button onClick={handleChangePass}
               className="w-full py-2.5 rounded-xl gradient-brand text-white text-sm font-bold hover:opacity-90 active:scale-95 transition-all mt-2">
-              Actualizar contraseña
+              Actualizar contraseÃ±a
             </button>
           </div>
         )}
@@ -241,9 +243,10 @@ export default function AdminSettings() {
         <p className="text-gray-400 text-sm mb-4">Estas acciones son irreversibles. Procede con cuidado.</p>
         <button onClick={logout}
           className="px-4 py-2.5 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm font-semibold hover:bg-red-500/20 transition-colors">
-          Cerrar sesión del panel
+          Cerrar sesiÃ³n del panel
         </button>
       </div>
     </div>
   );
 }
+

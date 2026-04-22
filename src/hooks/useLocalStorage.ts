@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 
 // Increment this version whenever you need to force-reset all stored data
-export const STORAGE_VERSION = '3'; // v3 = Peru / PEN forzado
+export const STORAGE_VERSION = '4'; // v4 = Peru PEN definitivo - reset forzado
 
 export function useLocalStorage<T>(key: string, initialValue: T) {
   const [value, setValue] = useState<T>(() => {

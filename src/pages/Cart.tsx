@@ -76,7 +76,7 @@ export default function Cart() {
             </div>
             {remaining > 0 && (
               <div className="flex justify-between mt-1.5">
-                <span className="text-xs text-gray-600">$0</span>
+                <span className="text-xs text-gray-600">{formatShort(0)}</span>
                 <span className="text-xs text-gray-500 flex items-center gap-1">
                   <Tag className="w-3 h-3" /> Gratis a partir de {formatShort(FREE_SHIPPING_THRESHOLD)}
                 </span>
@@ -143,7 +143,7 @@ export default function Cart() {
               {items.map(({ product, quantity }) => (
                 <div key={product.id} className="flex justify-between text-xs sm:text-sm gap-2">
                   <span className="text-gray-400 truncate">{product.name} Ã—{quantity}</span>
-                  <span className="text-gray-300 shrink-0 font-medium">${(product.price * quantity).toFixed(2)}</span>
+                  <span className="text-gray-300 shrink-0 font-medium">{formatShort(product.price * quantity)}</span>
                 </div>
               ))}
             </div>
@@ -185,4 +185,5 @@ export default function Cart() {
     </div>
   );
 }
+
 
