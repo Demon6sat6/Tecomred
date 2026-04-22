@@ -87,9 +87,9 @@ export default function Checkout() {
     if (!form.nombre.trim())    e.nombre    = 'El nombre es requerido';
     if (!form.apellido.trim())  e.apellido  = 'El apellido es requerido';
     if (!form.email.trim())     e.email     = 'El correo es requerido';
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) e.email = 'Correo invÃ¡lido';
-    if (!form.telefono.trim())  e.telefono  = 'El telÃ©fono es requerido';
-    if (!form.direccion.trim()) e.direccion = 'La direcciÃ³n es requerida';
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) e.email = 'Correo inválido';
+    if (!form.telefono.trim())  e.telefono  = 'El teléfono es requerido';
+    if (!form.direccion.trim()) e.direccion = 'La dirección es requerida';
     if (!form.ciudad.trim())    e.ciudad    = 'La ciudad es requerida';
     setErrors(e);
     return Object.keys(e).length === 0;
@@ -98,9 +98,9 @@ export default function Checkout() {
   const validatePayment = (): boolean => {
     const e: FormErrors = {};
     if (!form.cardName.trim())  e.cardName   = 'El nombre es requerido';
-    if (form.cardNumber.replace(/\s/g, '').length < 16) e.cardNumber = 'NÃºmero de tarjeta invÃ¡lido (16 dÃ­gitos)';
+    if (form.cardNumber.replace(/\s/g, '').length < 16) e.cardNumber = 'Número de tarjeta inválido (16 dígitos)';
     if (!/^\d{2}\/\d{2}$/.test(form.cardExpiry)) e.cardExpiry = 'Formato MM/AA requerido';
-    if (form.cardCvv.length < 3) e.cardCvv   = 'CVV invÃ¡lido (3-4 dÃ­gitos)';
+    if (form.cardCvv.length < 3) e.cardCvv   = 'CVV inválido (3-4 dígitos)';
     setErrors(e);
     return Object.keys(e).length === 0;
   };
