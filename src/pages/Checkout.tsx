@@ -255,12 +255,12 @@ export default function Checkout() {
                   <Field name="telefono"  label="Teléfono *"           value={form.telefono}  onChange={handleChange} placeholder="+1 234 567 890"    type="tel" error={errors.telefono} />
                   <Field name="direccion" label="Dirección *"          value={form.direccion} onChange={handleChange} placeholder="Av. Principal 123" error={errors.direccion} className="sm:col-span-2" />
                   <Field name="ciudad"    label="Ciudad *"             value={form.ciudad}    onChange={handleChange} placeholder="Caracas"           error={errors.ciudad} />
-                  <Field name="codigo"    label="CÃ³digo postal"        value={form.codigo}    onChange={handleChange} placeholder="1010" />
+                  <Field name="codigo"    label="Código postal"        value={form.codigo}    onChange={handleChange} placeholder="1010" />
                   <div>
-                    <label className="block text-sm text-gray-400 mb-1.5 font-medium">PaÃ­s</label>
+                    <label className="block text-sm text-gray-400 mb-1.5 font-medium">Departamento</label>
                     <select name="pais" value={form.pais} onChange={e => setForm(f => ({ ...f, pais: e.target.value }))}
                       className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-gray-200 focus:outline-none focus:border-sky-500/60 text-sm">
-                      {['Venezuela','Colombia','MÃ©xico','Argentina','Chile','PerÃº','Ecuador'].map(p => (
+                      {['Lima','Arequipa','Trujillo','Chiclayo','Piura','Cusco','Iquitos','Huancayo','Tacna','Puno'].map(p => (
                         <option key={p} value={p} className="bg-gray-900">{p}</option>
                       ))}
                     </select>
