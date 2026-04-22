@@ -206,7 +206,7 @@ export default function Checkout() {
                 <MapPin className="w-5 h-5 text-sky-400" />
               </div>
               <div>
-                <p className="text-white text-sm font-semibold">DirecciÃ³n de entrega</p>
+                <p className="text-white text-sm font-semibold">Dirección de entrega</p>
                 <p className="text-gray-400 text-xs">{form.direccion}, {form.ciudad}</p>
               </div>
             </div>
