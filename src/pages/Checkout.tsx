@@ -135,9 +135,9 @@ export default function Checkout() {
   };
 
   const steps = [
-    { id: 'envio',        label: 'EnvÃ­o',        icon: Truck },
+    { id: 'envio',        label: 'Envío',        icon: Truck },
     { id: 'pago',         label: 'Pago',         icon: CreditCard },
-    { id: 'confirmacion', label: 'ConfirmaciÃ³n', icon: Check },
+    { id: 'confirmacion', label: 'Confirmación', icon: Check },
   ];
 
   const estimatedDate = new Date();
@@ -185,7 +185,7 @@ export default function Checkout() {
             </div>
             <div className="absolute inset-0 rounded-full bg-emerald-500/5 animate-ping" />
           </div>
-          <h2 className="text-3xl font-extrabold text-white mb-2">Â¡Pedido confirmado!</h2>
+          <h2 className="text-3xl font-extrabold text-white mb-2">¡Pedido confirmado!</h2>
           <p className="text-gray-400 mb-6">Gracias por tu compra en TecomRed.</p>
           <div className="glass rounded-2xl p-6 text-left space-y-4 mb-8">
             <div className="flex items-center justify-between pb-4 border-b border-white/10">
