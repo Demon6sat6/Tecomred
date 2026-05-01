@@ -277,7 +277,7 @@ export default function Checkout() {
             {step === 'pago' && (
               <div className="glass rounded-2xl p-5 sm:p-6">
                 <h2 className="text-white font-bold text-lg mb-6 flex items-center gap-2">
-                  <CreditCard className="w-5 h-5 text-sky-400" /> InformaciÃ³n de pago
+                  <CreditCard className="w-5 h-5 text-sky-400" /> Información de pago
                 </h2>
                 {/* Card preview */}
                 <div className="relative h-40 rounded-2xl gradient-brand p-5 mb-6 overflow-hidden shadow-xl shadow-sky-500/20">
@@ -299,7 +299,7 @@ export default function Checkout() {
                 </div>
                 <div className="space-y-4">
                   <Field name="cardName"   label="Nombre en la tarjeta *" value={form.cardName}   onChange={handleChange} placeholder="JUAN PEREZ"          error={errors.cardName} />
-                  <Field name="cardNumber" label="NÃºmero de tarjeta *"    value={form.cardNumber} onChange={handleChange} placeholder="1234 5678 9012 3456" error={errors.cardNumber} />
+                  <Field name="cardNumber" label="Número de tarjeta *"    value={form.cardNumber} onChange={handleChange} placeholder="1234 5678 9012 3456" error={errors.cardNumber} />
                   <div className="grid grid-cols-2 gap-4">
                     <Field name="cardExpiry" label="Vencimiento *" value={form.cardExpiry} onChange={handleChange} placeholder="MM/AA" error={errors.cardExpiry} />
                     <Field name="cardCvv"    label="CVV *"         value={form.cardCvv}    onChange={handleChange} placeholder="123"   error={errors.cardCvv} />
@@ -307,12 +307,12 @@ export default function Checkout() {
                 </div>
                 <div className="flex items-center gap-2 mt-4 p-3 bg-emerald-500/5 border border-emerald-500/20 rounded-xl">
                   <Check className="w-4 h-4 text-emerald-400 shrink-0" />
-                  <p className="text-emerald-400 text-xs">Pago 100% seguro. Tus datos estÃ¡n encriptados.</p>
+                  <p className="text-emerald-400 text-xs">Pago 100% seguro. Tus datos están encriptados.</p>
                 </div>
                 <div className="flex gap-3 mt-6">
                   <button onClick={() => { setErrors({}); setStep('envio'); }}
                     className="px-5 py-3 rounded-xl bg-white/5 border border-white/10 text-gray-300 font-semibold hover:bg-white/10 transition-colors">
-                    â† AtrÃ¡s
+                    â† Atrás
                   </button>
                   <button onClick={handleOrder}
                     className="flex-1 py-3 rounded-xl gradient-brand text-white font-bold hover:opacity-90 active:scale-95 transition-all shadow-lg shadow-sky-500/20">
@@ -342,7 +342,7 @@ export default function Checkout() {
             {/* Coupon input */}
             <div className="border-t border-white/10 pt-4">
               <label className="block text-xs text-gray-400 mb-2 font-medium flex items-center gap-1.5">
-                <Tag className="w-3.5 h-3.5" /> CupÃ³n de descuento
+                <Tag className="w-3.5 h-3.5" /> Cupón de descuento
               </label>
               {appliedCoupon ? (
                 <div className="flex items-center justify-between p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl">
@@ -385,7 +385,7 @@ export default function Checkout() {
                 </div>
               )}
               <div className="flex justify-between text-sm">
-                <span className="text-gray-400">EnvÃ­o</span>
+                <span className="text-gray-400">Envío</span>
                 <span className="text-emerald-400 font-semibold">Gratis</span>
               </div>
               <div className="flex justify-between font-bold pt-2 border-t border-white/10">

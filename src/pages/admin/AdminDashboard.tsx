@@ -67,7 +67,7 @@ export default function AdminDashboard() {
   };
 
   const exportProductsCSV = () => {
-    const headers = ['ID', 'Nombre', 'CategorÃ­a', 'Precio', 'Stock', 'Rating'];
+    const headers = ['ID', 'Nombre', 'Categoría', 'Precio', 'Stock', 'Rating'];
     const rows = products.map(p => [p.id, `"${p.name}"`, p.category, p.price.toFixed(2), p.stock, p.rating]);
     const csv = [headers, ...rows].map(r => r.join(',')).join('\n');
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
@@ -94,7 +94,7 @@ export default function AdminDashboard() {
     { label: 'Productos',        value: totalProducts,    icon: Package,     color: 'text-indigo-400', bg: 'bg-indigo-500/10', change: `${totalProducts}` },
     { label: 'Clientes',         value: customers.length, icon: Users,       color: 'text-purple-400', bg: 'bg-purple-500/10', change: `${customers.filter(c => c.status === 'Activo').length} activos` },
     { label: 'Activos ahora',    value: activeNow,        icon: Eye,         color: 'text-emerald-400', bg: 'bg-emerald-500/10', change: `${visitsToday} hoy`, live: true },
-    { label: 'Visitas semana',   value: visitsThisWeek,   icon: TrendingUp,  color: 'text-sky-400',    bg: 'bg-sky-500/10',    change: 'Ãºltimos 7 dÃ­as' },
+    { label: 'Visitas semana',   value: visitsThisWeek,   icon: TrendingUp,  color: 'text-sky-400',    bg: 'bg-sky-500/10',    change: 'últimos 7 días' },
   ];
 
   return (
@@ -150,7 +150,7 @@ export default function AdminDashboard() {
       <div className="glass rounded-2xl p-5">
         <div className="flex items-center justify-between mb-5">
           <h3 className="text-white font-bold flex items-center gap-2">
-            <TrendingUp className="w-4 h-4 text-sky-400" /> Ventas Ãºltimos 7 dÃ­as
+            <TrendingUp className="w-4 h-4 text-sky-400" /> Ventas últimos 7 días
           </h3>
           <span className="text-xs text-gray-500">Total: {formatShort(salesData.reduce((a, b) => a + b, 0))}</span>
         </div>
@@ -183,7 +183,7 @@ export default function AdminDashboard() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-white text-sm font-semibold truncate">{order.customer}</p>
-                  <p className="text-gray-500 text-xs">{order.id} Â· {order.date}</p>
+                  <p className="text-gray-500 text-xs">{order.id} · {order.date}</p>
                 </div>
                 <div className="text-right shrink-0">
                   <p className="text-white text-sm font-bold">{formatShort(order.total)}</p>
@@ -200,7 +200,7 @@ export default function AdminDashboard() {
         <div className="space-y-4">
           {/* Categories chart */}
           <div className="glass rounded-2xl p-5">
-            <h3 className="text-white font-bold mb-4">Productos por categorÃ­a</h3>
+            <h3 className="text-white font-bold mb-4">Productos por categoría</h3>
             <div className="space-y-3">
               {topCategories.map(([cat, count]) => (
                 <div key={cat}>
@@ -243,7 +243,7 @@ export default function AdminDashboard() {
       {/* Top products table */}
       <div className="glass rounded-2xl p-5">
         <div className="flex items-center justify-between mb-5">
-          <h3 className="text-white font-bold">Productos mÃ¡s valorados</h3>
+          <h3 className="text-white font-bold">Productos más valorados</h3>
           <Link to="/admin/productos" className="text-sky-400 hover:text-sky-300 text-xs flex items-center gap-1 transition-colors">
             Ver todos <ArrowRight className="w-3.5 h-3.5" />
           </Link>
@@ -253,7 +253,7 @@ export default function AdminDashboard() {
             <thead>
               <tr className="border-b border-white/8">
                 <th className="text-left text-gray-500 text-xs font-semibold pb-3 pr-4">Producto</th>
-                <th className="text-left text-gray-500 text-xs font-semibold pb-3 pr-4 hidden sm:table-cell">CategorÃ­a</th>
+                <th className="text-left text-gray-500 text-xs font-semibold pb-3 pr-4 hidden sm:table-cell">Categoría</th>
                 <th className="text-right text-gray-500 text-xs font-semibold pb-3 pr-4">Precio</th>
                 <th className="text-right text-gray-500 text-xs font-semibold pb-3 pr-4">Stock</th>
                 <th className="text-right text-gray-500 text-xs font-semibold pb-3">Rating</th>
@@ -273,7 +273,7 @@ export default function AdminDashboard() {
                   <td className="py-3 pr-4 text-right">
                     <span className={`text-xs font-semibold ${p.stock <= 5 ? 'text-yellow-400' : 'text-emerald-400'}`}>{p.stock}</span>
                   </td>
-                  <td className="py-3 text-right"><span className="text-yellow-400 text-xs font-bold">â­ {p.rating}</span></td>
+                  <td className="py-3 text-right"><span className="text-yellow-400 text-xs font-bold">⭐ {p.rating}</span></td>
                 </tr>
               ))}
             </tbody>

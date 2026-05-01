@@ -181,7 +181,7 @@ export default function Chatbot() {
       setIsTyping(false);
       const lowerMessage = messageText.toLowerCase();
 
-      // BÃºsqueda de productos
+      // Búsqueda de productos
       if (lowerMessage.includes('switch') || lowerMessage.includes('switches')) {
         addBotMessage({
           text: 'Encontré estos switches para ti:',
@@ -272,7 +272,7 @@ export default function Chatbot() {
         }, 500);
       } else if (lowerMessage.includes('hola') || lowerMessage.includes('buenos') || lowerMessage.includes('buenas')) {
         addBotMessage({
-          text: 'Â¡Hola! ðŸ‘‹ Â¿En quÃ© puedo ayudarte? Puedo mostrarte productos, informaciÃ³n de envÃ­o, Métodos de pago o Soporte técnico.',
+          text: '¡Hola! ðŸ‘‹ ¿En qué puedo ayudarte? Puedo mostrarte productos, información de envío, Métodos de pago o Soporte técnico.',
         });
       } else if (lowerMessage.includes('precio') || lowerMessage.includes('costo') || lowerMessage.includes('cuanto')) {
         addBotMessage({
@@ -288,11 +288,11 @@ export default function Chatbot() {
         });
       } else if (lowerMessage.includes('gracias')) {
         addBotMessage({
-          text: 'Â¡De nada! ðŸ˜Š Estoy aquÃ­ para ayudarte. Â¿Necesitas algo mÃ¡s?',
+          text: '¡De nada! ðŸ˜Š Estoy aquí para ayudarte. ¿Necesitas algo más?',
         });
       } else {
         addBotMessage({
-          text: 'Puedo ayudarte con:\n\nâ€¢ Ver productos por categorÃ­a\nâ€¢ InformaciÃ³n de stock\nâ€¢ Tiempos de envío\nâ€¢ Métodos de pago\nâ€¢ Soporte técnico\n\nÂ¿QuÃ© te gustarÃ­a saber?',
+          text: 'Puedo ayudarte con:\n\nâ€¢ Ver productos por categoría\nâ€¢ Información de stock\nâ€¢ Tiempos de envío\nâ€¢ Métodos de pago\nâ€¢ Soporte técnico\n\n¿Qué te gustaría saber?',
         });
       }
     }, 800 + Math.random() * 400);

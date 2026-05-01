@@ -179,9 +179,9 @@ export default function AdminOrders() {
               <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold">Datos del cliente</p>
               <div className="grid grid-cols-2 gap-3">
                 {([
-                  { label: 'Nombre *', key: 'customer', placeholder: 'Juan PÃ©rez' },
+                  { label: 'Nombre *', key: 'customer', placeholder: 'Juan Pérez' },
                   { label: 'Email *',  key: 'email',    placeholder: 'juan@email.com' },
-                  { label: 'TelÃ©fono', key: 'phone',    placeholder: '+1 234 567' },
+                  { label: 'Teléfono', key: 'phone',    placeholder: '+1 234 567' },
                   { label: 'Ciudad',   key: 'city',     placeholder: 'Lima' },
                 ] as const).map(f => (
                   <div key={f.key}>
@@ -192,7 +192,7 @@ export default function AdminOrders() {
                   </div>
                 ))}
                 <div className="col-span-2">
-                  <label className="block text-xs text-gray-400 mb-1.5 font-medium">DirecciÃ³n</label>
+                  <label className="block text-xs text-gray-400 mb-1.5 font-medium">Dirección</label>
                   <input value={form.address} placeholder="Av. Principal 123"
                     onChange={e => setForm(f => ({ ...f, address: e.target.value }))}
                     className="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-gray-200 text-sm focus:outline-none focus:border-sky-500/60" />
@@ -225,7 +225,7 @@ export default function AdminOrders() {
                     <div key={idx} className="flex items-center justify-between p-3 bg-white/3 rounded-xl">
                       <div className="flex-1 min-w-0">
                         <p className="text-white text-xs font-medium truncate">{item.name}</p>
-                        <p className="text-gray-500 text-[10px]">x{item.qty} Â· {formatShort(item.price)} c/u</p>
+                        <p className="text-gray-500 text-[10px]">x{item.qty} · {formatShort(item.price)} c/u</p>
                       </div>
                       <div className="flex items-center gap-3">
                         <span className="text-white text-xs font-bold">{formatShort(item.price * item.qty)}</span>
@@ -269,11 +269,11 @@ export default function AdminOrders() {
             </div>
             <div className="p-5 space-y-4">
               {([
-                { label: 'Cliente',   key: 'customer', placeholder: 'Juan PÃ©rez' },
+                { label: 'Cliente',   key: 'customer', placeholder: 'Juan Pérez' },
                 { label: 'Email',     key: 'email',    placeholder: 'juan@email.com' },
-                { label: 'TelÃ©fono', key: 'phone',    placeholder: '+1 234 567' },
+                { label: 'Teléfono', key: 'phone',    placeholder: '+1 234 567' },
                 { label: 'Ciudad',   key: 'city',     placeholder: 'Lima' },
-                { label: 'DirecciÃ³n', key: 'address',  placeholder: 'Av. Principal 123' },
+                { label: 'Dirección', key: 'address',  placeholder: 'Av. Principal 123' },
               ] as const).map(f => (
                 <div key={f.key}>
                   <label className="block text-xs text-gray-400 mb-1.5 font-medium">{f.label}</label>

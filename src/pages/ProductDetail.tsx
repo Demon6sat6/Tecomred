@@ -58,7 +58,7 @@ export default function ProductDetail() {
       <div className="max-w-7xl mx-auto px-4 py-20 text-center">
         <div className="text-7xl mb-4">ðŸ˜•</div>
         <h2 className="text-2xl font-bold text-white mb-2">Producto no encontrado</h2>
-        <Link to="/productos" className="text-sky-400 hover:text-sky-300">â† Volver al catÃ¡logo</Link>
+        <Link to="/productos" className="text-sky-400 hover:text-sky-300">â† Volver al catálogo</Link>
       </div>
     );
   }
@@ -112,7 +112,7 @@ export default function ProductDetail() {
 
   const tabs: { id: Tab; label: string; count?: number }[] = [
     { id: 'specs',   label: 'Especificaciones' },
-    { id: 'reviews', label: 'ReseÃ±as', count: productReviews.length },
+    { id: 'reviews', label: 'Reseñas', count: productReviews.length },
     { id: 'bundle',  label: 'Comprado junto con' },
   ];
 
@@ -132,7 +132,7 @@ export default function ProductDetail() {
       </nav>
 
       <Link to="/productos" className="inline-flex items-center gap-1.5 text-sky-400 hover:text-sky-300 text-sm mb-6 transition-colors">
-        <ArrowLeft className="w-4 h-4" /> Volver al catÃ¡logo
+        <ArrowLeft className="w-4 h-4" /> Volver al catálogo
       </Link>
 
       {/* â”€â”€ MAIN PRODUCT SECTION â”€â”€ */}
@@ -204,7 +204,7 @@ export default function ProductDetail() {
             <StarRating rating={avgRating} size="md" />
             <span className="text-white font-bold">{avgRating.toFixed(1)}</span>
             <span className="text-gray-400 text-sm">
-              ({productReviews.length > 0 ? productReviews.length : product.reviews} reseÃ±as)
+              ({productReviews.length > 0 ? productReviews.length : product.reviews} reseñas)
             </span>
             {productReviews.filter(r => r.verified).length > 0 && (
               <span className="flex items-center gap-1 text-xs text-emerald-400">
@@ -239,7 +239,7 @@ export default function ProductDetail() {
               <div className="flex items-center gap-2 px-4 py-2.5 bg-yellow-500/10 border border-yellow-500/20 rounded-xl">
                 <AlertTriangle className="w-4 h-4 text-yellow-400 animate-pulse" />
                 <span className="text-yellow-400 text-sm font-semibold">
-                  Â¡Solo quedan {product.stock} unidades! â€” Compra pronto
+                  ¡Solo quedan {product.stock} unidades! â€” Compra pronto
                 </span>
               </div>
             ) : (
@@ -277,7 +277,7 @@ export default function ProductDetail() {
                 }`}
               >
                 {added
-                  ? <><Check className="w-5 h-5" /> Â¡Agregado al carrito!</>
+                  ? <><Check className="w-5 h-5" /> ¡Agregado al carrito!</>
                   : <><ShoppingCart className="w-5 h-5" /> Agregar al carrito</>
                 }
               </button>
@@ -287,10 +287,10 @@ export default function ProductDetail() {
           {/* Trust badges */}
           <div className="grid grid-cols-2 gap-2 mt-auto">
             {[
-              { icon: Shield, text: 'GarantÃ­a oficial del fabricante' },
-              { icon: Truck,  text: 'EnvÃ­o gratis en pedidos +$100' },
+              { icon: Shield, text: 'Garantía oficial del fabricante' },
+              { icon: Truck,  text: 'Envío gratis en pedidos +$100' },
               { icon: BadgeCheck, text: 'Producto 100% original' },
-              { icon: Package,    text: 'DevoluciÃ³n en 30 dÃ­as' },
+              { icon: Package,    text: 'Devolución en 30 días' },
             ].map(({ icon: Icon, text }) => (
               <div key={text} className="flex items-center gap-2 px-3 py-2 glass rounded-xl">
                 <Icon className="w-4 h-4 text-sky-400 shrink-0" />
@@ -359,7 +359,7 @@ export default function ProductDetail() {
                     <span className="text-6xl font-extrabold gradient-text">{avgRating.toFixed(1)}</span>
                     <StarRating rating={avgRating} size="lg" />
                     <p className="text-gray-400 text-sm mt-2">
-                      Basado en {productReviews.length} reseÃ±a{productReviews.length !== 1 ? 's' : ''}
+                      Basado en {productReviews.length} reseña{productReviews.length !== 1 ? 's' : ''}
                     </p>
                   </div>
                   {/* Distribution */}
@@ -415,8 +415,8 @@ export default function ProductDetail() {
             ) : (
               <div className="text-center py-16 glass rounded-2xl">
                 <Star className="w-12 h-12 text-gray-700 mx-auto mb-3" />
-                <p className="text-gray-400 font-medium">AÃºn no hay reseÃ±as para este producto.</p>
-                <p className="text-gray-600 text-sm mt-1">Â¡SÃ© el primero en opinar!</p>
+                <p className="text-gray-400 font-medium">Aún no hay reseñas para este producto.</p>
+                <p className="text-gray-600 text-sm mt-1">¡Sé el primero en opinar!</p>
               </div>
             )}
           </div>
@@ -426,7 +426,7 @@ export default function ProductDetail() {
         {activeTab === 'bundle' && (
           <div>
             <p className="text-gray-400 text-sm mb-5">
-              Los clientes que compraron <span className="text-white font-semibold">{product.name}</span> tambiÃ©n compraron:
+              Los clientes que compraron <span className="text-white font-semibold">{product.name}</span> también compraron:
             </p>
             {bundleProducts.length > 0 ? (
               <>
@@ -468,7 +468,7 @@ export default function ProductDetail() {
                 </div>
               </>
             ) : (
-              <p className="text-gray-500 text-sm">No hay sugerencias disponibles para esta categorÃ­a.</p>
+              <p className="text-gray-500 text-sm">No hay sugerencias disponibles para esta categoría.</p>
             )}
           </div>
         )}
