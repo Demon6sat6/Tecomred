@@ -1,4 +1,4 @@
-﻿import { useState } from 'react';
+import { useState } from 'react';
 import { Plus, Pencil, Trash2, Search, X, Check, User, ShoppingBag } from 'lucide-react';
 import { useAdmin, type Customer } from '../../context/AdminContext';
 import { useCurrency } from '../../hooks/useCurrency';
@@ -222,7 +222,7 @@ export default function AdminCustomers() {
                       <div key={o.id} className="flex items-center justify-between p-3 glass rounded-xl">
                         <div>
                           <p className="text-white text-xs font-mono font-semibold">{o.id}</p>
-                          <p className="text-gray-500 text-[10px]">{o.date} · {o.items.length} item{o.items.length !== 1 ? 's' : ''}</p>
+                          <p className="text-gray-500 text-[10px]">{o.date} Â· {o.items.length} item{o.items.length !== 1 ? 's' : ''}</p>
                         </div>
                         <div className="text-right">
                           <p className="text-white text-xs font-bold">{formatShort(o.total)}</p>

@@ -1,4 +1,4 @@
-﻿import { useState } from 'react';
+import { useState } from 'react';
 import { Plus, Pencil, Trash2, Search, X, Check, AlertTriangle } from 'lucide-react';
 import { useAdmin } from '../../context/AdminContext';
 import { useCurrency } from '../../hooks/useCurrency';
@@ -143,7 +143,7 @@ export default function AdminProducts() {
                       <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-sky-500/15 text-sky-400 border border-sky-500/20">
                         {p.badge}
                       </span>
-                    ) : <span className="text-gray-700 text-xs">â€”</span>}
+                    ) : <span className="text-gray-700 text-xs">Ã¢â¬”</span>}
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center justify-end gap-1.5">

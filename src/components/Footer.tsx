@@ -119,7 +119,7 @@ export default function Footer() {
 
         <div className="border-t border-white/10 mt-8 sm:mt-10 pt-5 sm:pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4">
           <p className="text-gray-500 text-xs sm:text-sm text-center sm:text-left">
-            © 2026 TecomRed. Todos los derechos reservados.
+            Â© 2026 TecomRed. Todos los derechos reservados.
           </p>
           <div className="flex gap-3 sm:gap-4">
             <a href="#" className="text-gray-500 hover:text-gray-400 text-xs sm:text-sm transition-colors">Privacidad</a>

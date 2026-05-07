@@ -1,4 +1,4 @@
-﻿import { Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import {
   DollarSign, Package, ShoppingBag, Users,
   ArrowRight, ArrowUpRight, AlertTriangle, Download,
@@ -183,7 +183,7 @@ export default function AdminDashboard() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-white text-sm font-semibold truncate">{order.customer}</p>
-                  <p className="text-gray-500 text-xs">{order.id} · {order.date}</p>
+                  <p className="text-gray-500 text-xs">{order.id} Â· {order.date}</p>
                 </div>
                 <div className="text-right shrink-0">
                   <p className="text-white text-sm font-bold">{formatShort(order.total)}</p>
@@ -233,7 +233,7 @@ export default function AdminDashboard() {
                 ))}
               </div>
               <Link to="/admin/productos" className="block mt-3 text-xs text-sky-400 hover:text-sky-300 transition-colors">
-                Gestionar stock â†’
+                Gestionar stock Ã¢â â
               </Link>
             </div>
           )}
@@ -273,7 +273,7 @@ export default function AdminDashboard() {
                   <td className="py-3 pr-4 text-right">
                     <span className={`text-xs font-semibold ${p.stock <= 5 ? 'text-yellow-400' : 'text-emerald-400'}`}>{p.stock}</span>
                   </td>
-                  <td className="py-3 text-right"><span className="text-yellow-400 text-xs font-bold">⭐ {p.rating}</span></td>
+                  <td className="py-3 text-right"><span className="text-yellow-400 text-xs font-bold">â­ {p.rating}</span></td>
                 </tr>
               ))}
             </tbody>

@@ -1,4 +1,4 @@
-﻿import { Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { Trash2, Plus, Minus, ShoppingBag, ArrowRight, Truck, Tag } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useCurrency } from '../hooks/useCurrency';
@@ -48,7 +48,7 @@ export default function Cart() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
 
-        {/* â”€â”€ LEFT: Items + progress bar â”€â”€ */}
+        {/* Ã¢”â¬Ã¢”â¬ LEFT: Items + progress bar Ã¢”â¬Ã¢”â¬ */}
         <div className="lg:col-span-2 space-y-3 sm:space-y-4">
 
           {/* Free shipping progress bar */}
@@ -134,7 +134,7 @@ export default function Cart() {
           ))}
         </div>
 
-        {/* â”€â”€ RIGHT: Order summary â”€â”€ */}
+        {/* Ã¢”â¬Ã¢”â¬ RIGHT: Order summary Ã¢”â¬Ã¢”â¬ */}
         <div className="lg:col-span-1">
           <div className="glass rounded-xl sm:rounded-2xl p-5 sm:p-6 lg:sticky lg:top-24">
             <h2 className="text-white font-bold text-base sm:text-lg mb-4 sm:mb-6">Resumen del pedido</h2>

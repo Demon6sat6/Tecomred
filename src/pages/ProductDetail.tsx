@@ -1,4 +1,4 @@
-﻿import { useParams, Link } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import {
   ShoppingCart, Star, ArrowLeft, Check, Shield, Truck,
   Package, AlertTriangle, ThumbsUp, BadgeCheck, ChevronLeft, ChevronRight,
@@ -56,9 +56,9 @@ export default function ProductDetail() {
   if (!product) {
     return (
       <div className="max-w-7xl mx-auto px-4 py-20 text-center">
-        <div className="text-7xl mb-4">ðŸ˜•</div>
+        <div className="text-7xl mb-4">Ã°Å¸Ë•</div>
         <h2 className="text-2xl font-bold text-white mb-2">Producto no encontrado</h2>
-        <Link to="/productos" className="text-sky-400 hover:text-sky-300">â† Volver al catálogo</Link>
+        <Link to="/productos" className="text-sky-400 hover:text-sky-300">Ã¢â Â Volver al catálogo</Link>
       </div>
     );
   }
@@ -135,10 +135,10 @@ export default function ProductDetail() {
         <ArrowLeft className="w-4 h-4" /> Volver al catálogo
       </Link>
 
-      {/* â”€â”€ MAIN PRODUCT SECTION â”€â”€ */}
+      {/* Ã¢”â¬Ã¢”â¬ MAIN PRODUCT SECTION Ã¢”â¬Ã¢”â¬ */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 mb-12">
 
-        {/* â”€â”€ IMAGE GALLERY â”€â”€ */}
+        {/* Ã¢”â¬Ã¢”â¬ IMAGE GALLERY Ã¢”â¬Ã¢”â¬ */}
         <div className="space-y-3">
           {/* Main image */}
           <div className="relative glass rounded-2xl overflow-hidden aspect-square bg-gray-900 group">
@@ -194,7 +194,7 @@ export default function ProductDetail() {
           </div>
         </div>
 
-        {/* â”€â”€ PRODUCT INFO â”€â”€ */}
+        {/* Ã¢”â¬Ã¢”â¬ PRODUCT INFO Ã¢”â¬Ã¢”â¬ */}
         <div className="flex flex-col">
           <p className="text-sky-400 text-xs font-bold uppercase tracking-widest mb-2">{product.category}</p>
           <h1 className="text-2xl sm:text-3xl font-extrabold text-white mb-3 leading-tight">{product.name}</h1>
@@ -239,7 +239,7 @@ export default function ProductDetail() {
               <div className="flex items-center gap-2 px-4 py-2.5 bg-yellow-500/10 border border-yellow-500/20 rounded-xl">
                 <AlertTriangle className="w-4 h-4 text-yellow-400 animate-pulse" />
                 <span className="text-yellow-400 text-sm font-semibold">
-                  ¡Solo quedan {product.stock} unidades! â€” Compra pronto
+                  ¡Solo quedan {product.stock} unidades! Ã¢â¬” Compra pronto
                 </span>
               </div>
             ) : (
@@ -258,7 +258,7 @@ export default function ProductDetail() {
                   onClick={() => setQty(q => Math.max(1, q - 1))}
                   className="w-11 h-11 flex items-center justify-center text-gray-300 hover:text-white hover:bg-white/10 transition-colors text-xl font-bold"
                 >
-                  âˆ’
+                  Ã¢Ëâ
                 </button>
                 <span className="w-10 text-center text-white font-bold text-lg">{qty}</span>
                 <button
@@ -301,7 +301,7 @@ export default function ProductDetail() {
         </div>
       </div>
 
-      {/* â”€â”€ TABS â”€â”€ */}
+      {/* Ã¢”â¬Ã¢”â¬ TABS Ã¢”â¬Ã¢”â¬ */}
       <div className="mb-12">
         {/* Tab headers */}
         <div className="flex gap-1 border-b border-white/10 mb-6 overflow-x-auto">
@@ -327,7 +327,7 @@ export default function ProductDetail() {
           ))}
         </div>
 
-        {/* â”€â”€ SPECS TAB â”€â”€ */}
+        {/* Ã¢”â¬Ã¢”â¬ SPECS TAB Ã¢”â¬Ã¢”â¬ */}
         {activeTab === 'specs' && (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {product.specs.map((spec, i) => {
@@ -347,7 +347,7 @@ export default function ProductDetail() {
           </div>
         )}
 
-        {/* â”€â”€ REVIEWS TAB â”€â”€ */}
+        {/* Ã¢”â¬Ã¢”â¬ REVIEWS TAB Ã¢”â¬Ã¢”â¬ */}
         {activeTab === 'reviews' && (
           <div className="space-y-6">
             {productReviews.length > 0 ? (
@@ -406,7 +406,7 @@ export default function ProductDetail() {
                       <h4 className="text-white font-semibold text-sm mb-1">{review.title}</h4>
                       <p className="text-gray-400 text-sm leading-relaxed">{review.body}</p>
                       <button className="flex items-center gap-1.5 mt-3 text-xs text-gray-500 hover:text-gray-300 transition-colors">
-                        <ThumbsUp className="w-3.5 h-3.5" /> Ãštil
+                        <ThumbsUp className="w-3.5 h-3.5" /> ÃÅ¡til
                       </button>
                     </div>
                   ))}
@@ -422,7 +422,7 @@ export default function ProductDetail() {
           </div>
         )}
 
-        {/* â”€â”€ BUNDLE TAB â”€â”€ */}
+        {/* Ã¢”â¬Ã¢”â¬ BUNDLE TAB Ã¢”â¬Ã¢”â¬ */}
         {activeTab === 'bundle' && (
           <div>
             <p className="text-gray-400 text-sm mb-5">
@@ -474,13 +474,13 @@ export default function ProductDetail() {
         )}
       </div>
 
-      {/* â”€â”€ RELATED PRODUCTS â”€â”€ */}
+      {/* Ã¢”â¬Ã¢”â¬ RELATED PRODUCTS Ã¢”â¬Ã¢”â¬ */}
       {related.length > 0 && (
         <div>
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl sm:text-2xl font-bold text-white">Productos relacionados</h2>
             <Link to={`/productos?categoria=${encodeURIComponent(product.category)}`} className="text-sky-400 hover:text-sky-300 text-sm transition-colors">
-              Ver todos â†’
+              Ver todos Ã¢â â
             </Link>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">

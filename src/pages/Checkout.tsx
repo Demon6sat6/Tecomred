@@ -1,4 +1,4 @@
-﻿import { useState } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Check, CreditCard, Truck, ArrowLeft, AlertCircle, Package, Clock, MapPin, Tag, X } from 'lucide-react';
 import { useCart } from '../context/CartContext';
@@ -268,7 +268,7 @@ export default function Checkout() {
                 </div>
                 <button onClick={handleNextShipping}
                   className="mt-6 w-full py-3 rounded-xl gradient-brand text-white font-bold hover:opacity-90 active:scale-95 transition-all shadow-lg shadow-sky-500/20">
-                  Continuar al pago â†’
+                  Continuar al pago Ã¢â â
                 </button>
               </div>
             )}
@@ -312,11 +312,11 @@ export default function Checkout() {
                 <div className="flex gap-3 mt-6">
                   <button onClick={() => { setErrors({}); setStep('envio'); }}
                     className="px-5 py-3 rounded-xl bg-white/5 border border-white/10 text-gray-300 font-semibold hover:bg-white/10 transition-colors">
-                    â† Atrás
+                    Ã¢â Â Atrás
                   </button>
                   <button onClick={handleOrder}
                     className="flex-1 py-3 rounded-xl gradient-brand text-white font-bold hover:opacity-90 active:scale-95 transition-all shadow-lg shadow-sky-500/20">
-                    Confirmar pedido â€” {formatShort(finalTotal)}
+                    Confirmar pedido Ã¢â¬” {formatShort(finalTotal)}
                   </button>
                 </div>
               </div>

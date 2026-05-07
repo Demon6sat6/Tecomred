@@ -1,4 +1,4 @@
-﻿import { useState } from 'react';
+import { useState } from 'react';
 import { Check, Store, Mail, Phone, MapPin, Globe, Save, Lock, Eye, EyeOff, AlertCircle, BarChart2 } from 'lucide-react';
 import { useAdmin, type StoreSettings } from '../../context/AdminContext';
 import { useCurrency } from '../../hooks/useCurrency';
@@ -132,7 +132,7 @@ export default function AdminSettings() {
                 <div className="flex items-center gap-2 mb-3">
                   <span className="w-6 h-6 rounded-lg gradient-brand flex items-center justify-center text-white text-xs font-bold shrink-0">{i + 1}</span>
                   <span className="text-sky-400 font-bold text-sm">{stat.preview}</span>
-                  <span className="text-gray-500 text-xs">â€” {(form as any)[stat.l]}</span>
+                  <span className="text-gray-500 text-xs">Ã¢â¬” {(form as any)[stat.l]}</span>
                 </div>
                 <div className="grid grid-cols-3 gap-2">
                   <div>

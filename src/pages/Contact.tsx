@@ -22,7 +22,7 @@ export default function Contact() {
     { icon: MapPin, label: 'Dirección', value: settings.storeAddress },
     { icon: Phone,  label: 'Teléfono',  value: settings.storePhone },
     { icon: Mail,   label: 'Email',     value: settings.storeEmail },
-    { icon: Clock,  label: 'Horario',   value: 'Lun–Vie 9am–6pm (Lima, GMT-5)' },
+    { icon: Clock,  label: 'Horario',   value: 'LunâVie 9amâ6pm (Lima, GMT-5)' },
   ];
 
   return (

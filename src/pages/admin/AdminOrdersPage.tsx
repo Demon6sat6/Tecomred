@@ -1,4 +1,4 @@
-﻿import { useState } from 'react';
+import { useState } from 'react';
 import { Search, X, ChevronDown, Plus, Trash2, Check, Pencil } from 'lucide-react';
 import { useAdmin, type Order } from '../../context/AdminContext';
 import { useCurrency } from '../../hooks/useCurrency';
@@ -210,7 +210,7 @@ export default function AdminOrders() {
                 <select value={itemProductId} onChange={e => setItemProductId(e.target.value)}
                   className="flex-1 px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-gray-200 text-sm focus:outline-none focus:border-sky-500/60">
                   <option value="" className="bg-gray-900">Seleccionar producto...</option>
-                  {products.map(p => <option key={p.id} value={p.id} className="bg-gray-900">{p.name} â€” ${p.price}</option>)}
+                  {products.map(p => <option key={p.id} value={p.id} className="bg-gray-900">{p.name} Ã¢â¬” ${p.price}</option>)}
                 </select>
                 <input type="number" min={1} value={itemQty} onChange={e => setItemQty(+e.target.value)}
                   className="w-16 px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-gray-200 text-sm focus:outline-none focus:border-sky-500/60 text-center" />
@@ -225,7 +225,7 @@ export default function AdminOrders() {
                     <div key={idx} className="flex items-center justify-between p-3 bg-white/3 rounded-xl">
                       <div className="flex-1 min-w-0">
                         <p className="text-white text-xs font-medium truncate">{item.name}</p>
-                        <p className="text-gray-500 text-[10px]">x{item.qty} · {formatShort(item.price)} c/u</p>
+                        <p className="text-gray-500 text-[10px]">x{item.qty} Â· {formatShort(item.price)} c/u</p>
                       </div>
                       <div className="flex items-center gap-3">
                         <span className="text-white text-xs font-bold">{formatShort(item.price * item.qty)}</span>
@@ -319,9 +319,9 @@ export default function AdminOrders() {
                 {[
                   { label: 'Cliente',   value: selected.customer },
                   { label: 'Email',     value: selected.email },
-                  { label: 'Telefono',  value: selected.phone || 'â€”' },
+                  { label: 'Telefono',  value: selected.phone || 'Ã¢â¬”' },
                   { label: 'Ciudad',    value: selected.city },
-                  { label: 'Direccion', value: selected.address || 'â€”' },
+                  { label: 'Direccion', value: selected.address || 'Ã¢â¬”' },
                   { label: 'Fecha',     value: selected.date },
                 ].map(({ label, value }) => (
                   <div key={label}>

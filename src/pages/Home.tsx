@@ -32,7 +32,7 @@ const categoryIcons = [
 ];
 
 const features = [
-  { icon: Truck,      title: 'Envío Rápido',      desc: 'Entrega en 24–48 horas a todo el país' },
+  { icon: Truck,      title: 'Envío Rápido',      desc: 'Entrega en 24â48 horas a todo el país' },
   { icon: Shield,     title: 'Garantía Oficial',  desc: 'Todos los productos con garantía del fabricante' },
   { icon: Headphones, title: 'Soporte Técnico',   desc: 'Asesoría especializada en redes y hardware' },
   { icon: Zap,        title: 'Mejores Precios',   desc: 'Precios competitivos y ofertas exclusivas' },
@@ -58,7 +58,7 @@ export default function Home() {
 
   return (
     <div>
-      {/* ── HERO ── */}
+      {/* ââ HERO ââ */}
       <section className="relative overflow-hidden py-16 sm:py-24 px-4">
         {/* Animated background glows */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -148,7 +148,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ── STATS ── */}
+      {/* ââ STATS ââ */}
       <SectionReveal className="py-8 px-4 border-y border-white/5">
         <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6">
           <AnimatedStat value={Number(settings.stat1Value)} suffix={settings.stat1Suffix} label={settings.stat1Label} />
@@ -158,10 +158,10 @@ export default function Home() {
         </div>
       </SectionReveal>
 
-      {/* ── BRANDS ── */}
+      {/* ââ BRANDS ââ */}
       <BrandsBar />
 
-      {/* ── CATEGORIES ── */}
+      {/* ââ CATEGORIES ââ */}
       <SectionReveal className="py-16 px-4">
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-between mb-8">
@@ -190,7 +190,7 @@ export default function Home() {
         </div>
       </SectionReveal>
 
-      {/* ── FEATURED PRODUCTS ── */}
+      {/* ââ FEATURED PRODUCTS ââ */}
       <SectionReveal className="py-16 px-4 bg-gray-900/40">
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-between mb-8">
@@ -210,7 +210,7 @@ export default function Home() {
         </div>
       </SectionReveal>
 
-      {/* ── NEW PRODUCTS ── */}
+      {/* ââ NEW PRODUCTS ââ */}
       {newProducts.length > 0 && (
         <SectionReveal className="py-16 px-4">
           <div className="max-w-7xl mx-auto">
@@ -232,7 +232,7 @@ export default function Home() {
         </SectionReveal>
       )}
 
-      {/* ── FEATURES ── */}
+      {/* ââ FEATURES ââ */}
       <SectionReveal className="py-16 px-4 bg-gray-900/40">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12">
@@ -257,10 +257,10 @@ export default function Home() {
         </div>
       </SectionReveal>
 
-      {/* ── TESTIMONIALS ── */}
+      {/* ââ TESTIMONIALS ââ */}
       <Testimonials />
 
-      {/* ── CTA BANNER ── */}
+      {/* ââ CTA BANNER ââ */}
       <SectionReveal className="py-16 px-4">
         <div className="max-w-7xl mx-auto">
           <div className="relative overflow-hidden rounded-3xl p-10 sm:p-14 text-center" style={{ background: 'linear-gradient(135deg, #0369a1 0%, #4f46e5 50%, #0369a1 100%)' }}>

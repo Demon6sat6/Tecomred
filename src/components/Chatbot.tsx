@@ -1,4 +1,4 @@
-﻿import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { MessageCircle, X, Send, Bot, User, Package, Truck, CreditCard, Headphones, ExternalLink, ShoppingCart, Star } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useStore } from '../context/StoreContext';
@@ -127,7 +127,7 @@ export default function Chatbot() {
           addBotMessage({
             type: 'card',
             data: {
-              title: 'ðŸ’³ Métodos de pago',
+              title: 'Ã°Å¸âÂ³ Métodos de pago',
               items: [
                 { label: 'Tarjetas', value: 'Visa, Mastercard, Amex' },
                 { label: 'Transferencia', value: 'Bancaria directa' },
@@ -143,7 +143,7 @@ export default function Chatbot() {
           addBotMessage({
             type: 'card',
             data: {
-              title: 'ðŸŽ§ Soporte técnico',
+              title: 'Ã°Å¸Å½Â§ Soporte técnico',
               items: [
                 { label: 'Teléfono', value: '+51 1 234-5678' },
                 { label: 'Email', value: 'soporte@tecomred.pe' },
@@ -272,7 +272,7 @@ export default function Chatbot() {
         }, 500);
       } else if (lowerMessage.includes('hola') || lowerMessage.includes('buenos') || lowerMessage.includes('buenas')) {
         addBotMessage({
-          text: '¡Hola! ðŸ‘‹ ¿En qué puedo ayudarte? Puedo mostrarte productos, información de envío, Métodos de pago o Soporte técnico.',
+          text: '¡Hola! Ã°Å¸ââ¹ ¿En qué puedo ayudarte? Puedo mostrarte productos, información de envío, Métodos de pago o Soporte técnico.',
         });
       } else if (lowerMessage.includes('precio') || lowerMessage.includes('costo') || lowerMessage.includes('cuanto')) {
         addBotMessage({
@@ -288,11 +288,11 @@ export default function Chatbot() {
         });
       } else if (lowerMessage.includes('gracias')) {
         addBotMessage({
-          text: '¡De nada! ðŸ˜Š Estoy aquí para ayudarte. ¿Necesitas algo más?',
+          text: '¡De nada! Ã°Å¸ËÅ  Estoy aquí para ayudarte. ¿Necesitas algo más?',
         });
       } else {
         addBotMessage({
-          text: 'Puedo ayudarte con:\n\nâ€¢ Ver productos por categoría\nâ€¢ Información de stock\nâ€¢ Tiempos de envío\nâ€¢ Métodos de pago\nâ€¢ Soporte técnico\n\n¿Qué te gustaría saber?',
+          text: 'Puedo ayudarte con:\n\nÃ¢â¬Â¢ Ver productos por categoría\nÃ¢â¬Â¢ Información de stock\nÃ¢â¬Â¢ Tiempos de envío\nÃ¢â¬Â¢ Métodos de pago\nÃ¢â¬Â¢ Soporte técnico\n\n¿Qué te gustaría saber?',
         });
       }
     }, 800 + Math.random() * 400);
@@ -434,7 +434,7 @@ export default function Chatbot() {
                       onClick={() => setIsOpen(false)}
                       className="block text-center py-2 text-xs text-sky-400 hover:text-sky-300 transition-colors"
                     >
-                      Ver todos los productos →’
+                      Ver todos los productos →â
                     </Link>
                   </div>
                 )}

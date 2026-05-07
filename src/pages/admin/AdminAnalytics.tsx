@@ -166,7 +166,7 @@ export default function AdminAnalytics() {
                       <span className="text-gray-500 text-xs font-mono">{v.path}</span>
                     </td>
                     <td className="py-2.5 pr-4 hidden md:table-cell">
-                      <span className="text-gray-600 text-xs font-mono">{v.sessionId.slice(0, 12)}…</span>
+                      <span className="text-gray-600 text-xs font-mono">{v.sessionId.slice(0, 12)}â¦</span>
                     </td>
                     <td className="py-2.5 text-right">
                       <span className="text-gray-400 text-xs">
@@ -207,7 +207,7 @@ export default function AdminAnalytics() {
           </div>
           <button onClick={handleSaveGa}
             className={`px-5 py-2.5 rounded-xl text-white text-sm font-bold transition-all active:scale-95 ${gaSaved ? 'bg-emerald-500' : 'gradient-brand hover:opacity-90'}`}>
-            {gaSaved ? '✓ Guardado' : 'Guardar'}
+            {gaSaved ? 'â Guardado' : 'Guardar'}
           </button>
         </div>
         {data.gaId && (
