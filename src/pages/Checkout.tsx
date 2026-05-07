@@ -332,7 +332,7 @@ export default function Checkout() {
                   <img src={product.image} alt={product.name} className="w-12 h-12 rounded-lg object-cover shrink-0" />
                   <div className="flex-1 min-w-0">
                     <p className="text-xs text-gray-300 truncate font-medium">{product.name}</p>
-                    <p className="text-xs text-gray-500">Ã—{quantity}</p>
+                    <p className="text-xs text-gray-500">×{quantity}</p>
                   </div>
                   <span className="text-sm text-gray-300 shrink-0 font-semibold">{formatShort(product.price * quantity)}</span>
                 </div>
