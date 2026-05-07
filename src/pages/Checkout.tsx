@@ -290,7 +290,7 @@ export default function Checkout() {
                       <div className="w-10 h-7 bg-yellow-400/80 rounded-md" />
                       <span className="text-white/60 text-xs font-mono">VISA</span>
                     </div>
-                    <p className="text-white font-mono text-lg tracking-widest mb-3">{form.cardNumber || 'â€¢â€¢â€¢â€¢ â€¢â€¢â€¢â€¢ â€¢â€¢â€¢â€¢ â€¢â€¢â€¢â€¢'}</p>
+                    <p className="text-white font-mono text-lg tracking-widest mb-3">{form.cardNumber || '•••• •••• •••• ••••'}</p>
                     <div className="flex justify-between">
                       <span className="text-white/70 text-xs">{form.cardName || 'NOMBRE APELLIDO'}</span>
                       <span className="text-white/70 text-xs">{form.cardExpiry || 'MM/AA'}</span>
