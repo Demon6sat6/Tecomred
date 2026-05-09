@@ -1,0 +1,14 @@
+-- Migración: Crear tabla de items de orden
+CREATE TABLE IF NOT EXISTS order_items (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  order_id VARCHAR(20) NOT NULL,
+  product_id INT NOT NULL,
+  name VARCHAR(255) NOT NULL,
+  qty INT NOT NULL DEFAULT 1,
+  price DECIMAL(10, 2) NOT NULL DEFAULT 0.00,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Índice para búsquedas por orden
+CREATE INDEX idx_order_items_order_id ON order_items(order_id);
