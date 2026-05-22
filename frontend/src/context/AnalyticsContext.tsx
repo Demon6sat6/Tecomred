@@ -88,10 +88,31 @@ export function AnalyticsProvider({ children }: { children: ReactNode }) {
         }
       };
     } catch {
-      // BroadcastChannel not supported
+      // BroadcastChannel not supported in this environment
     }
     return () => channel.current?.close();
   }, []);
+
+  // Dynamically inject the gtag script when a GA ID is configured
+  useEffect(() => {
+    if (!data.gaId) return;
+    const scriptId = 'ga-script';
+    if (document.getElementById(scriptId)) return; // already loaded
+
+    const script = document.createElement('script');
+    script.id = scriptId;
+    script.src = `https://www.googletagmanager.com/gtag/js?id=${data.gaId}`;
+    script.async = true;
+    document.head.appendChild(script);
+
+    script.onload = () => {
+      (window as any).dataLayer = (window as any).dataLayer || [];
+      function gtag(...args: any[]) { (window as any).dataLayer.push(args); }
+      (window as any).gtag = gtag;
+      gtag('js', new Date());
+      gtag('config', data.gaId, { send_page_view: false });
+    };
+  }, [data.gaId]);
 
   // Heartbeat — mark this session as active every 15s
   useEffect(() => {

@@ -1,6 +1,71 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Wifi, Mail, Phone, MapPin, Share2, MessageCircle, Globe, ArrowRight } from 'lucide-react';
+import { Wifi, Mail, Phone, MapPin, Share2, MessageCircle, Globe, ArrowRight, CheckCircle, Loader2 } from 'lucide-react';
 import { useAdmin } from '../context/AdminContext';
+
+function NewsletterForm() {
+  const [email, setEmail] = useState('');
+  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [error, setError] = useState('');
+
+  const validate = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!validate(email)) {
+      setError('Ingresa un correo válido.');
+      return;
+    }
+    setError('');
+    setStatus('loading');
+    // Simula envío — reemplazar con llamada real a tu API/newsletter service
+    await new Promise(r => setTimeout(r, 900));
+    setStatus('success');
+    setEmail('');
+  };
+
+  if (status === 'success') {
+    return (
+      <div className="flex items-center gap-2 px-4 py-2.5 bg-emerald-500/10 border border-emerald-500/30 rounded-xl text-emerald-400 text-sm font-medium">
+        <CheckCircle className="w-4 h-4 shrink-0" />
+        ¡Suscrito! Pronto recibirás nuestras ofertas.
+      </div>
+    );
+  }
+
+  return (
+    <form className="flex flex-col gap-2 w-full sm:w-auto" onSubmit={handleSubmit} noValidate>
+      <div className="flex gap-2">
+        <input
+          type="email"
+          value={email}
+          onChange={e => { setEmail(e.target.value); setError(''); }}
+          placeholder="tu@correo.com"
+          aria-label="Correo electrónico para newsletter"
+          disabled={status === 'loading'}
+          className={`flex-1 sm:w-64 px-3 sm:px-4 py-2 sm:py-2.5 bg-white/5 border rounded-lg sm:rounded-xl text-xs sm:text-sm text-gray-200 placeholder-gray-600 focus:outline-none transition-colors disabled:opacity-50 ${
+            error ? 'border-red-500/60' : 'border-white/10 focus:border-sky-500/50'
+          }`}
+        />
+        <button
+          type="submit"
+          disabled={status === 'loading'}
+          className="px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg sm:rounded-xl gradient-brand text-white text-xs sm:text-sm font-semibold hover:opacity-90 transition-opacity flex items-center gap-1 sm:gap-1.5 shrink-0 disabled:opacity-60 disabled:cursor-not-allowed"
+        >
+          {status === 'loading' ? (
+            <Loader2 className="w-4 h-4 animate-spin" />
+          ) : (
+            <>
+              <span className="hidden sm:inline">Suscribir</span>
+              <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            </>
+          )}
+        </button>
+      </div>
+      {error && <p className="text-red-400 text-xs">{error}</p>}
+    </form>
+  );
+}
 
 export default function Footer() {
   const { settings } = useAdmin();
@@ -14,21 +79,7 @@ export default function Footer() {
               <h3 className="text-white font-bold text-base sm:text-lg">Suscríbete a nuestras ofertas</h3>
               <p className="text-gray-400 text-xs sm:text-sm">Recibe descuentos exclusivos y novedades en tu correo.</p>
             </div>
-            <form className="flex gap-2 w-full sm:w-auto" onSubmit={e => e.preventDefault()}>
-              <input
-                type="email"
-                placeholder="tu@correo.com"
-                className="flex-1 sm:w-64 px-3 sm:px-4 py-2 sm:py-2.5 bg-white/5 border border-white/10 rounded-lg sm:rounded-xl text-xs sm:text-sm text-gray-200 placeholder-gray-600 focus:outline-none focus:border-sky-500/50"
-              />
-              <button
-                type="submit"
-                className="px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg sm:rounded-xl gradient-brand text-white text-xs sm:text-sm font-semibold hover:opacity-90 transition-opacity flex items-center gap-1 sm:gap-1.5 shrink-0"
-              >
-                <span className="hidden sm:inline">Suscribir</span>
-                <span className="sm:hidden">OK</span>
-                <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-              </button>
-            </form>
+            <NewsletterForm />
           </div>
         </div>
       </div>

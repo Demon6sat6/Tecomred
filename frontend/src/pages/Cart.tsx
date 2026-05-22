@@ -10,8 +10,11 @@ export default function Cart() {
   const { settings } = useAdmin();
 
   const FREE_SHIPPING_THRESHOLD = Number(settings.freeShippingMin) || 300;
+  const SHIPPING_COST = 15;
   const remaining = Math.max(0, FREE_SHIPPING_THRESHOLD - totalPrice);
   const progress  = Math.min(100, (totalPrice / FREE_SHIPPING_THRESHOLD) * 100);
+  const shippingCost = remaining === 0 ? 0 : SHIPPING_COST;
+  const grandTotal = totalPrice + shippingCost;
 
   if (items.length === 0) {
     return (
@@ -155,13 +158,13 @@ export default function Cart() {
               </div>
               <div className="flex justify-between text-xs sm:text-sm">
                 <span className="text-gray-400">Envío</span>
-                <span className="text-emerald-400 font-medium">
-                  {remaining === 0 ? 'Gratis 🎉' : `$${(5).toFixed(2)}`}
+                <span className={remaining === 0 ? 'text-emerald-400 font-medium' : 'text-gray-300'}>
+                  {remaining === 0 ? 'Gratis' : formatShort(SHIPPING_COST)}
                 </span>
               </div>
               <div className="flex justify-between text-base sm:text-lg font-bold pt-2 border-t border-white/10">
                 <span className="text-white">Total</span>
-                <span className="gradient-text">{formatShort(totalPrice)}</span>
+                <span className="gradient-text">{formatShort(grandTotal)}</span>
               </div>
             </div>
 
