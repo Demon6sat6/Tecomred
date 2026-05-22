@@ -59,6 +59,7 @@ export interface StoreSettings {
   allowReviews: boolean;
   adminUser: string;
   adminPass: string;
+  apiKey: string;
   gaId: string;
   // Hero stats
   stat1Value: string;
@@ -77,6 +78,7 @@ export interface StoreSettings {
 
 interface AdminContextType {
   isAuthenticated: boolean;
+  apiKey: string;
   login: (user: string, pass: string) => boolean;
   logout: () => void;
   settings: StoreSettings;
@@ -129,6 +131,7 @@ const defaultSettings: StoreSettings = {
   allowReviews: true,
   adminUser: 'admin',
   adminPass: 'tecomred2026',
+  apiKey: 'change-this-api-key',
   gaId: '',
   stat1Value: '500',  stat1Suffix: '+',     stat1Label: 'Productos en stock',
   stat2Value: '2000', stat2Suffix: '+',     stat2Label: 'Clientes satisfechos',
@@ -138,19 +141,22 @@ const defaultSettings: StoreSettings = {
 
 const API_URL = '/api';
 
-async function apiCall<T>(endpoint: string, options?: RequestInit): Promise<T> {
-  const response = await fetch(`${API_URL}${endpoint}`, {
-    headers: {
-      'Content-Type': 'application/json',
-      ...(options?.headers || {}),
-    },
-    ...options,
-  });
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-    throw new Error(errorData.error || `Error ${response.status}`);
-  }
-  return response.json();
+function makeApiCall(apiKey: string) {
+  return async function apiCall<T>(endpoint: string, options?: RequestInit): Promise<T> {
+    const response = await fetch(`${API_URL}${endpoint}`, {
+      ...options,
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${apiKey}`,
+        ...(options?.headers || {}),
+      },
+    });
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.error || `Error ${response.status}`);
+    }
+    return response.json();
+  };
 }
 
 const initialOrders: Order[] = [
@@ -195,6 +201,7 @@ export function AdminProvider({ children }: { children: ReactNode }) {
   const [reviewList, setReviewList]           = useLocalStorage<Review[]>('admin_reviews', initialReviewsWithApproval);
   const [coupons, setCoupons]                 = useLocalStorage<Coupon[]>('admin_coupons', initialCoupons);
   const [isBackendAvailable, setIsBackendAvailable] = useState<boolean | null>(null);
+  const apiCall = makeApiCall(settings.apiKey);
 
   // Verificar disponibilidad del backend al iniciar
   useEffect(() => {
@@ -356,7 +363,7 @@ export function AdminProvider({ children }: { children: ReactNode }) {
 
   return (
     <AdminContext.Provider value={{
-      isAuthenticated, login, logout, settings, saveSettings,
+      isAuthenticated, apiKey: settings.apiKey, login, logout, settings, saveSettings,
       products: productList, addProduct, updateProduct, deleteProduct,
       categoryList, addCategory, deleteCategory,
       orders, addOrder, updateOrder, updateOrderStatus, deleteOrder, loadOrders,

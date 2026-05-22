@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate, Outlet } from 'react-router-dom';
 import {
   Wifi, LayoutDashboard, Package, ShoppingBag,
   LogOut, Menu, X, ChevronRight, Bell, Settings,
-  Users, Tag, Star, FolderOpen, BarChart2,
+  Users, Tag, Star, FolderOpen, BarChart2, ImageIcon,
 } from 'lucide-react';
 import { useAdmin } from '../../context/AdminContext';
 
@@ -11,6 +11,7 @@ const navItems = [
   { to: '/admin/dashboard',  icon: LayoutDashboard, label: 'Dashboard' },
   { to: '/admin/analytics',  icon: BarChart2,        label: 'Analytics' },
   { to: '/admin/productos',  icon: Package,          label: 'Productos' },
+  { to: '/admin/medios',     icon: ImageIcon,        label: 'Medios' },
   { to: '/admin/categorias', icon: FolderOpen,       label: 'Categorías' },
   { to: '/admin/pedidos',    icon: ShoppingBag,      label: 'Pedidos' },
   { to: '/admin/clientes',   icon: Users,            label: 'Clientes' },

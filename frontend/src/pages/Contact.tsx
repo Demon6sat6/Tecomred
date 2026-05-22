@@ -43,11 +43,20 @@ export default function Contact() {
     }
 
     setStatus('loading');
-    // Simula envío — reemplazar con fetch a tu API de contacto
-    await new Promise(r => setTimeout(r, 1200));
-    setStatus('success');
-    setForm(INITIAL_FORM);
-    setErrors({});
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nombre: form.nombre.trim(), email: form.email, asunto: form.asunto, mensaje: form.mensaje.trim() }),
+      });
+      if (!res.ok) throw new Error('Error al enviar');
+      setStatus('success');
+      setForm(INITIAL_FORM);
+      setErrors({});
+    } catch {
+      setStatus('idle');
+      setErrors({ mensaje: 'Error al enviar. Inténtalo de nuevo.' });
+    }
   };
 
   const contactInfo = [

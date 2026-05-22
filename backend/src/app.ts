@@ -2,46 +2,53 @@ import cors from "cors";
 import express from "express";
 import helmet from "helmet";
 import morgan from "morgan";
+import path from "path";
 import { env } from "./config/env.js";
-import { authRouter } from "./routes/auth.js";
-import { healthRouter } from "./routes/health.js";
-import { ordersRouter } from "./routes/orders.js";
+import { authRouter }       from "./routes/auth.js";
+import { healthRouter }     from "./routes/health.js";
+import { ordersRouter }     from "./routes/orders.js";
+import { mediaRouter }      from "./routes/media.js";
+import { contactRouter }    from "./routes/contact.js";
+import { newsletterRouter } from "./routes/newsletter.js";
 
 export const app = express();
 
-app.use(helmet());
-app.use(
-  cors({
-    origin: env.CORS_ORIGIN,
-    credentials: true,
-  }),
-);
-app.use(express.json({ limit: "1mb" }));
+// Security headers (allow img-src for uploaded files)
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: "cross-origin" },
+}));
+
+app.use(cors({
+  origin: env.CORS_ORIGIN.split(",").map(o => o.trim()),
+  credentials: true,
+}));
+
+app.use(express.json({ limit: "2mb" }));
 app.use(morgan(env.NODE_ENV === "production" ? "combined" : "dev"));
 
-app.get("/api", (_req, res) => {
-  res.json({ message: "TecomRed API ready" });
-});
+// Serve uploaded files as static assets
+app.use("/uploads", express.static(path.resolve("uploads")));
 
-app.use("/api/health", healthRouter);
-app.use("/api/auth", authRouter);
-app.use("/api/orders", ordersRouter);
+// Routes
+app.get("/api", (_req, res) => res.json({ message: "TecomRed API ready" }));
+app.use("/api/health",      healthRouter);
+app.use("/api/auth",        authRouter);
+app.use("/api/orders",      ordersRouter);
+app.use("/api/media",       mediaRouter);
+app.use("/api/contact",     contactRouter);
+app.use("/api/newsletter",  newsletterRouter);
 
-
-// Middleware para rutas no encontradas
+// 404
 app.use((_req, res, next) => {
-  const error = new Error("Route not found");
-  // @ts-ignore
-  error.status = 404;
+  const error = Object.assign(new Error("Route not found"), { status: 404 });
   next(error);
 });
 
-// Middleware global de manejo de errores
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+// Global error handler
 app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
   const status = err.status || 500;
   res.status(status).json({
     error: err.message || "Internal Server Error",
-    details: process.env.NODE_ENV !== "production" ? err.stack : undefined,
+    ...(env.NODE_ENV !== "production" && { stack: err.stack }),
   });
 });

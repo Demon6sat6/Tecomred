@@ -18,10 +18,19 @@ function NewsletterForm() {
     }
     setError('');
     setStatus('loading');
-    // Simula envío — reemplazar con llamada real a tu API/newsletter service
-    await new Promise(r => setTimeout(r, 900));
-    setStatus('success');
-    setEmail('');
+    try {
+      const res = await fetch('/api/newsletter/subscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+      if (!res.ok) throw new Error('Error');
+      setStatus('success');
+      setEmail('');
+    } catch {
+      setStatus('idle');
+      setError('Error al suscribirse. Inténtalo de nuevo.');
+    }
   };
 
   if (status === 'success') {
@@ -173,8 +182,8 @@ export default function Footer() {
             © 2026 TecomRed. Todos los derechos reservados.
           </p>
           <div className="flex gap-3 sm:gap-4">
-            <a href="#" className="text-gray-500 hover:text-gray-400 text-xs sm:text-sm transition-colors">Privacidad</a>
-            <a href="#" className="text-gray-500 hover:text-gray-400 text-xs sm:text-sm transition-colors">Términos</a>
+            <Link to="/privacidad" className="text-gray-500 hover:text-gray-400 text-xs sm:text-sm transition-colors">Privacidad</Link>
+            <Link to="/terminos" className="text-gray-500 hover:text-gray-400 text-xs sm:text-sm transition-colors">Términos</Link>
           </div>
         </div>
       </div>

@@ -1,9 +1,53 @@
-import { useState } from 'react';
-import { Plus, Pencil, Trash2, Search, X, Check, AlertTriangle } from 'lucide-react';
+import { useState, useEffect, useCallback } from 'react';
+import { Plus, Pencil, Trash2, Search, X, Check, AlertTriangle, Image } from 'lucide-react';
 import { useAdmin } from '../../context/AdminContext';
 import { useCurrency } from '../../hooks/useCurrency';
 import type { Product } from '../../types';
 import { categories } from '../../data/products';
+
+interface MediaFile { id: number; url: string; original_name: string; alt_text: string }
+
+function MediaPickerModal({ onSelect, onClose, apiKey }: { onSelect: (url: string) => void; onClose: () => void; apiKey: string }) {
+  const [files, setFiles] = useState<MediaFile[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch('/api/media', { headers: { Authorization: `Bearer ${apiKey}` } })
+      .then(r => r.json())
+      .then(d => setFiles(d.data ?? []))
+      .catch(() => setFiles([]))
+      .finally(() => setLoading(false));
+  }, [apiKey]);
+
+  return (
+    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+      <div className="glass-strong rounded-2xl w-full max-w-2xl max-h-[80vh] flex flex-col shadow-2xl border border-white/10">
+        <div className="flex items-center justify-between p-4 border-b border-white/10">
+          <h3 className="text-white font-bold">Seleccionar imagen de la biblioteca</h3>
+          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-white/10 text-gray-400"><X className="w-5 h-5" /></button>
+        </div>
+        <div className="flex-1 overflow-y-auto p-4">
+          {loading ? (
+            <div className="grid grid-cols-4 gap-3">
+              {Array.from({ length: 8 }).map((_, i) => <div key={i} className="aspect-square bg-white/5 rounded-xl animate-pulse" />)}
+            </div>
+          ) : files.length === 0 ? (
+            <div className="text-center py-12 text-gray-500 text-sm">No hay imágenes en la biblioteca. Súbelas en <strong>Medios</strong>.</div>
+          ) : (
+            <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
+              {files.map(f => (
+                <button key={f.id} onClick={() => { onSelect(f.url); onClose(); }}
+                  className="aspect-square rounded-xl overflow-hidden border-2 border-transparent hover:border-sky-500 transition-all group">
+                  <img src={f.url} alt={f.alt_text || f.original_name} className="w-full h-full object-cover group-hover:scale-105 transition-transform" loading="lazy" />
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
 
 const emptyProduct: Omit<Product, 'id'> = {
   name: '', category: 'Switches', price: 0, image: '',
@@ -11,7 +55,7 @@ const emptyProduct: Omit<Product, 'id'> = {
 };
 
 export default function AdminProducts() {
-  const { products, addProduct, updateProduct, deleteProduct } = useAdmin();
+  const { products, addProduct, updateProduct, deleteProduct, apiKey } = useAdmin();
   const { formatShort } = useCurrency();
   const [search, setSearch] = useState('');
   const [filterCat, setFilterCat] = useState('Todos');
@@ -20,6 +64,7 @@ export default function AdminProducts() {
   const [form, setForm] = useState<Omit<Product, 'id'>>(emptyProduct);
   const [specsInput, setSpecsInput] = useState('');
   const [saved, setSaved] = useState(false);
+  const [showMediaPicker, setShowMediaPicker] = useState(false);
 
   const filtered = products.filter(p => {
     const matchSearch = p.name.toLowerCase().includes(search.toLowerCase());
@@ -225,12 +270,21 @@ export default function AdminProducts() {
                     className="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-gray-200 text-sm focus:outline-none focus:border-sky-500/60" />
                 </div>
               </div>
-              {/* Image URL */}
+              {/* Image URL + media picker */}
               <div>
-                <label className="block text-xs text-gray-400 mb-1.5 font-medium">URL de imagen</label>
-                <input value={form.image} onChange={e => setForm(f => ({ ...f, image: e.target.value }))}
-                  placeholder="https://..."
-                  className="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-gray-200 text-sm focus:outline-none focus:border-sky-500/60" />
+                <label className="block text-xs text-gray-400 mb-1.5 font-medium">Imagen del producto</label>
+                <div className="flex gap-2">
+                  <input value={form.image} onChange={e => setForm(f => ({ ...f, image: e.target.value }))}
+                    placeholder="https://... o elige de la biblioteca"
+                    className="flex-1 px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-gray-200 text-sm focus:outline-none focus:border-sky-500/60" />
+                  <button type="button" onClick={() => setShowMediaPicker(true)}
+                    className="px-3 py-2.5 rounded-xl bg-white/5 border border-white/10 text-sky-400 hover:bg-sky-500/10 transition-colors text-xs font-semibold flex items-center gap-1.5 shrink-0">
+                    <Image className="w-3.5 h-3.5" /> Biblioteca
+                  </button>
+                </div>
+                {form.image && (
+                  <img src={form.image} alt="Vista previa" className="mt-2 h-24 w-full object-cover rounded-xl border border-white/10" />
+                )}
               </div>
               {/* Description */}
               <div>
@@ -258,6 +312,15 @@ export default function AdminProducts() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Media picker modal */}
+      {showMediaPicker && (
+        <MediaPickerModal
+          apiKey={apiKey}
+          onSelect={url => setForm(f => ({ ...f, image: url }))}
+          onClose={() => setShowMediaPicker(false)}
+        />
       )}
 
       {/* Delete Modal */}
