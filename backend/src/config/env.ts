@@ -12,7 +12,7 @@ const envSchema = z.object({
   ADMIN_API_KEY: z.string().min(16).default("change-this-api-key"),
   MYSQL_HOST: z.string().default("localhost"),
   MYSQL_USER: z.string().default("root"),
-  MYSQL_PASSWORD: z.string().default("Sat271227"),
+  MYSQL_PASSWORD: z.string().default(""),
   MYSQL_DATABASE: z.string().default("tecomred"),
 });
 

@@ -2,16 +2,28 @@ import cors from "cors";
 import express from "express";
 import helmet from "helmet";
 import morgan from "morgan";
+import rateLimit from "express-rate-limit";
 import path from "path";
 import { env } from "./config/env.js";
 import { authRouter }       from "./routes/auth.js";
 import { healthRouter }     from "./routes/health.js";
 import { ordersRouter }     from "./routes/orders.js";
+import { productsRouter }   from "./routes/products.js";
 import { mediaRouter }      from "./routes/media.js";
 import { contactRouter }    from "./routes/contact.js";
 import { newsletterRouter } from "./routes/newsletter.js";
 
 export const app = express();
+
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Demasiadas solicitudes, intenta de nuevo en 15 minutos" },
+});
+
+app.use("/api", limiter);
 
 // Security headers (allow img-src for uploaded files)
 app.use(helmet({
@@ -34,6 +46,7 @@ app.get("/api", (_req, res) => res.json({ message: "TecomRed API ready" }));
 app.use("/api/health",      healthRouter);
 app.use("/api/auth",        authRouter);
 app.use("/api/orders",      ordersRouter);
+app.use("/api/products",    productsRouter);
 app.use("/api/media",       mediaRouter);
 app.use("/api/contact",     contactRouter);
 app.use("/api/newsletter",  newsletterRouter);

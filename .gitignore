@@ -13,8 +13,12 @@ dist-ssr
 *.local
 frontend/node_modules
 frontend/dist
+frontend/.env
+frontend/.env.local
+frontend/.env.production
 backend/node_modules
 backend/.env
+backend/.env.local
 backend/dist
 
 # Editor directories and files

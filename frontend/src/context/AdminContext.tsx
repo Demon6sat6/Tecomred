@@ -57,8 +57,6 @@ export interface StoreSettings {
   maintenanceMode: boolean;
   showOutOfStock: boolean;
   allowReviews: boolean;
-  adminUser: string;
-  adminPass: string;
   apiKey: string;
   gaId: string;
   // Hero stats
@@ -78,16 +76,17 @@ export interface StoreSettings {
 
 interface AdminContextType {
   isAuthenticated: boolean;
+  isVerifying: boolean;
   apiKey: string;
-  login: (user: string, pass: string) => boolean;
+  login: () => void;
   logout: () => void;
   settings: StoreSettings;
   saveSettings: (s: StoreSettings) => void;
   // Products (shared with store)
   products: Product[];
-  addProduct: (p: Omit<Product, 'id'>) => void;
-  updateProduct: (p: Product) => void;
-  deleteProduct: (id: number) => void;
+  addProduct: (p: Omit<Product, 'id'>) => Promise<void>;
+  updateProduct: (p: Product) => Promise<void>;
+  deleteProduct: (id: number) => Promise<void>;
   // Categories
   categoryList: string[];
   addCategory: (name: string) => void;
@@ -129,8 +128,6 @@ const defaultSettings: StoreSettings = {
   maintenanceMode: false,
   showOutOfStock: true,
   allowReviews: true,
-  adminUser: 'admin',
-  adminPass: 'tecomred2026',
   apiKey: 'change-this-api-key',
   gaId: '',
   stat1Value: '500',  stat1Suffix: '+',     stat1Label: 'Productos en stock',
@@ -139,7 +136,7 @@ const defaultSettings: StoreSettings = {
   stat4Value: '24',   stat4Suffix: '/7',    stat4Label: 'Soporte técnico',
 };
 
-const API_URL = '/api';
+const API_URL = (import.meta.env.VITE_API_URL as string | undefined) ?? '/api';
 
 function makeApiCall(apiKey: string) {
   return async function apiCall<T>(endpoint: string, options?: RequestInit): Promise<T> {
@@ -201,23 +198,48 @@ export function AdminProvider({ children }: { children: ReactNode }) {
   const [reviewList, setReviewList]           = useLocalStorage<Review[]>('admin_reviews', initialReviewsWithApproval);
   const [coupons, setCoupons]                 = useLocalStorage<Coupon[]>('admin_coupons', initialCoupons);
   const [isBackendAvailable, setIsBackendAvailable] = useState<boolean | null>(null);
+  const [isVerifying, setIsVerifying] = useState(() => isAuthenticated as boolean);
   const apiCall = makeApiCall(settings.apiKey);
 
-  // Verificar disponibilidad del backend al iniciar
+  // Al montar: verifica la sesión guardada y la disponibilidad del backend
   useEffect(() => {
-    checkBackend();
+    if (isAuthenticated) {
+      verifySession().then(() => checkBackend());
+    } else {
+      checkBackend();
+    }
   }, []);
+
+  async function verifySession() {
+    const token = localStorage.getItem('admin_token');
+    if (!token) {
+      setIsAuthenticated(false);
+      setIsVerifying(false);
+      return;
+    }
+    try {
+      const res = await fetch(`${API_URL}/auth/verify`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) {
+        setIsAuthenticated(false);
+        localStorage.removeItem('admin_token');
+      }
+    } catch {
+      // Backend no disponible — mantiene la sesión local
+    } finally {
+      setIsVerifying(false);
+    }
+  }
 
   async function checkBackend() {
     try {
       const response = await fetch(`${API_URL}/health`);
       if (response.ok) {
         setIsBackendAvailable(true);
-        // Si el backend está disponible, cargar órdenes desde MySQL
-        await fetchOrders();
+        await Promise.all([fetchOrders(), fetchProducts()]);
       } else {
         setIsBackendAvailable(false);
-        // Fallback a datos locales
         setOrders(initialOrders);
       }
     } catch {
@@ -235,20 +257,57 @@ export function AdminProvider({ children }: { children: ReactNode }) {
     }
   }
 
-  const login = (user: string, pass: string) => {
-    if (user === settings.adminUser && pass === settings.adminPass) {
-      setIsAuthenticated(true);
-      return true;
+  async function fetchProducts() {
+    try {
+      const data = await apiCall<{ data: Product[] }>('/products');
+      setProductList(data.data);
+    } catch {
+      // Mantiene los productos de localStorage como fallback
     }
-    return false;
+  }
+
+  const login = () => setIsAuthenticated(true);
+  const logout = () => {
+    setIsAuthenticated(false);
+    localStorage.removeItem('admin_token');
   };
-  const logout = () => setIsAuthenticated(false);
   const saveSettings = (s: StoreSettings) => setSettings(s);
 
-  // Products
-  const addProduct    = (p: Omit<Product, 'id'>) => setProductList(prev => [...prev, { ...p, id: Date.now() }]);
-  const updateProduct = (p: Product)              => setProductList(prev => prev.map(x => x.id === p.id ? p : x));
-  const deleteProduct = (id: number)              => setProductList(prev => prev.filter(x => x.id !== id));
+  // Products — CRUD contra MySQL cuando el backend está disponible
+  const addProduct = async (p: Omit<Product, 'id'>): Promise<void> => {
+    if (isBackendAvailable) {
+      try {
+        const result = await apiCall<{ data: Product }>('/products', {
+          method: 'POST',
+          body: JSON.stringify({ ...p, isActive: true }),
+        });
+        setProductList(prev => [...prev, result.data]);
+        return;
+      } catch { /* fallback */ }
+    }
+    setProductList(prev => [...prev, { ...p, id: Date.now() }]);
+  };
+
+  const updateProduct = async (p: Product): Promise<void> => {
+    if (isBackendAvailable) {
+      try {
+        await apiCall(`/products/${p.id}`, {
+          method: 'PUT',
+          body: JSON.stringify({ ...p, isActive: true }),
+        });
+      } catch { /* fallback */ }
+    }
+    setProductList(prev => prev.map(x => x.id === p.id ? p : x));
+  };
+
+  const deleteProduct = async (id: number): Promise<void> => {
+    if (isBackendAvailable) {
+      try {
+        await apiCall(`/products/${id}`, { method: 'DELETE' });
+      } catch { /* fallback */ }
+    }
+    setProductList(prev => prev.filter(x => x.id !== id));
+  };
 
   // Categories
   const addCategory    = (name: string) => setCategoryList(prev => [...prev, name]);
@@ -363,7 +422,7 @@ export function AdminProvider({ children }: { children: ReactNode }) {
 
   return (
     <AdminContext.Provider value={{
-      isAuthenticated, apiKey: settings.apiKey, login, logout, settings, saveSettings,
+      isAuthenticated, isVerifying, apiKey: settings.apiKey, login, logout, settings, saveSettings,
       products: productList, addProduct, updateProduct, deleteProduct,
       categoryList, addCategory, deleteCategory,
       orders, addOrder, updateOrder, updateOrderStatus, deleteOrder, loadOrders,

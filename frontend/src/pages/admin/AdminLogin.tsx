@@ -16,31 +16,22 @@ export default function AdminLogin() {
     setError('');
     setLoading(true);
     try {
-      const response = await fetch('/api/auth/login', {
+      const apiBase = (import.meta.env.VITE_API_URL as string | undefined) ?? '/api';
+      const response = await fetch(`${apiBase}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username: form.user, password: form.pass }),
       });
       if (response.ok) {
         const data = await response.json();
-        // Guardar el token para futuras peticiones (ya se usa Authorization header en el proxy)
-        if (data.token) {
-          localStorage.setItem('admin_token', data.token);
-        }
-        const ok = login(form.user, form.pass);
-        if (ok) {
-          navigate('/admin/dashboard');
-        } else {
-          setError('Usuario o contraseña incorrectos');
-        }
+        if (data.token) localStorage.setItem('admin_token', data.token);
+        login();
+        navigate('/admin/dashboard');
       } else {
         setError('Usuario o contraseña incorrectos');
       }
     } catch {
-      // Fallback: autenticación local
-      const ok = login(form.user, form.pass);
-      if (ok) navigate('/admin/dashboard');
-      else setError('Usuario o contraseña incorrectos');
+      setError('No se pudo conectar con el servidor. Verifica tu conexión.');
     }
     setLoading(false);
   };
@@ -128,7 +119,7 @@ export default function AdminLogin() {
 
           <div className="mt-6 pt-5 border-t border-white/10">
             <p className="text-xs text-gray-600 text-center">
-              Credenciales: <span className="text-gray-500">admin / tecomred2026</span>
+              Acceso restringido al personal autorizado
             </p>
           </div>
         </div>

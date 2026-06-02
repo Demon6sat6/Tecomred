@@ -7,12 +7,16 @@
     "dev": "tsx watch src/server.ts",
     "build": "tsc -p tsconfig.json",
     "start": "node dist/server.js",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "db:migrate": "node scripts/db-setup.mjs",
+    "db:seed": "node scripts/db-setup.mjs --seed-only",
+    "db:setup": "node scripts/db-setup.mjs --seed"
   },
   "dependencies": {
     "cors": "^2.8.5",
     "dotenv": "^16.6.1",
     "express": "^5.1.0",
+    "express-rate-limit": "^8.5.2",
     "helmet": "^8.1.0",
     "morgan": "^1.10.1",
     "multer": "^2.1.1",
