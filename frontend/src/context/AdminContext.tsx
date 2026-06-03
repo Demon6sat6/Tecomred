@@ -59,6 +59,8 @@ export interface StoreSettings {
   allowReviews: boolean;
   apiKey: string;
   gaId: string;
+  adminUser: string;
+  adminPass: string;
   // Hero stats
   stat1Value: string;
   stat1Suffix: string;
@@ -130,6 +132,8 @@ const defaultSettings: StoreSettings = {
   allowReviews: true,
   apiKey: 'change-this-api-key',
   gaId: '',
+  adminUser: 'admin',
+  adminPass: 'tecomred2026',
   stat1Value: '500',  stat1Suffix: '+',     stat1Label: 'Productos en stock',
   stat2Value: '2000', stat2Suffix: '+',     stat2Label: 'Clientes satisfechos',
   stat3Value: '10',   stat3Suffix: ' años', stat3Label: 'De experiencia',

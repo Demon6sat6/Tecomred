@@ -20,17 +20,15 @@ export default defineConfig({
 
     rollupOptions: {
       output: {
-        // Split vendor libs into separate cacheable chunks
-        manualChunks: {
-          'react-vendor': ['react', 'react-dom'],
-          'router':       ['react-router-dom'],
-          'icons':        ['lucide-react'],
+        manualChunks: (id: string) => {
+          if (id.includes('react-dom') || id.includes('node_modules/react/')) return 'react-vendor';
+          if (id.includes('react-router-dom')) return 'router';
+          if (id.includes('lucide-react')) return 'icons';
         },
       },
     },
 
-    // Enable minification (default esbuild, fastest)
-    minify: 'esbuild',
+    minify: true,
 
     // Generate source maps for production error tracking
     sourcemap: false,

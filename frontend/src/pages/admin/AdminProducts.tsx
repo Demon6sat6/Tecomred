@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { Plus, Pencil, Trash2, Search, X, Check, AlertTriangle, Image } from 'lucide-react';
 import { useAdmin } from '../../context/AdminContext';
 import { useCurrency } from '../../hooks/useCurrency';

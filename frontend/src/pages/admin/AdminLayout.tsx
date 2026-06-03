@@ -20,7 +20,7 @@ const navItems = [
   { to: '/admin/ajustes',    icon: Settings,         label: 'Ajustes' },
 ];
 
-function Sidebar({ mobile = false, onLogout, pendingOrders }: {
+function Sidebar({ onLogout, pendingOrders }: {
   mobile?: boolean;
   onLogout: () => void;
   pendingOrders: number;

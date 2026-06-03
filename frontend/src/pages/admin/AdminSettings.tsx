@@ -160,15 +160,15 @@ export default function AdminSettings() {
               <div key={i} className="glass rounded-xl p-4">
                 <div className="flex items-center gap-2 mb-3">
                   <span className="w-6 h-6 rounded-lg gradient-brand flex items-center justify-center text-white text-xs font-bold shrink-0">{i + 1}</span>
-                  <span className="text-sky-400 font-bold text-sm">{(form as Record<string, string>)[stat.v]}{(form as Record<string, string>)[stat.s]}</span>
-                  <span className="text-gray-500 text-xs">- {(form as Record<string, string>)[stat.l]}</span>
+                  <span className="text-sky-400 font-bold text-sm">{(form as unknown as Record<string, string>)[stat.v]}{(form as unknown as Record<string, string>)[stat.s]}</span>
+                  <span className="text-gray-500 text-xs">- {(form as unknown as Record<string, string>)[stat.l]}</span>
                 </div>
                 <div className="grid grid-cols-3 gap-2">
                   <div>
                     <label className="block text-xs text-gray-500 mb-1">Número</label>
                     <input
                       type="number"
-                      value={(form as Record<string, string>)[stat.v]}
+                      value={(form as unknown as Record<string, string>)[stat.v]}
                       onChange={e => handleInputChange(stat.v as keyof StoreSettings, e.target.value)}
                       className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-gray-200 text-sm focus:outline-none focus:border-sky-500/60"
                     />
@@ -177,7 +177,7 @@ export default function AdminSettings() {
                     <label className="block text-xs text-gray-500 mb-1">Sufijo</label>
                     <input
                       type="text"
-                      value={(form as Record<string, string>)[stat.s]}
+                      value={(form as unknown as Record<string, string>)[stat.s]}
                       onChange={e => handleInputChange(stat.s as keyof StoreSettings, e.target.value)}
                       placeholder="+ / años / /7"
                       className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-gray-200 text-sm focus:outline-none focus:border-sky-500/60"
@@ -187,7 +187,7 @@ export default function AdminSettings() {
                     <label className="block text-xs text-gray-500 mb-1">Etiqueta</label>
                     <input
                       type="text"
-                      value={(form as Record<string, string>)[stat.l]}
+                      value={(form as unknown as Record<string, string>)[stat.l]}
                       onChange={e => handleInputChange(stat.l as keyof StoreSettings, e.target.value)}
                       placeholder="Descripción"
                       className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-gray-200 text-sm focus:outline-none focus:border-sky-500/60"
