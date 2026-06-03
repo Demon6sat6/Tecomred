@@ -61,6 +61,7 @@ export interface StoreSettings {
   gaId: string;
   adminUser: string;
   adminPass: string;
+  brands: { name: string; colorClass: string }[];
   // Hero stats
   stat1Value: string;
   stat1Suffix: string;
@@ -134,6 +135,16 @@ const defaultSettings: StoreSettings = {
   gaId: '',
   adminUser: 'admin',
   adminPass: 'tecomred2026',
+  brands: [
+    { name: 'Cisco',    colorClass: 'text-blue-400' },
+    { name: 'MikroTik', colorClass: 'text-red-400' },
+    { name: 'Ubiquiti', colorClass: 'text-sky-400' },
+    { name: 'Intel',    colorClass: 'text-blue-300' },
+    { name: 'Samsung',  colorClass: 'text-blue-500' },
+    { name: 'Kingston', colorClass: 'text-red-500' },
+    { name: 'TP-Link',  colorClass: 'text-green-400' },
+    { name: 'Seagate',  colorClass: 'text-emerald-400' },
+  ],
   stat1Value: '500',  stat1Suffix: '+',     stat1Label: 'Productos en stock',
   stat2Value: '2000', stat2Suffix: '+',     stat2Label: 'Clientes satisfechos',
   stat3Value: '10',   stat3Suffix: ' años', stat3Label: 'De experiencia',

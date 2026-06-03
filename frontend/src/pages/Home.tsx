@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import {
   ArrowRight, Shield, Truck, Headphones, Zap,
   Network, Cpu, HardDrive, Cable, Wifi, Server,
-  CheckCircle,
+  CheckCircle, Tag, type LucideIcon,
 } from 'lucide-react';
 import { useStore } from '../context/StoreContext';
 import { useAdmin } from '../context/AdminContext';
@@ -22,14 +22,16 @@ function AnimatedStat({ value, suffix, label }: { value: number; suffix: string;
   );
 }
 
-const categoryIcons = [
-  { name: 'Switches',      icon: Network,    color: 'text-sky-400',     bg: 'bg-sky-500/10',     border: 'hover:border-sky-500/40' },
-  { name: 'Routers',       icon: Wifi,       color: 'text-indigo-400',  bg: 'bg-indigo-500/10',  border: 'hover:border-indigo-500/40' },
-  { name: 'Procesadores',  icon: Cpu,        color: 'text-purple-400',  bg: 'bg-purple-500/10',  border: 'hover:border-purple-500/40' },
-  { name: 'Almacenamiento',icon: HardDrive,  color: 'text-emerald-400', bg: 'bg-emerald-500/10', border: 'hover:border-emerald-500/40' },
-  { name: 'Cables',        icon: Cable,      color: 'text-orange-400',  bg: 'bg-orange-500/10',  border: 'hover:border-orange-500/40' },
-  { name: 'Access Points', icon: Server,     color: 'text-pink-400',    bg: 'bg-pink-500/10',    border: 'hover:border-pink-500/40' },
-];
+type CatStyle = { icon: LucideIcon; color: string; bg: string; border: string };
+const CATEGORY_STYLES: Record<string, CatStyle> = {
+  'Switches':       { icon: Network,   color: 'text-sky-400',     bg: 'bg-sky-500/10',     border: 'hover:border-sky-500/40' },
+  'Routers':        { icon: Wifi,      color: 'text-indigo-400',  bg: 'bg-indigo-500/10',  border: 'hover:border-indigo-500/40' },
+  'Procesadores':   { icon: Cpu,       color: 'text-purple-400',  bg: 'bg-purple-500/10',  border: 'hover:border-purple-500/40' },
+  'Almacenamiento': { icon: HardDrive, color: 'text-emerald-400', bg: 'bg-emerald-500/10', border: 'hover:border-emerald-500/40' },
+  'Cables':         { icon: Cable,     color: 'text-orange-400',  bg: 'bg-orange-500/10',  border: 'hover:border-orange-500/40' },
+  'Access Points':  { icon: Server,    color: 'text-pink-400',    bg: 'bg-pink-500/10',    border: 'hover:border-pink-500/40' },
+};
+const DEFAULT_CAT_STYLE: CatStyle = { icon: Tag, color: 'text-gray-400', bg: 'bg-gray-500/10', border: 'hover:border-gray-500/40' };
 
 const features = [
   { icon: Truck,      title: 'Envío Rápido',      desc: 'Entrega en 24-48 horas a todo el país' },
@@ -52,7 +54,7 @@ function SectionReveal({ children, className = '' }: { children: React.ReactNode
 
 export default function Home() {
   const { products } = useStore();
-  const { settings } = useAdmin();
+  const { settings, categoryList } = useAdmin();
   const featured = products.filter(p => p.badge === 'Popular' || p.badge === 'Oferta').slice(0, 4);
   const newProducts = products.filter(p => p.badge === 'Nuevo').slice(0, 3);
 
@@ -174,18 +176,21 @@ export default function Home() {
             </Link>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-            {categoryIcons.map(({ name, icon: Icon, color, bg, border }) => (
-              <Link
-                key={name}
-                to={`/productos?categoria=${encodeURIComponent(name)}`}
-                className={`glass rounded-2xl p-5 flex flex-col items-center gap-3 transition-all duration-200 card-hover group border border-transparent ${border}`}
-              >
-                <div className={`w-14 h-14 rounded-2xl ${bg} flex items-center justify-center group-hover:scale-110 transition-transform duration-200`}>
-                  <Icon className={`w-7 h-7 ${color}`} />
-                </div>
-                <span className="text-sm font-medium text-gray-300 text-center leading-tight">{name}</span>
-              </Link>
-            ))}
+            {categoryList.slice(0, 6).map(name => {
+              const { icon: Icon, color, bg, border } = CATEGORY_STYLES[name] ?? DEFAULT_CAT_STYLE;
+              return (
+                <Link
+                  key={name}
+                  to={`/productos?categoria=${encodeURIComponent(name)}`}
+                  className={`glass rounded-2xl p-5 flex flex-col items-center gap-3 transition-all duration-200 card-hover group border border-transparent ${border}`}
+                >
+                  <div className={`w-14 h-14 rounded-2xl ${bg} flex items-center justify-center group-hover:scale-110 transition-transform duration-200`}>
+                    <Icon className={`w-7 h-7 ${color}`} />
+                  </div>
+                  <span className="text-sm font-medium text-gray-300 text-center leading-tight">{name}</span>
+                </Link>
+              );
+            })}
           </div>
         </div>
       </SectionReveal>

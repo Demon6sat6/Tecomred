@@ -8,8 +8,8 @@ import {
 import { useAdmin } from '../../context/AdminContext';
 
 const navItems = [
-  { to: '/admin/dashboard',  icon: LayoutDashboard, label: 'Dashboard' },
-  { to: '/admin/analytics',  icon: BarChart2,        label: 'Analytics' },
+  { to: '/admin/dashboard',  icon: LayoutDashboard, label: 'Panel' },
+  { to: '/admin/analytics',  icon: BarChart2,        label: 'Analíticas' },
   { to: '/admin/productos',  icon: Package,          label: 'Productos' },
   { to: '/admin/medios',     icon: ImageIcon,        label: 'Medios' },
   { to: '/admin/categorias', icon: FolderOpen,       label: 'Categorías' },
