@@ -20,7 +20,7 @@
 
   /* Accessible focus ring — only shown on keyboard navigation */
   :focus-visible {
-    outline: 2px solid #0ea5e9;
+    outline: 2px solid #863bff;
     outline-offset: 2px;
     border-radius: 6px;
   }
@@ -61,17 +61,17 @@
 
   /* Selection color */
   ::selection {
-    background: rgba(14, 165, 233, 0.35);
+    background: rgba(134, 59, 255, 0.35);
     color: #fff;
   }
 }
 
 @layer utilities {
   .gradient-brand {
-    background: linear-gradient(135deg, #0ea5e9 0%, #6366f1 100%);
+    background: linear-gradient(135deg, #47bfff 0%, #863bff 100%);
   }
   .gradient-text {
-    background: linear-gradient(135deg, #0ea5e9 0%, #6366f1 100%);
+    background: linear-gradient(135deg, #47bfff 0%, #863bff 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -81,7 +81,7 @@
   }
   .card-hover:hover {
     transform: translateY(-5px);
-    box-shadow: 0 24px 48px rgba(14, 165, 233, 0.12);
+    box-shadow: 0 24px 48px rgba(134, 59, 255, 0.15);
   }
   .glass {
     background: rgba(255, 255, 255, 0.04);
@@ -96,6 +96,31 @@
     border: 1px solid rgba(255, 255, 255, 0.12);
   }
 }
+
+/* Admin light theme overrides */
+[data-theme="light"] {
+  --admin-bg: #f1f5f9;
+  --admin-surface: #ffffff;
+  --admin-surface2: #f8fafc;
+  --admin-border: rgba(0,0,0,0.08);
+  --admin-text: #0f172a;
+  --admin-text-muted: #64748b;
+  --admin-text-faint: #94a3b8;
+}
+[data-theme="dark"] {
+  --admin-bg: #030712;
+  --admin-surface: rgba(255,255,255,0.04);
+  --admin-surface2: rgba(255,255,255,0.02);
+  --admin-border: rgba(255,255,255,0.08);
+  --admin-text: #f1f5f9;
+  --admin-text-muted: #6b7280;
+  --admin-text-faint: #374151;
+}
+
+.admin-bg      { background-color: var(--admin-bg) !important; }
+.admin-surface { background-color: var(--admin-surface) !important; border-color: var(--admin-border) !important; }
+.admin-text    { color: var(--admin-text) !important; }
+.admin-muted   { color: var(--admin-text-muted) !important; }
 
 /* Marquee animation for brands */
 @keyframes marquee {

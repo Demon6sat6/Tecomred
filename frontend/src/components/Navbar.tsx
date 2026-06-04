@@ -1,11 +1,14 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { ShoppingCart, Search, Menu, X, Wifi, ChevronDown } from 'lucide-react';
+import { ShoppingCart, Search, Menu, X, ChevronDown } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 
 const navLinks = [
   { to: '/',          label: 'Inicio' },
   { to: '/productos', label: 'Catálogo' },
+  { to: '/nosotros',  label: 'Nosotros' },
+  { to: '/proyectos', label: 'Proyectos' },
+  { to: '/ubicacion', label: 'Ubicación' },
   { to: '/contacto',  label: 'Contacto' },
 ];
 
@@ -25,12 +28,8 @@ export default function Navbar() {
   const isActive = (path: string) =>
     path === '/' ? location.pathname === '/' : location.pathname.startsWith(path);
 
-  // Close mobile menu on route change
-  useEffect(() => {
-    setMenuOpen(false);
-  }, [location.pathname]);
+  useEffect(() => { setMenuOpen(false); }, [location.pathname]);
 
-  // Close on Escape key
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && menuOpen) setMenuOpen(false);
@@ -39,7 +38,6 @@ export default function Navbar() {
     return () => document.removeEventListener('keydown', onKey);
   }, [menuOpen]);
 
-  // Close on click outside the mobile menu
   useEffect(() => {
     if (!menuOpen) return;
     const onClick = (e: MouseEvent) => {
@@ -47,7 +45,6 @@ export default function Navbar() {
         setMenuOpen(false);
       }
     };
-    // Delay so the toggle button click doesn't immediately close the menu
     const timer = setTimeout(() => document.addEventListener('mousedown', onClick), 50);
     return () => {
       clearTimeout(timer);
@@ -71,14 +68,14 @@ export default function Navbar() {
 
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2.5 group shrink-0">
-            <div className="w-9 h-9 rounded-xl gradient-brand flex items-center justify-center shadow-lg shadow-sky-500/20 group-hover:scale-105 transition-transform">
-              <Wifi className="w-5 h-5 text-white" />
+            <div className="w-9 h-9 rounded-xl gradient-brand flex items-center justify-center shadow-lg shadow-violet-500/25 group-hover:scale-105 transition-transform">
+              <img src="/favicon.svg" alt="TecomRed" className="w-5 h-5" />
             </div>
             <span className="text-xl font-extrabold gradient-text tracking-tight">TecomRed</span>
           </Link>
 
           {/* Nav links — desktop */}
-          <div className="hidden md:flex items-center gap-1">
+          <div className="hidden lg:flex items-center gap-0.5">
             {navLinks.map(link => (
               link.to === '/productos' ? (
                 <div key={link.to} className="relative group">
@@ -86,7 +83,7 @@ export default function Navbar() {
                     to="/productos"
                     className={`flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                       isActive('/productos')
-                        ? 'text-sky-400 bg-sky-500/10'
+                        ? 'text-violet-400 bg-violet-500/10'
                         : 'text-gray-300 hover:text-white hover:bg-white/5'
                     }`}
                   >
@@ -101,16 +98,16 @@ export default function Navbar() {
                       <Link
                         key={cat}
                         to={`/productos?categoria=${encodeURIComponent(cat)}`}
-                        className="flex items-center gap-2 px-3 py-2 text-sm text-gray-300 hover:text-sky-400 hover:bg-white/5 transition-colors mx-1 rounded-lg"
+                        className="flex items-center gap-2 px-3 py-2 text-sm text-gray-300 hover:text-violet-400 hover:bg-white/5 transition-colors mx-1 rounded-lg"
                       >
-                        <span className="w-1.5 h-1.5 rounded-full bg-sky-500/50" />
+                        <span className="w-1.5 h-1.5 rounded-full bg-violet-500/50" />
                         {cat}
                       </Link>
                     ))}
                     <div className="border-t border-white/10 mt-1 pt-1 mx-1">
                       <Link
                         to="/productos"
-                        className="flex items-center gap-2 px-3 py-2 text-sm text-sky-400 hover:bg-white/5 transition-colors rounded-lg font-medium"
+                        className="flex items-center gap-2 px-3 py-2 text-sm text-violet-400 hover:bg-white/5 transition-colors rounded-lg font-medium"
                       >
                         Ver todo el catálogo →
                       </Link>
@@ -123,7 +120,7 @@ export default function Navbar() {
                   to={link.to}
                   className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                     isActive(link.to)
-                      ? 'text-sky-400 bg-sky-500/10'
+                      ? 'text-violet-400 bg-violet-500/10'
                       : 'text-gray-300 hover:text-white hover:bg-white/5'
                   }`}
                 >
@@ -144,7 +141,7 @@ export default function Navbar() {
                   onChange={e => setSearchQuery(e.target.value)}
                   placeholder="Buscar productos..."
                   aria-label="Buscar productos"
-                  className="pl-9 pr-4 py-2 bg-white/5 border border-white/10 rounded-xl text-sm text-gray-200 placeholder-gray-600 focus:outline-none focus:border-sky-500/50 focus:bg-white/8 transition-all w-44 focus:w-60"
+                  className="pl-9 pr-4 py-2 bg-white/5 border border-white/10 rounded-xl text-sm text-gray-200 placeholder-gray-600 focus:outline-none focus:border-violet-500/50 focus:bg-white/8 transition-all w-40 focus:w-52"
                 />
               </div>
             </form>
@@ -152,12 +149,12 @@ export default function Navbar() {
             <Link
               to="/carrito"
               className="relative p-2.5 rounded-xl hover:bg-white/8 transition-colors group"
-              aria-label={`Carrito de compras${totalItems > 0 ? `, ${totalItems} producto${totalItems !== 1 ? 's' : ''}` : ''}`}
+              aria-label={`Carrito${totalItems > 0 ? `, ${totalItems} producto${totalItems !== 1 ? 's' : ''}` : ''}`}
             >
-              <ShoppingCart className={`w-5 h-5 transition-colors ${totalItems > 0 ? 'text-sky-400' : 'text-gray-400 group-hover:text-gray-200'}`} />
+              <ShoppingCart className={`w-5 h-5 transition-colors ${totalItems > 0 ? 'text-violet-400' : 'text-gray-400 group-hover:text-gray-200'}`} />
               {totalItems > 0 && (
                 <span
-                  className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] gradient-brand rounded-full text-[10px] font-bold flex items-center justify-center text-white px-1 shadow-lg shadow-sky-500/30 animate-slide-up"
+                  className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] gradient-brand rounded-full text-[10px] font-bold flex items-center justify-center text-white px-1 shadow-lg shadow-violet-500/30 animate-slide-up"
                   aria-hidden="true"
                 >
                   {totalItems > 9 ? '9+' : totalItems}
@@ -168,7 +165,7 @@ export default function Navbar() {
             {/* Mobile menu button */}
             <button
               onClick={() => setMenuOpen(prev => !prev)}
-              className="md:hidden p-2.5 rounded-xl hover:bg-white/8 transition-colors"
+              className="lg:hidden p-2.5 rounded-xl hover:bg-white/8 transition-colors"
               aria-label={menuOpen ? 'Cerrar menú' : 'Abrir menú'}
               aria-expanded={menuOpen}
               aria-controls="mobile-menu"
@@ -183,7 +180,7 @@ export default function Navbar() {
 
         {/* Mobile menu */}
         {menuOpen && (
-          <div id="mobile-menu" className="md:hidden py-4 border-t border-white/10 space-y-1">
+          <div id="mobile-menu" className="lg:hidden py-4 border-t border-white/10 space-y-1">
             <form onSubmit={handleSearch} className="mb-3" role="search">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" aria-hidden="true" />
@@ -193,7 +190,7 @@ export default function Navbar() {
                   onChange={e => setSearchQuery(e.target.value)}
                   placeholder="Buscar productos..."
                   aria-label="Buscar productos"
-                  className="w-full pl-9 pr-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-sm text-gray-200 placeholder-gray-600 focus:outline-none focus:border-sky-500/50"
+                  className="w-full pl-9 pr-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-sm text-gray-200 placeholder-gray-600 focus:outline-none focus:border-violet-500/50"
                 />
               </div>
             </form>
@@ -204,7 +201,7 @@ export default function Navbar() {
                 to={link.to}
                 className={`flex items-center px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${
                   isActive(link.to)
-                    ? 'text-sky-400 bg-sky-500/10'
+                    ? 'text-violet-400 bg-violet-500/10'
                     : 'text-gray-300 hover:text-white hover:bg-white/5'
                 }`}
               >
@@ -218,15 +215,15 @@ export default function Navbar() {
                 <Link
                   key={cat}
                   to={`/productos?categoria=${encodeURIComponent(cat)}`}
-                  className="flex items-center gap-2 px-3 py-2 text-sm text-gray-400 hover:text-sky-400 hover:bg-white/5 rounded-xl transition-colors"
+                  className="flex items-center gap-2 px-3 py-2 text-sm text-gray-400 hover:text-violet-400 hover:bg-white/5 rounded-xl transition-colors"
                 >
-                  <span className="w-1.5 h-1.5 rounded-full bg-sky-500/50" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-violet-500/50" />
                   {cat}
                 </Link>
               ))}
               <Link
                 to="/productos"
-                className="flex items-center gap-2 px-3 py-2 text-sm text-sky-400 hover:bg-white/5 rounded-xl transition-colors font-medium mt-1"
+                className="flex items-center gap-2 px-3 py-2 text-sm text-violet-400 hover:bg-white/5 rounded-xl transition-colors font-medium mt-1"
               >
                 Ver todas las categorías →
               </Link>

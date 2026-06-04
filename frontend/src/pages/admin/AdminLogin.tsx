@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Wifi, Eye, EyeOff, AlertCircle, Lock, User } from 'lucide-react';
+import { Eye, EyeOff, AlertCircle, Lock, User, ShieldCheck } from 'lucide-react';
 import { useAdmin } from '../../context/AdminContext';
 
 export default function AdminLogin() {
@@ -37,25 +37,30 @@ export default function AdminLogin() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-950 flex items-center justify-center px-4">
-      {/* Background glows */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -left-40 w-96 h-96 bg-sky-500/8 rounded-full blur-3xl" />
-        <div className="absolute -bottom-40 -right-40 w-96 h-96 bg-indigo-500/8 rounded-full blur-3xl" />
+    <div className="min-h-screen bg-gray-950 flex items-center justify-center px-4 relative overflow-hidden">
+      {/* Background glows logo-colors */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute -top-40 -left-20 w-[500px] h-[500px] rounded-full blur-3xl opacity-15"
+          style={{ background: 'radial-gradient(circle, #863bff, transparent 70%)' }} />
+        <div className="absolute -bottom-40 -right-20 w-[500px] h-[500px] rounded-full blur-3xl opacity-10"
+          style={{ background: 'radial-gradient(circle, #47bfff, transparent 70%)' }} />
       </div>
 
       <div className="relative w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="w-16 h-16 rounded-2xl gradient-brand flex items-center justify-center mx-auto mb-4 shadow-2xl shadow-sky-500/20">
-            <Wifi className="w-8 h-8 text-white" />
+          <div className="w-20 h-20 rounded-2xl gradient-brand flex items-center justify-center mx-auto mb-5 shadow-2xl shadow-violet-500/30">
+            <img src="/favicon.svg" alt="TecomRed" className="w-11 h-11" />
           </div>
-          <h1 className="text-2xl font-extrabold text-white">TecomRed</h1>
-          <p className="text-gray-500 text-sm mt-1">Panel de Administración</p>
+          <h1 className="text-3xl font-extrabold text-white">TecomRed</h1>
+          <p className="text-gray-500 text-sm mt-1.5 flex items-center justify-center gap-1.5">
+            <ShieldCheck className="w-3.5 h-3.5 text-violet-400" />
+            Panel de Administración
+          </p>
         </div>
 
         {/* Card */}
-        <div className="glass rounded-2xl p-8 shadow-2xl shadow-black/40">
+        <div className="glass rounded-2xl p-8 shadow-2xl shadow-black/40 border border-white/10">
           <h2 className="text-white font-bold text-xl mb-6">Iniciar sesión</h2>
 
           {error && (
@@ -76,7 +81,8 @@ export default function AdminLogin() {
                   onChange={e => setForm(f => ({ ...f, user: e.target.value }))}
                   placeholder="admin"
                   required
-                  className="w-full pl-10 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-gray-200 placeholder-gray-600 focus:outline-none focus:border-sky-500/60 text-sm"
+                  autoComplete="username"
+                  className="w-full pl-10 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-gray-200 placeholder-gray-600 focus:outline-none focus:border-violet-500/60 focus:bg-white/8 transition-all text-sm"
                 />
               </div>
             </div>
@@ -91,12 +97,14 @@ export default function AdminLogin() {
                   onChange={e => setForm(f => ({ ...f, pass: e.target.value }))}
                   placeholder="••••••••"
                   required
-                  className="w-full pl-10 pr-12 py-3 bg-white/5 border border-white/10 rounded-xl text-gray-200 placeholder-gray-600 focus:outline-none focus:border-sky-500/60 text-sm"
+                  autoComplete="current-password"
+                  className="w-full pl-10 pr-12 py-3 bg-white/5 border border-white/10 rounded-xl text-gray-200 placeholder-gray-600 focus:outline-none focus:border-violet-500/60 focus:bg-white/8 transition-all text-sm"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPass(s => !s)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300 transition-colors"
+                  aria-label={showPass ? 'Ocultar contraseña' : 'Mostrar contraseña'}
                 >
                   {showPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
@@ -106,7 +114,7 @@ export default function AdminLogin() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 rounded-xl gradient-brand text-white font-bold hover:opacity-90 active:scale-95 transition-all shadow-lg shadow-sky-500/20 disabled:opacity-60 disabled:cursor-not-allowed mt-2"
+              className="w-full py-3 rounded-xl gradient-brand text-white font-bold hover:opacity-90 active:scale-95 transition-all shadow-lg shadow-violet-500/25 disabled:opacity-60 disabled:cursor-not-allowed mt-2"
             >
               {loading ? (
                 <span className="flex items-center justify-center gap-2">
@@ -119,7 +127,7 @@ export default function AdminLogin() {
 
           <div className="mt-6 pt-5 border-t border-white/10">
             <p className="text-xs text-gray-600 text-center">
-              Acceso restringido al personal autorizado
+              Acceso restringido al personal autorizado de TecomRed
             </p>
           </div>
         </div>

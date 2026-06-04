@@ -1,9 +1,8 @@
 import { useState } from 'react';
-import { Mail, Phone, MapPin, Clock, Send, Check, Loader2 } from 'lucide-react';
+import { Mail, Phone, MapPin, Clock, Send, Check, Loader2, MessageCircle } from 'lucide-react';
 import { useAdmin } from '../context/AdminContext';
 
 const MAX_MESSAGE = 1000;
-
 const INITIAL_FORM = { nombre: '', email: '', asunto: '', mensaje: '', _trap: '' };
 
 export default function Contact() {
@@ -15,9 +14,7 @@ export default function Contact() {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setForm(f => ({ ...f, [name]: value }));
-    if (errors[name as keyof typeof errors]) {
-      setErrors(prev => ({ ...prev, [name]: '' }));
-    }
+    if (errors[name as keyof typeof errors]) setErrors(p => ({ ...p, [name]: '' }));
   };
 
   const validate = () => {
@@ -32,16 +29,9 @@ export default function Contact() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    // Honeypot: si el campo oculto tiene valor, es un bot
     if (form._trap) return;
-
     const nextErrors = validate();
-    if (Object.keys(nextErrors).length > 0) {
-      setErrors(nextErrors);
-      return;
-    }
-
+    if (Object.keys(nextErrors).length > 0) { setErrors(nextErrors); return; }
     setStatus('loading');
     try {
       const res = await fetch('/api/contact', {
@@ -49,7 +39,7 @@ export default function Contact() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ nombre: form.nombre.trim(), email: form.email, asunto: form.asunto, mensaje: form.mensaje.trim() }),
       });
-      if (!res.ok) throw new Error('Error al enviar');
+      if (!res.ok) throw new Error();
       setStatus('success');
       setForm(INITIAL_FORM);
       setErrors({});
@@ -59,40 +49,45 @@ export default function Contact() {
     }
   };
 
-  const contactInfo = [
-    { icon: MapPin, label: 'Dirección', value: settings.storeAddress },
-    { icon: Phone,  label: 'Teléfono',  value: settings.storePhone,  href: `tel:${settings.storePhone}` },
-    { icon: Mail,   label: 'Email',     value: settings.storeEmail,  href: `mailto:${settings.storeEmail}` },
-    { icon: Clock,  label: 'Horario',   value: 'Lun-Vie 9am-6pm (Lima, GMT-5)' },
-  ];
-
   const inputCls = (field: keyof typeof errors) =>
     `w-full px-4 py-2.5 bg-white/5 border rounded-xl text-gray-200 placeholder-gray-500 focus:outline-none text-sm transition-colors ${
-      errors[field] ? 'border-red-500/60 focus:border-red-500' : 'border-white/10 focus:border-sky-500'
+      errors[field] ? 'border-red-500/60 focus:border-red-500' : 'border-white/10 focus:border-violet-500/60'
     }`;
+
+  const phone   = settings.storePhone  || '+51 999 888 777';
+  const email   = settings.storeEmail  || 'ventas@tecomred.com';
+  const address = settings.storeAddress || 'Av. Tecnología 1234, Lima, Perú';
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
       {/* Header */}
       <div className="text-center mb-14">
-        <h1 className="text-4xl font-extrabold text-white mb-4">Contáctanos</h1>
+        <span className="inline-block px-4 py-1.5 rounded-full text-xs font-semibold tracking-wider uppercase mb-4 border border-violet-500/30 text-violet-400 bg-violet-500/10">
+          Contáctanos
+        </span>
+        <h1 className="text-4xl font-extrabold text-white mb-4">¿En qué podemos <span className="gradient-text">ayudarte?</span></h1>
         <p className="text-gray-400 max-w-xl mx-auto">
           ¿Tienes preguntas sobre nuestros productos o necesitas asesoría técnica? Estamos aquí para ayudarte.
         </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-        {/* Contact info */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Sidebar info */}
         <div className="space-y-4">
-          {contactInfo.map(({ icon: Icon, label, value, href }) => (
+          {[
+            { icon: MapPin, label: 'Dirección', value: address, href: undefined },
+            { icon: Phone,  label: 'Teléfono',  value: phone,   href: `tel:${phone}` },
+            { icon: Mail,   label: 'Email',     value: email,   href: `mailto:${email}` },
+            { icon: Clock,  label: 'Horario',   value: 'Lun-Vie 9am-7pm · Sáb 9am-2pm', href: undefined },
+          ].map(({ icon: Icon, label, value, href }) => (
             <div key={label} className="glass rounded-2xl p-5 flex items-start gap-4">
-              <div className="w-10 h-10 rounded-xl gradient-brand flex items-center justify-center shrink-0">
+              <div className="w-10 h-10 rounded-xl gradient-brand flex items-center justify-center shrink-0 shadow-lg shadow-violet-500/20">
                 <Icon className="w-5 h-5 text-white" />
               </div>
               <div>
-                <p className="text-gray-400 text-xs mb-0.5">{label}</p>
+                <p className="text-gray-500 text-xs mb-0.5 font-medium uppercase tracking-wide">{label}</p>
                 {href ? (
-                  <a href={href} className="text-white font-medium text-sm hover:text-sky-400 transition-colors">{value}</a>
+                  <a href={href} className="text-white font-medium text-sm hover:text-violet-400 transition-colors">{value}</a>
                 ) : (
                   <p className="text-white font-medium text-sm">{value}</p>
                 )}
@@ -100,18 +95,36 @@ export default function Contact() {
             </div>
           ))}
 
-          {/* Map placeholder */}
-          <div className="glass rounded-2xl overflow-hidden h-48 flex items-center justify-center">
-            <div className="text-center">
-              <MapPin className="w-10 h-10 text-sky-400 mx-auto mb-2" />
-              <p className="text-gray-400 text-sm">Mapa de ubicación</p>
+          {/* WhatsApp CTA */}
+          <a
+            href={`https://wa.me/${phone.replace(/\D/g, '')}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-3 px-5 py-4 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/15 transition-colors group"
+          >
+            <div className="w-10 h-10 rounded-xl bg-emerald-500 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+              <MessageCircle className="w-5 h-5 text-white" />
             </div>
+            <div>
+              <p className="text-white font-semibold text-sm">Escríbenos por WhatsApp</p>
+              <p className="text-emerald-400 text-xs">Respuesta en minutos</p>
+            </div>
+          </a>
+
+          {/* Map */}
+          <div className="glass rounded-2xl overflow-hidden" style={{ height: '200px' }}>
+            <iframe
+              title="Mapa TecomRed"
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3901.2!2d-77.0428!3d-12.0464!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMTLCsDAyJzQ3LjAiUyA3N8KwMDInMzQuMSJX!5e0!3m2!1ses!2spe!4v1620000000000!5m2!1ses!2spe"
+              width="100%" height="200" style={{ border: 0 }}
+              allowFullScreen loading="lazy" referrerPolicy="no-referrer-when-downgrade"
+            />
           </div>
         </div>
 
         {/* Form */}
         <div className="lg:col-span-2">
-          <div className="glass rounded-2xl p-8">
+          <div className="glass rounded-2xl p-8 border border-white/8">
             <h2 className="text-white font-bold text-xl mb-6">Envíanos un mensaje</h2>
 
             {status === 'success' && (
@@ -122,49 +135,28 @@ export default function Contact() {
             )}
 
             <form onSubmit={handleSubmit} noValidate className="space-y-5">
-              {/* Honeypot — hidden from real users, bots lo llenan */}
-              <input
-                type="text"
-                name="_trap"
-                value={form._trap}
-                onChange={handleChange}
-                aria-hidden="true"
-                tabIndex={-1}
-                className="absolute -left-[9999px] opacity-0 pointer-events-none"
-                autoComplete="off"
-              />
+              {/* Honeypot */}
+              <input type="text" name="_trap" value={form._trap} onChange={handleChange}
+                aria-hidden="true" tabIndex={-1}
+                className="absolute -left-[9999px] opacity-0 pointer-events-none" autoComplete="off" />
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 <div>
                   <label htmlFor="nombre" className="block text-sm text-gray-400 mb-1.5">
                     Nombre completo <span className="text-red-400">*</span>
                   </label>
-                  <input
-                    id="nombre"
-                    type="text"
-                    name="nombre"
-                    value={form.nombre}
-                    onChange={handleChange}
-                    placeholder="Juan Pérez"
-                    autoComplete="name"
-                    className={inputCls('nombre')}
-                  />
+                  <input id="nombre" type="text" name="nombre" value={form.nombre}
+                    onChange={handleChange} placeholder="Juan Pérez" autoComplete="name"
+                    className={inputCls('nombre')} />
                   {errors.nombre && <p className="text-red-400 text-xs mt-1">{errors.nombre}</p>}
                 </div>
                 <div>
                   <label htmlFor="email" className="block text-sm text-gray-400 mb-1.5">
                     Correo electrónico <span className="text-red-400">*</span>
                   </label>
-                  <input
-                    id="email"
-                    type="email"
-                    name="email"
-                    value={form.email}
-                    onChange={handleChange}
-                    placeholder="juan@email.com"
-                    autoComplete="email"
-                    className={inputCls('email')}
-                  />
+                  <input id="email" type="email" name="email" value={form.email}
+                    onChange={handleChange} placeholder="juan@email.com" autoComplete="email"
+                    className={inputCls('email')} />
                   {errors.email && <p className="text-red-400 text-xs mt-1">{errors.email}</p>}
                 </div>
               </div>
@@ -173,18 +165,14 @@ export default function Contact() {
                 <label htmlFor="asunto" className="block text-sm text-gray-400 mb-1.5">
                   Asunto <span className="text-red-400">*</span>
                 </label>
-                <select
-                  id="asunto"
-                  name="asunto"
-                  value={form.asunto}
-                  onChange={handleChange}
-                  className={`${inputCls('asunto')} bg-gray-900`}
-                >
+                <select id="asunto" name="asunto" value={form.asunto}
+                  onChange={handleChange} className={`${inputCls('asunto')} bg-gray-900`}>
                   <option value="">Selecciona un asunto</option>
                   <option value="consulta">Consulta de producto</option>
                   <option value="cotizacion">Solicitar cotización</option>
                   <option value="soporte">Soporte técnico</option>
                   <option value="pedido">Estado de pedido</option>
+                  <option value="proyecto">Proyecto de red</option>
                   <option value="otro">Otro</option>
                 </select>
                 {errors.asunto && <p className="text-red-400 text-xs mt-1">{errors.asunto}</p>}
@@ -199,22 +187,17 @@ export default function Contact() {
                     {form.mensaje.length}/{MAX_MESSAGE}
                   </span>
                 </div>
-                <textarea
-                  id="mensaje"
-                  name="mensaje"
-                  value={form.mensaje}
-                  onChange={handleChange}
-                  rows={5}
-                  placeholder="Describe tu consulta o necesidad..."
-                  className={`${inputCls('mensaje')} resize-none`}
-                />
+                <textarea id="mensaje" name="mensaje" value={form.mensaje}
+                  onChange={handleChange} rows={5}
+                  placeholder="Describe tu consulta, el proyecto que tienes en mente o la ayuda que necesitas..."
+                  className={`${inputCls('mensaje')} resize-none`} />
                 {errors.mensaje && <p className="text-red-400 text-xs mt-1">{errors.mensaje}</p>}
               </div>
 
               <button
                 type="submit"
                 disabled={status === 'loading'}
-                className="w-full flex items-center justify-center gap-2 py-3 rounded-xl gradient-brand text-white font-semibold hover:opacity-90 transition-opacity disabled:opacity-60 disabled:cursor-not-allowed"
+                className="w-full flex items-center justify-center gap-2 py-3 rounded-xl gradient-brand text-white font-semibold hover:opacity-90 active:scale-[0.99] transition-all shadow-lg shadow-violet-500/20 disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 {status === 'loading' ? (
                   <><Loader2 className="w-5 h-5 animate-spin" /> Enviando...</>
@@ -222,6 +205,12 @@ export default function Contact() {
                   <><Send className="w-5 h-5" /> Enviar mensaje</>
                 )}
               </button>
+
+              <p className="text-gray-600 text-xs text-center">
+                Al enviar aceptas nuestra{' '}
+                <a href="/privacidad" className="text-violet-400 hover:text-violet-300 transition-colors">política de privacidad</a>.
+                Respondemos en menos de 24 horas.
+              </p>
             </form>
           </div>
         </div>

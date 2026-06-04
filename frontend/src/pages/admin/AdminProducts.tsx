@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, Pencil, Trash2, Search, X, Check, AlertTriangle, Image } from 'lucide-react';
+import { Plus, Pencil, Trash2, Search, X, Check, AlertTriangle, Image, Star } from 'lucide-react';
 import { useAdmin } from '../../context/AdminContext';
 import { useCurrency } from '../../hooks/useCurrency';
 import type { Product } from '../../types';
@@ -37,7 +37,7 @@ function MediaPickerModal({ onSelect, onClose, apiKey }: { onSelect: (url: strin
             <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
               {files.map(f => (
                 <button key={f.id} onClick={() => { onSelect(f.url); onClose(); }}
-                  className="aspect-square rounded-xl overflow-hidden border-2 border-transparent hover:border-sky-500 transition-all group">
+                  className="aspect-square rounded-xl overflow-hidden border-2 border-transparent hover:border-violet-500 transition-all group">
                   <img src={f.url} alt={f.alt_text || f.original_name} className="w-full h-full object-cover group-hover:scale-105 transition-transform" loading="lazy" />
                 </button>
               ))}
@@ -53,6 +53,8 @@ const emptyProduct: Omit<Product, 'id'> = {
   name: '', category: 'Switches', price: 0, image: '',
   description: '', specs: [], stock: 0, rating: 4.5, reviews: 0,
 };
+
+const inputCls = "w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-gray-200 text-sm focus:outline-none focus:border-violet-500/60 focus:bg-white/8 transition-all";
 
 export default function AdminProducts() {
   const { products, addProduct, updateProduct, deleteProduct, apiKey } = useAdmin();
@@ -105,16 +107,26 @@ export default function AdminProducts() {
 
   const badgeOptions = ['', 'Nuevo', 'Oferta', 'Popular', 'Agotado'] as const;
 
+  const badgeColor = (badge?: string) => {
+    switch (badge) {
+      case 'Nuevo':    return 'bg-emerald-500/15 text-emerald-400 border-emerald-500/20';
+      case 'Oferta':   return 'bg-orange-500/15 text-orange-400 border-orange-500/20';
+      case 'Popular':  return 'bg-violet-500/15 text-violet-400 border-violet-500/20';
+      case 'Agotado':  return 'bg-red-500/15 text-red-400 border-red-500/20';
+      default:         return '';
+    }
+  };
+
   return (
     <div className="space-y-5">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h2 className="text-xl sm:text-2xl font-extrabold text-white">Productos</h2>
-          <p className="text-gray-500 text-sm">{products.length} productos en total</p>
+          <p className="text-gray-500 text-sm">{products.length} productos en total · {filtered.length} mostrados</p>
         </div>
         <button
           onClick={openAdd}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl gradient-brand text-white text-sm font-bold hover:opacity-90 active:scale-95 transition-all shadow-lg shadow-sky-500/20 self-start sm:self-auto"
+          className="flex items-center gap-2 px-4 py-2.5 rounded-xl gradient-brand text-white text-sm font-bold hover:opacity-90 active:scale-95 transition-all shadow-lg shadow-violet-500/20 self-start sm:self-auto"
         >
           <Plus className="w-4 h-4" /> Agregar producto
         </button>
@@ -127,7 +139,7 @@ export default function AdminProducts() {
           <input
             type="text" value={search} onChange={e => setSearch(e.target.value)}
             placeholder="Buscar producto..."
-            className="w-full pl-9 pr-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-sm text-gray-200 placeholder-gray-600 focus:outline-none focus:border-sky-500/60"
+            className="w-full pl-9 pr-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-sm text-gray-200 placeholder-gray-600 focus:outline-none focus:border-violet-500/60 focus:bg-white/8 transition-all"
           />
           {search && (
             <button onClick={() => setSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2">
@@ -137,7 +149,7 @@ export default function AdminProducts() {
         </div>
         <select
           value={filterCat} onChange={e => setFilterCat(e.target.value)}
-          className="px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-sm text-gray-200 focus:outline-none focus:border-sky-500/60"
+          className="px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-sm text-gray-200 focus:outline-none focus:border-violet-500/60"
         >
           {categories.map(c => <option key={c} value={c} className="bg-gray-900">{c}</option>)}
         </select>
@@ -153,16 +165,17 @@ export default function AdminProducts() {
                 <th className="text-left text-gray-500 text-xs font-semibold px-4 py-3 hidden md:table-cell">Categoría</th>
                 <th className="text-right text-gray-500 text-xs font-semibold px-4 py-3">Precio</th>
                 <th className="text-right text-gray-500 text-xs font-semibold px-4 py-3">Stock</th>
+                <th className="text-center text-gray-500 text-xs font-semibold px-4 py-3 hidden sm:table-cell">Rating</th>
                 <th className="text-left text-gray-500 text-xs font-semibold px-4 py-3 hidden sm:table-cell">Badge</th>
                 <th className="text-right text-gray-500 text-xs font-semibold px-4 py-3">Acciones</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5">
               {filtered.map(p => (
-                <tr key={p.id} className="hover:bg-white/3 transition-colors">
+                <tr key={p.id} className="hover:bg-white/3 transition-colors group">
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
-                      <img src={p.image} alt={p.name} className="w-10 h-10 rounded-lg object-cover shrink-0" />
+                      <img src={p.image} alt={p.name} className="w-10 h-10 rounded-lg object-cover shrink-0 border border-white/10" />
                       <div className="min-w-0">
                         <p className="text-white text-xs font-semibold truncate max-w-[160px]">{p.name}</p>
                         <p className="text-gray-500 text-[10px]">ID: {p.id}</p>
@@ -173,7 +186,12 @@ export default function AdminProducts() {
                     <span className="text-gray-400 text-xs">{p.category}</span>
                   </td>
                   <td className="px-4 py-3 text-right">
-                    <span className="text-white text-xs font-bold">{formatShort(p.price)}</span>
+                    <div>
+                      <span className="text-white text-xs font-bold">{formatShort(p.price)}</span>
+                      {p.originalPrice && (
+                        <span className="block text-gray-600 text-[10px] line-through">{formatShort(p.originalPrice)}</span>
+                      )}
+                    </div>
                   </td>
                   <td className="px-4 py-3 text-right">
                     <span className={`text-xs font-bold flex items-center justify-end gap-1 ${
@@ -183,18 +201,23 @@ export default function AdminProducts() {
                       {p.stock}
                     </span>
                   </td>
+                  <td className="px-4 py-3 hidden sm:table-cell text-center">
+                    <span className="flex items-center justify-center gap-1 text-yellow-400 text-xs font-semibold">
+                      <Star className="w-3 h-3 fill-yellow-400" /> {p.rating.toFixed(1)}
+                    </span>
+                  </td>
                   <td className="px-4 py-3 hidden sm:table-cell">
                     {p.badge ? (
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-sky-500/15 text-sky-400 border border-sky-500/20">
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${badgeColor(p.badge)}`}>
                         {p.badge}
                       </span>
-                    ) : <span className="text-gray-700 text-xs">-</span>}
+                    ) : <span className="text-gray-700 text-xs">—</span>}
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center justify-end gap-1.5">
                       <button
                         onClick={() => openEdit(p)}
-                        className="p-1.5 rounded-lg hover:bg-sky-500/15 text-gray-400 hover:text-sky-400 transition-colors"
+                        className="p-1.5 rounded-lg hover:bg-violet-500/15 text-gray-400 hover:text-violet-400 transition-colors"
                         title="Editar"
                       >
                         <Pencil className="w-3.5 h-3.5" />
@@ -222,8 +245,8 @@ export default function AdminProducts() {
       {(modal === 'add' || modal === 'edit') && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
           <div className="glass-strong rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-2xl border border-white/10">
-            <div className="flex items-center justify-between p-5 border-b border-white/10">
-              <h3 className="text-white font-bold">{modal === 'add' ? 'Agregar producto' : 'Editar producto'}</h3>
+            <div className="flex items-center justify-between p-5 border-b border-white/10 sticky top-0 glass-strong z-10">
+              <h3 className="text-white font-bold">{modal === 'add' ? 'Agregar producto' : `Editar — ${selected?.name ?? ''}`}</h3>
               <button onClick={() => setModal(null)} className="p-1.5 rounded-lg hover:bg-white/10 text-gray-400">
                 <X className="w-5 h-5" />
               </button>
@@ -233,81 +256,109 @@ export default function AdminProducts() {
               <div>
                 <label className="block text-xs text-gray-400 mb-1.5 font-medium">Nombre *</label>
                 <input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
-                  className="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-gray-200 text-sm focus:outline-none focus:border-sky-500/60" />
+                  placeholder="Ej: Switch Cisco Catalyst 24 puertos"
+                  className={inputCls} />
               </div>
+
               {/* Category + Badge */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs text-gray-400 mb-1.5 font-medium">Categoría</label>
                   <select value={form.category} onChange={e => setForm(f => ({ ...f, category: e.target.value }))}
-                    className="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-gray-200 text-sm focus:outline-none focus:border-sky-500/60">
+                    className={inputCls}>
                     {categories.filter(c => c !== 'Todos').map(c => <option key={c} value={c} className="bg-gray-900">{c}</option>)}
                   </select>
                 </div>
                 <div>
                   <label className="block text-xs text-gray-400 mb-1.5 font-medium">Badge</label>
                   <select value={form.badge ?? ''} onChange={e => setForm(f => ({ ...f, badge: e.target.value as any || undefined }))}
-                    className="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-gray-200 text-sm focus:outline-none focus:border-sky-500/60">
+                    className={inputCls}>
                     {badgeOptions.map(b => <option key={b} value={b} className="bg-gray-900">{b || 'Sin badge'}</option>)}
                   </select>
                 </div>
               </div>
+
               {/* Price + Original + Stock */}
               <div className="grid grid-cols-3 gap-3">
                 <div>
-                  <label className="block text-xs text-gray-400 mb-1.5 font-medium">Precio *</label>
-                  <input type="number" value={form.price} onChange={e => setForm(f => ({ ...f, price: +e.target.value }))}
-                    className="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-gray-200 text-sm focus:outline-none focus:border-sky-500/60" />
+                  <label className="block text-xs text-gray-400 mb-1.5 font-medium">Precio (S/) *</label>
+                  <input type="number" min="0" step="0.01" value={form.price}
+                    onChange={e => setForm(f => ({ ...f, price: +e.target.value }))}
+                    className={inputCls} />
                 </div>
                 <div>
                   <label className="block text-xs text-gray-400 mb-1.5 font-medium">Precio original</label>
-                  <input type="number" value={form.originalPrice ?? ''} onChange={e => setForm(f => ({ ...f, originalPrice: e.target.value ? +e.target.value : undefined }))}
-                    className="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-gray-200 text-sm focus:outline-none focus:border-sky-500/60" />
+                  <input type="number" min="0" step="0.01" value={form.originalPrice ?? ''}
+                    onChange={e => setForm(f => ({ ...f, originalPrice: e.target.value ? +e.target.value : undefined }))}
+                    className={inputCls} />
                 </div>
                 <div>
                   <label className="block text-xs text-gray-400 mb-1.5 font-medium">Stock *</label>
-                  <input type="number" value={form.stock} onChange={e => setForm(f => ({ ...f, stock: +e.target.value }))}
-                    className="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-gray-200 text-sm focus:outline-none focus:border-sky-500/60" />
+                  <input type="number" min="0" value={form.stock}
+                    onChange={e => setForm(f => ({ ...f, stock: +e.target.value }))}
+                    className={inputCls} />
                 </div>
               </div>
+
+              {/* Rating + Reviews */}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs text-gray-400 mb-1.5 font-medium">Rating (0-5)</label>
+                  <input type="number" min="0" max="5" step="0.1" value={form.rating}
+                    onChange={e => setForm(f => ({ ...f, rating: +e.target.value }))}
+                    className={inputCls} />
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-400 mb-1.5 font-medium">N.° reseñas</label>
+                  <input type="number" min="0" value={form.reviews}
+                    onChange={e => setForm(f => ({ ...f, reviews: +e.target.value }))}
+                    className={inputCls} />
+                </div>
+              </div>
+
               {/* Image URL + media picker */}
               <div>
                 <label className="block text-xs text-gray-400 mb-1.5 font-medium">Imagen del producto</label>
                 <div className="flex gap-2">
                   <input value={form.image} onChange={e => setForm(f => ({ ...f, image: e.target.value }))}
                     placeholder="https://... o elige de la biblioteca"
-                    className="flex-1 px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-gray-200 text-sm focus:outline-none focus:border-sky-500/60" />
+                    className={`flex-1 ${inputCls}`} />
                   <button type="button" onClick={() => setShowMediaPicker(true)}
-                    className="px-3 py-2.5 rounded-xl bg-white/5 border border-white/10 text-sky-400 hover:bg-sky-500/10 transition-colors text-xs font-semibold flex items-center gap-1.5 shrink-0">
+                    className="px-3 py-2.5 rounded-xl bg-white/5 border border-white/10 text-violet-400 hover:bg-violet-500/10 hover:border-violet-500/30 transition-colors text-xs font-semibold flex items-center gap-1.5 shrink-0">
                     <Image className="w-3.5 h-3.5" /> Biblioteca
                   </button>
                 </div>
                 {form.image && (
-                  <img src={form.image} alt="Vista previa" className="mt-2 h-24 w-full object-cover rounded-xl border border-white/10" />
+                  <img src={form.image} alt="Vista previa" className="mt-2 h-28 w-full object-cover rounded-xl border border-white/10" onError={e => (e.currentTarget.style.display = 'none')} />
                 )}
               </div>
+
               {/* Description */}
               <div>
                 <label className="block text-xs text-gray-400 mb-1.5 font-medium">Descripción</label>
                 <textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
-                  rows={3} className="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-gray-200 text-sm focus:outline-none focus:border-sky-500/60 resize-none" />
+                  rows={3} placeholder="Descripción del producto..."
+                  className={`${inputCls} resize-none`} />
               </div>
+
               {/* Specs */}
               <div>
-                <label className="block text-xs text-gray-400 mb-1.5 font-medium">Especificaciones (una por línea)</label>
+                <label className="block text-xs text-gray-400 mb-1.5 font-medium">Especificaciones <span className="text-gray-600">(una por línea)</span></label>
                 <textarea value={specsInput} onChange={e => setSpecsInput(e.target.value)}
-                  rows={4} placeholder="24 puertos GbE&#10;PoE+ 370W&#10;..."
-                  className="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-gray-200 text-sm focus:outline-none focus:border-sky-500/60 resize-none font-mono" />
+                  rows={5} placeholder={"24 puertos GbE\nPoE+ 370W\nGestión vía web..."}
+                  className={`${inputCls} resize-none font-mono text-xs`} />
+                <p className="text-gray-600 text-[10px] mt-1">{specsInput.split('\n').filter(Boolean).length} especificaciones</p>
               </div>
             </div>
-            <div className="flex gap-3 p-5 border-t border-white/10">
+
+            <div className="flex gap-3 p-5 border-t border-white/10 sticky bottom-0 glass-strong">
               <button onClick={() => setModal(null)}
                 className="flex-1 py-2.5 rounded-xl bg-white/5 border border-white/10 text-gray-300 text-sm font-semibold hover:bg-white/10 transition-colors">
                 Cancelar
               </button>
-              <button onClick={handleSave}
-                className={`flex-1 py-2.5 rounded-xl text-white text-sm font-bold transition-all active:scale-95 ${saved ? 'bg-emerald-500' : 'gradient-brand hover:opacity-90'}`}>
-                {saved ? <span className="flex items-center justify-center gap-2"><Check className="w-4 h-4" /> Guardado</span> : 'Guardar'}
+              <button onClick={handleSave} disabled={!form.name || !form.price}
+                className={`flex-1 py-2.5 rounded-xl text-white text-sm font-bold transition-all active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed ${saved ? 'bg-emerald-500' : 'gradient-brand hover:opacity-90'}`}>
+                {saved ? <span className="flex items-center justify-center gap-2"><Check className="w-4 h-4" /> Guardado</span> : (modal === 'add' ? 'Agregar' : 'Guardar cambios')}
               </button>
             </div>
           </div>
@@ -332,7 +383,7 @@ export default function AdminProducts() {
             </div>
             <h3 className="text-white font-bold text-lg mb-2">¿Eliminar producto?</h3>
             <p className="text-gray-400 text-sm mb-6">
-              Se eliminará <span className="text-white font-semibold">"{selected.name}"</span> permanentemente.
+              Se eliminará <span className="text-white font-semibold">"{selected.name}"</span> permanentemente. Esta acción no se puede deshacer.
             </p>
             <div className="flex gap-3">
               <button onClick={() => setModal(null)}
@@ -350,4 +401,3 @@ export default function AdminProducts() {
     </div>
   );
 }
-

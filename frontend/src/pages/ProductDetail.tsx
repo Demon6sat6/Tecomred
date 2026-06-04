@@ -13,6 +13,76 @@ import { useState } from 'react';
 
 type Tab = 'specs' | 'reviews' | 'bundle';
 
+interface LocalReview {
+  id: number; author: string; rating: number; title: string; body: string; date: string;
+}
+
+function ReviewForm({ onSubmit }: { productId: number; onSubmit: (r: LocalReview) => void }) {
+  const [form, setForm] = useState({ author: '', rating: 5, title: '', body: '' });
+  const [sent, setSent] = useState(false);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!form.author.trim() || !form.title.trim() || form.body.trim().length < 10) return;
+    onSubmit({
+      id: Date.now(), author: form.author.trim(), rating: form.rating,
+      title: form.title.trim(), body: form.body.trim(),
+      date: new Date().toLocaleDateString('es', { day: 'numeric', month: 'short', year: 'numeric' }),
+    });
+    setSent(true);
+    setForm({ author: '', rating: 5, title: '', body: '' });
+    setTimeout(() => setSent(false), 3000);
+  };
+
+  const inputCls = "w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-gray-200 text-sm placeholder-gray-600 focus:outline-none focus:border-violet-500/60 transition-colors";
+
+  return (
+    <div className="glass rounded-2xl p-6 border border-violet-500/10">
+      <h4 className="text-white font-bold text-base mb-4">Escribe tu reseña</h4>
+      {sent && (
+        <div className="flex items-center gap-2 p-3 bg-emerald-500/10 border border-emerald-500/30 rounded-xl mb-4">
+          <Check className="w-4 h-4 text-emerald-400" />
+          <p className="text-emerald-400 text-sm">¡Gracias por tu reseña! Será visible próximamente.</p>
+        </div>
+      )}
+      <form onSubmit={handleSubmit} className="space-y-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label className="block text-xs text-gray-400 mb-1.5">Tu nombre</label>
+            <input value={form.author} onChange={e => setForm(f => ({ ...f, author: e.target.value }))}
+              placeholder="Juan Pérez" className={inputCls} required />
+          </div>
+          <div>
+            <label className="block text-xs text-gray-400 mb-1.5">Puntuación</label>
+            <div className="flex gap-1 pt-1">
+              {[1,2,3,4,5].map(s => (
+                <button key={s} type="button" onClick={() => setForm(f => ({ ...f, rating: s }))}>
+                  <Star className={`w-6 h-6 transition-colors ${s <= form.rating ? 'text-yellow-400 fill-yellow-400' : 'text-gray-600 hover:text-yellow-400'}`} />
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+        <div>
+          <label className="block text-xs text-gray-400 mb-1.5">Título de tu reseña</label>
+          <input value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
+            placeholder="Resumen en una frase" className={inputCls} required />
+        </div>
+        <div>
+          <label className="block text-xs text-gray-400 mb-1.5">Tu opinión</label>
+          <textarea value={form.body} onChange={e => setForm(f => ({ ...f, body: e.target.value }))}
+            rows={3} placeholder="Describe tu experiencia con el producto (mínimo 10 caracteres)..."
+            className={`${inputCls} resize-none`} required minLength={10} />
+        </div>
+        <button type="submit"
+          className="px-6 py-2.5 gradient-brand text-white text-sm font-bold rounded-xl hover:opacity-90 active:scale-95 transition-all shadow-lg shadow-violet-500/20">
+          Publicar reseña
+        </button>
+      </form>
+    </div>
+  );
+}
+
 // Complementary product suggestions per category
 const bundleSuggestions: Record<string, number[]> = {
   'Switches':       [3, 10, 7],
@@ -50,6 +120,7 @@ export default function ProductDetail() {
   const [qty, setQty] = useState(1);
   const [activeTab, setActiveTab] = useState<Tab>('specs');
   const [activeImg, setActiveImg] = useState(0);
+  const [localReviews, setLocalReviews] = useState<LocalReview[]>([]);
 
   const product = products.find(p => p.id === Number(id));
 
@@ -58,7 +129,7 @@ export default function ProductDetail() {
       <div className="max-w-7xl mx-auto px-4 py-20 text-center">
         <div className="text-7xl mb-4">:(</div>
         <h2 className="text-2xl font-bold text-white mb-2">Producto no encontrado</h2>
-        <Link to="/productos" className="text-sky-400 hover:text-sky-300">&lt;- Volver al catálogo</Link>
+        <Link to="/productos" className="text-violet-400 hover:text-violet-300">&lt;- Volver al catálogo</Link>
       </div>
     );
   }
@@ -120,18 +191,18 @@ export default function ProductDetail() {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
       {/* Breadcrumb */}
       <nav className="flex items-center gap-1.5 text-xs sm:text-sm text-gray-500 mb-6 flex-wrap">
-        <Link to="/" className="hover:text-sky-400 transition-colors">Inicio</Link>
+        <Link to="/" className="hover:text-violet-400 transition-colors">Inicio</Link>
         <span>/</span>
-        <Link to="/productos" className="hover:text-sky-400 transition-colors">Productos</Link>
+        <Link to="/productos" className="hover:text-violet-400 transition-colors">Productos</Link>
         <span>/</span>
-        <Link to={`/productos?categoria=${encodeURIComponent(product.category)}`} className="hover:text-sky-400 transition-colors">
+        <Link to={`/productos?categoria=${encodeURIComponent(product.category)}`} className="hover:text-violet-400 transition-colors">
           {product.category}
         </Link>
         <span>/</span>
         <span className="text-gray-300 truncate max-w-[200px]">{product.name}</span>
       </nav>
 
-      <Link to="/productos" className="inline-flex items-center gap-1.5 text-sky-400 hover:text-sky-300 text-sm mb-6 transition-colors">
+      <Link to="/productos" className="inline-flex items-center gap-1.5 text-violet-400 hover:text-violet-300 text-sm mb-6 transition-colors">
         <ArrowLeft className="w-4 h-4" /> Volver al catálogo
       </Link>
 
@@ -152,7 +223,7 @@ export default function ProductDetail() {
               <span className={`absolute top-4 left-4 text-xs font-bold px-3 py-1.5 rounded-full border backdrop-blur-sm ${
                 product.badge === 'Oferta'  ? 'bg-red-500/20 text-red-400 border-red-500/30' :
                 product.badge === 'Nuevo'   ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' :
-                product.badge === 'Popular' ? 'bg-sky-500/20 text-sky-400 border-sky-500/30' :
+                product.badge === 'Popular' ? 'bg-sky-500/20 text-violet-400 border-violet-500/30' :
                 'bg-gray-500/20 text-gray-400 border-gray-500/30'
               }`}>
                 {product.badge}
@@ -185,7 +256,7 @@ export default function ProductDetail() {
                 key={i}
                 onClick={() => setActiveImg(i)}
                 className={`aspect-square rounded-xl overflow-hidden border-2 transition-all ${
-                  activeImg === i ? 'border-sky-500 scale-95' : 'border-white/10 hover:border-white/30'
+                  activeImg === i ? 'border-violet-500 scale-95' : 'border-white/10 hover:border-white/30'
                 }`}
               >
                 <img src={img} alt={`Vista ${i + 1}`} className="w-full h-full object-cover" />
@@ -196,7 +267,7 @@ export default function ProductDetail() {
 
         {/* PRODUCT INFO */}
         <div className="flex flex-col">
-          <p className="text-sky-400 text-xs font-bold uppercase tracking-widest mb-2">{product.category}</p>
+          <p className="text-violet-400 text-xs font-bold uppercase tracking-widest mb-2">{product.category}</p>
           <h1 className="text-2xl sm:text-3xl font-extrabold text-white mb-3 leading-tight">{product.name}</h1>
 
           {/* Rating summary */}
@@ -273,7 +344,7 @@ export default function ProductDetail() {
                 className={`flex-1 flex items-center justify-center gap-2 h-11 rounded-xl font-bold text-sm transition-all active:scale-95 shadow-lg ${
                   added
                     ? 'bg-emerald-500 text-white shadow-emerald-500/20'
-                    : 'gradient-brand text-white hover:opacity-90 shadow-sky-500/20'
+                    : 'gradient-brand text-white hover:opacity-90 shadow-violet-500/20'
                 }`}
               >
                 {added
@@ -293,7 +364,7 @@ export default function ProductDetail() {
               { icon: Package,    text: 'Devolución en 30 días' },
             ].map(({ icon: Icon, text }) => (
               <div key={text} className="flex items-center gap-2 px-3 py-2 glass rounded-xl">
-                <Icon className="w-4 h-4 text-sky-400 shrink-0" />
+                <Icon className="w-4 h-4 text-violet-400 shrink-0" />
                 <span className="text-gray-400 text-xs">{text}</span>
               </div>
             ))}
@@ -311,14 +382,14 @@ export default function ProductDetail() {
               onClick={() => setActiveTab(tab.id)}
               className={`flex items-center gap-2 px-4 sm:px-6 py-3 text-sm font-semibold whitespace-nowrap border-b-2 transition-all ${
                 activeTab === tab.id
-                  ? 'border-sky-500 text-sky-400'
+                  ? 'border-violet-500 text-violet-400'
                   : 'border-transparent text-gray-400 hover:text-gray-200'
               }`}
             >
               {tab.label}
               {tab.count !== undefined && (
                 <span className={`text-xs px-2 py-0.5 rounded-full font-bold ${
-                  activeTab === tab.id ? 'bg-sky-500/20 text-sky-400' : 'bg-white/10 text-gray-500'
+                  activeTab === tab.id ? 'bg-sky-500/20 text-violet-400' : 'bg-white/10 text-gray-500'
                 }`}>
                   {tab.count}
                 </span>
@@ -334,8 +405,8 @@ export default function ProductDetail() {
               const [label, ...rest] = spec.split(' ');
               return (
                 <div key={i} className="glass rounded-xl p-4 flex items-start gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-sky-500/10 flex items-center justify-center shrink-0">
-                    <Check className="w-4 h-4 text-sky-400" />
+                  <div className="w-8 h-8 rounded-lg bg-violet-500/10 flex items-center justify-center shrink-0">
+                    <Check className="w-4 h-4 text-violet-400" />
                   </div>
                   <div>
                     <p className="text-white text-sm font-semibold">{label}</p>
@@ -413,12 +484,35 @@ export default function ProductDetail() {
                 </div>
               </>
             ) : (
-              <div className="text-center py-16 glass rounded-2xl">
+              <div className="text-center py-10 glass rounded-2xl mb-4">
                 <Star className="w-12 h-12 text-gray-700 mx-auto mb-3" />
                 <p className="text-gray-400 font-medium">Aún no hay reseñas para este producto.</p>
                 <p className="text-gray-600 text-sm mt-1">¡Sé el primero en opinar!</p>
               </div>
             )}
+            {/* Local reviews (submitted this session) */}
+            {localReviews.filter(r => r.id > 0).map(r => (
+              <div key={r.id} className="glass rounded-2xl p-5 border border-violet-500/10">
+                <div className="flex items-start justify-between gap-4 mb-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full gradient-brand flex items-center justify-center text-white text-sm font-bold shrink-0">
+                      {r.author.slice(0,2).toUpperCase()}
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-white font-semibold text-sm">{r.author}</span>
+                        <span className="text-[10px] text-violet-400 bg-violet-500/10 px-2 py-0.5 rounded-full">Nueva</span>
+                      </div>
+                      <span className="text-gray-500 text-xs">{r.date}</span>
+                    </div>
+                  </div>
+                  <StarRating rating={r.rating} size="sm" />
+                </div>
+                <h4 className="text-white font-semibold text-sm mb-1">{r.title}</h4>
+                <p className="text-gray-400 text-sm leading-relaxed">{r.body}</p>
+              </div>
+            ))}
+            <ReviewForm productId={product.id} onSubmit={r => setLocalReviews(prev => [r, ...prev])} />
           </div>
         )}
 
@@ -435,10 +529,10 @@ export default function ProductDetail() {
                     <div key={bp.id} className="glass rounded-2xl p-4 flex gap-3 card-hover">
                       <img src={bp.image} alt={bp.name} className="w-16 h-16 rounded-xl object-cover shrink-0" />
                       <div className="flex-1 min-w-0">
-                        <p className="text-xs text-sky-400 font-semibold mb-0.5">{bp.category}</p>
+                        <p className="text-xs text-violet-400 font-semibold mb-0.5">{bp.category}</p>
                         <Link
                           to={`/producto/${bp.id}`}
-                          className="text-white text-xs font-semibold line-clamp-2 hover:text-sky-400 transition-colors"
+                          className="text-white text-xs font-semibold line-clamp-2 hover:text-violet-400 transition-colors"
                         >
                           {bp.name}
                         </Link>
@@ -460,7 +554,7 @@ export default function ProductDetail() {
                       [product, ...bundleProducts].forEach(p => addToCart(p));
                       showToast('Bundle completo', product.image);
                     }}
-                    className="flex items-center gap-2 px-6 py-3 rounded-xl gradient-brand text-white font-bold hover:opacity-90 active:scale-95 transition-all shadow-lg shadow-sky-500/20 whitespace-nowrap"
+                    className="flex items-center gap-2 px-6 py-3 rounded-xl gradient-brand text-white font-bold hover:opacity-90 active:scale-95 transition-all shadow-lg shadow-violet-500/20 whitespace-nowrap"
                   >
                     <ShoppingCart className="w-5 h-5" />
                     Agregar bundle al carrito
@@ -479,7 +573,7 @@ export default function ProductDetail() {
         <div>
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl sm:text-2xl font-bold text-white">Productos relacionados</h2>
-            <Link to={`/productos?categoria=${encodeURIComponent(product.category)}`} className="text-sky-400 hover:text-sky-300 text-sm transition-colors">
+            <Link to={`/productos?categoria=${encodeURIComponent(product.category)}`} className="text-violet-400 hover:text-violet-300 text-sm transition-colors">
               Ver todos
             </Link>
           </div>

@@ -16,26 +16,10 @@ interface Message {
 }
 
 const quickReplies = [
-  { 
-    icon: Package, 
-    text: '¿Tienen stock?', 
-    action: 'stock'
-  },
-  { 
-    icon: Truck, 
-    text: 'Tiempos de envío', 
-    action: 'envio'
-  },
-  { 
-    icon: CreditCard, 
-    text: 'Métodos de pago', 
-    action: 'pago'
-  },
-  { 
-    icon: Headphones, 
-    text: 'Soporte técnico', 
-    action: 'soporte'
-  },
+  { icon: Package,    text: '¿Tienen stock?',    action: 'stock'   },
+  { icon: Truck,      text: 'Tiempos de envío',  action: 'envio'   },
+  { icon: CreditCard, text: 'Métodos de pago',   action: 'pago'    },
+  { icon: Headphones, text: 'Soporte técnico',   action: 'soporte' },
 ];
 
 export default function Chatbot() {
@@ -57,102 +41,65 @@ export default function Chatbot() {
   const { formatShort } = useCurrency();
   const { showToast } = useToast();
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
-
   useEffect(() => {
-    scrollToBottom();
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isTyping]);
 
   const addBotMessage = (message: Partial<Message>) => {
-    const botMessage: Message = {
-      id: Date.now(),
-      sender: 'bot',
-      timestamp: new Date(),
-      type: 'text',
-      ...message,
-    };
-    setMessages(prev => [...prev, botMessage]);
+    setMessages(prev => [...prev, {
+      id: Date.now(), sender: 'bot', timestamp: new Date(), type: 'text', ...message,
+    }]);
   };
 
   const handleQuickReply = (reply: typeof quickReplies[0]) => {
-    // Add user message
-    const userMessage: Message = {
-      id: Date.now(),
-      text: reply.text,
-      sender: 'user',
-      timestamp: new Date(),
-      type: 'text',
-    };
-    setMessages(prev => [...prev, userMessage]);
-
-    // Show typing
+    setMessages(prev => [...prev, {
+      id: Date.now(), text: reply.text, sender: 'user', timestamp: new Date(), type: 'text',
+    }]);
     setIsTyping(true);
-
     setTimeout(() => {
       setIsTyping(false);
-      
       switch (reply.action) {
         case 'stock':
-          addBotMessage({
-            text: 'Todos nuestros productos tienen stock disponible. Te muestro algunos de nuestros productos más populares:',
-          });
+          addBotMessage({ text: 'Todos nuestros productos tienen stock disponible. Te muestro algunos populares:' });
           setTimeout(() => {
-            const popularProducts = products.filter(p => p.badge === 'Popular' || p.badge === 'Oferta').slice(0, 3);
-            addBotMessage({
-              type: 'products',
-              data: popularProducts,
-            });
+            addBotMessage({ type: 'products', data: products.filter(p => p.badge === 'Popular' || p.badge === 'Oferta').slice(0, 3) });
           }, 500);
           break;
-
         case 'envio':
-          addBotMessage({
-            type: 'card',
-            data: {
-              title: '🚚 Información de Envío',
-              items: [
-                { label: 'Envío estándar', value: '24-48 horas' },
-                { label: 'Envío express', value: '12-24 horas' },
-                { label: 'Envío gratis', value: 'Compras +S/ 300' },
-                { label: 'Cobertura', value: 'Todo el país' },
-              ],
-              footer: 'Rastreo en tiempo real incluido',
-            },
-          });
+          addBotMessage({ type: 'card', data: {
+            title: '🚚 Información de Envío',
+            items: [
+              { label: 'Envío estándar', value: '24-48 horas' },
+              { label: 'Envío express', value: '12-24 horas' },
+              { label: 'Envío gratis', value: 'Compras +S/ 300' },
+              { label: 'Cobertura', value: 'Todo el país' },
+            ],
+            footer: 'Rastreo en tiempo real incluido',
+          }});
           break;
-
         case 'pago':
-          addBotMessage({
-            type: 'card',
-            data: {
-              title: 'Metodos de pago',
-              items: [
-                { label: 'Tarjetas', value: 'Visa, Mastercard, Amex' },
-                { label: 'Transferencia', value: 'Bancaria directa' },
-                { label: 'PayPal', value: 'Pago seguro' },
-                { label: 'Contra entrega', value: 'Zonas seleccionadas' },
-              ],
-              footer: 'Todos los pagos son 100% seguros',
-            },
-          });
+          addBotMessage({ type: 'card', data: {
+            title: '💳 Métodos de Pago',
+            items: [
+              { label: 'Tarjetas', value: 'Visa, Mastercard, Amex' },
+              { label: 'Transferencia', value: 'Bancaria directa' },
+              { label: 'PayPal', value: 'Pago seguro' },
+              { label: 'Contra entrega', value: 'Zonas seleccionadas' },
+            ],
+            footer: 'Todos los pagos son 100% seguros',
+          }});
           break;
-
         case 'soporte':
-          addBotMessage({
-            type: 'card',
-            data: {
-              title: 'Soporte tecnico',
-              items: [
-                { label: 'Teléfono', value: '+51 1 234-5678' },
-                { label: 'Email', value: 'soporte@tecomred.pe' },
-                { label: 'Horario', value: 'Lun-Vie 8am-6pm' },
-                { label: 'Emergencias', value: '24/7 disponible' },
-              ],
-              footer: 'Asesoría técnica especializada incluida',
-            },
-          });
+          addBotMessage({ type: 'card', data: {
+            title: '🎧 Soporte Técnico',
+            items: [
+              { label: 'Teléfono', value: '+51 999 888 777' },
+              { label: 'Email', value: 'soporte@tecomred.com' },
+              { label: 'Horario', value: 'Lun-Vie 9am-7pm' },
+              { label: 'Emergencias', value: '24/7 disponible' },
+            ],
+            footer: 'Asesoría técnica especializada incluida',
+          }});
           break;
       }
     }, 800);
@@ -161,139 +108,45 @@ export default function Chatbot() {
   const handleSend = (text?: string) => {
     const messageText = text || inputValue.trim();
     if (!messageText) return;
-
-    // Add user message
-    const userMessage: Message = {
-      id: Date.now(),
-      text: messageText,
-      sender: 'user',
-      timestamp: new Date(),
-      type: 'text',
-    };
-    setMessages(prev => [...prev, userMessage]);
+    setMessages(prev => [...prev, {
+      id: Date.now(), text: messageText, sender: 'user', timestamp: new Date(), type: 'text',
+    }]);
     setInputValue('');
-
-    // Show typing
     setIsTyping(true);
-
-    // Process message
     setTimeout(() => {
       setIsTyping(false);
-      const lowerMessage = messageText.toLowerCase();
-
-      // Búsqueda de productos
-      if (lowerMessage.includes('switch') || lowerMessage.includes('switches')) {
-        addBotMessage({
-          text: 'Encontré estos switches para ti:',
-        });
-        setTimeout(() => {
-          const switchProducts = products.filter(p => p.category === 'Switches');
-          addBotMessage({
-            type: 'products',
-            data: switchProducts.slice(0, 3),
-          });
-        }, 500);
-      } else if (lowerMessage.includes('router') || lowerMessage.includes('routers')) {
-        addBotMessage({
-          text: 'Estos son nuestros routers disponibles:',
-        });
-        setTimeout(() => {
-          const routerProducts = products.filter(p => p.category === 'Routers');
-          addBotMessage({
-            type: 'products',
-            data: routerProducts.slice(0, 3),
-          });
-        }, 500);
-      } else if (lowerMessage.includes('procesador') || lowerMessage.includes('cpu')) {
-        addBotMessage({
-          text: 'Tenemos estos procesadores en stock:',
-        });
-        setTimeout(() => {
-          const cpuProducts = products.filter(p => p.category === 'Procesadores');
-          addBotMessage({
-            type: 'products',
-            data: cpuProducts.slice(0, 3),
-          });
-        }, 500);
-      } else if (lowerMessage.includes('memoria') || lowerMessage.includes('ram')) {
-        addBotMessage({
-          text: 'Estas son nuestras memorias RAM disponibles:',
-        });
-        setTimeout(() => {
-          const ramProducts = products.filter(p => p.category === 'Memorias RAM');
-          addBotMessage({
-            type: 'products',
-            data: ramProducts.slice(0, 3),
-          });
-        }, 500);
-      } else if (lowerMessage.includes('almacenamiento') || lowerMessage.includes('ssd') || lowerMessage.includes('disco')) {
-        addBotMessage({
-          text: 'Mira nuestras opciones de almacenamiento:',
-        });
-        setTimeout(() => {
-          const storageProducts = products.filter(p => p.category === 'Almacenamiento');
-          addBotMessage({
-            type: 'products',
-            data: storageProducts.slice(0, 3),
-          });
-        }, 500);
-      } else if (lowerMessage.includes('producto') || lowerMessage.includes('catalogo') || lowerMessage.includes('ver')) {
-        addBotMessage({
-          text: 'Te muestro algunos de nuestros productos más populares:',
-        });
-        setTimeout(() => {
-          const popularProducts = products.filter(p => p.badge === 'Popular').slice(0, 3);
-          addBotMessage({
-            type: 'products',
-            data: popularProducts,
-          });
-        }, 500);
-      } else if (lowerMessage.includes('oferta') || lowerMessage.includes('descuento') || lowerMessage.includes('promocion')) {
-        addBotMessage({
-          text: '🔥 ¡Tenemos estas ofertas especiales para ti!',
-        });
-        setTimeout(() => {
-          const offerProducts = products.filter(p => p.badge === 'Oferta');
-          addBotMessage({
-            type: 'products',
-            data: offerProducts.slice(0, 3),
-          });
-        }, 500);
-      } else if (lowerMessage.includes('nuevo') || lowerMessage.includes('novedad')) {
-        addBotMessage({
-          text: '✨ Estos son nuestros productos más recientes:',
-        });
-        setTimeout(() => {
-          const newProducts = products.filter(p => p.badge === 'Nuevo');
-          addBotMessage({
-            type: 'products',
-            data: newProducts,
-          });
-        }, 500);
-      } else if (lowerMessage.includes('hola') || lowerMessage.includes('buenos') || lowerMessage.includes('buenas')) {
-        addBotMessage({
-          text: '¡Hola! ¿En que puedo ayudarte? Puedo mostrarte productos, informacion de envio, metodos de pago o soporte tecnico.',
-        });
-      } else if (lowerMessage.includes('precio') || lowerMessage.includes('costo') || lowerMessage.includes('cuanto')) {
-        addBotMessage({
-          text: 'Nuestros precios son muy competitivos. ¿Qué producto te interesa? Puedo mostrarte opciones por categoría.',
-          type: 'buttons',
-          data: {
-            buttons: [
-              { text: 'Ver Switches', action: 'switches' },
-              { text: 'Ver Routers', action: 'routers' },
-              { text: 'Ver todo', action: 'catalogo' },
-            ],
-          },
-        });
-      } else if (lowerMessage.includes('gracias')) {
-        addBotMessage({
-          text: '¡De nada! Estoy aqui para ayudarte. ¿Necesitas algo mas?',
-        });
+      const q = messageText.toLowerCase();
+      const catMap: [string[], string][] = [
+        [['switch','switches'], 'Switches'],
+        [['router','routers'], 'Routers'],
+        [['procesador','cpu'], 'Procesadores'],
+        [['memoria','ram'], 'Memorias RAM'],
+        [['almacenamiento','ssd','disco'], 'Almacenamiento'],
+      ];
+      const match = catMap.find(([keys]) => keys.some(k => q.includes(k)));
+      if (match) {
+        addBotMessage({ text: `Encontré estos ${match[1]} para ti:` });
+        setTimeout(() => addBotMessage({ type: 'products', data: products.filter(p => p.category === match[1]).slice(0, 3) }), 500);
+      } else if (q.includes('oferta') || q.includes('descuento')) {
+        addBotMessage({ text: '🔥 ¡Nuestras mejores ofertas!' });
+        setTimeout(() => addBotMessage({ type: 'products', data: products.filter(p => p.badge === 'Oferta').slice(0, 3) }), 500);
+      } else if (q.includes('nuevo') || q.includes('novedad')) {
+        addBotMessage({ text: '✨ Nuestros productos más recientes:' });
+        setTimeout(() => addBotMessage({ type: 'products', data: products.filter(p => p.badge === 'Nuevo').slice(0, 3) }), 500);
+      } else if (q.includes('hola') || q.includes('buenos') || q.includes('buenas')) {
+        addBotMessage({ text: '¡Hola! ¿En qué puedo ayudarte? Puedo mostrarte productos, info de envío, métodos de pago o soporte.' });
+      } else if (q.includes('precio') || q.includes('costo') || q.includes('cuanto')) {
+        addBotMessage({ text: 'Nuestros precios son muy competitivos. ¿Qué producto te interesa?', type: 'buttons', data: {
+          buttons: [
+            { text: 'Ver Switches', action: 'switches' },
+            { text: 'Ver Routers', action: 'routers' },
+            { text: 'Ver todo', action: 'catalogo' },
+          ],
+        }});
+      } else if (q.includes('gracias')) {
+        addBotMessage({ text: '¡De nada! Estoy aquí para ayudarte. ¿Necesitas algo más?' });
       } else {
-        addBotMessage({
-          text: 'Puedo ayudarte con:\n\n- Ver productos por categoria\n- Informacion de stock\n- Tiempos de envio\n- Metodos de pago\n- Soporte tecnico\n\n¿Que te gustaria saber?',
-        });
+        addBotMessage({ text: 'Puedo ayudarte con:\n\n- Ver productos por categoría\n- Info de stock y envío\n- Métodos de pago\n- Soporte técnico\n\n¿Qué te gustaría saber?' });
       }
     }, 800 + Math.random() * 400);
   };
@@ -301,45 +154,34 @@ export default function Chatbot() {
   const handleAddToCart = (product: any) => {
     addToCart(product);
     showToast(product.name, product.image);
-    
-    setTimeout(() => {
-      addBotMessage({
-        text: `✅ ${product.name} agregado al carrito. ¿Quieres ver más productos similares?`,
-      });
-    }, 300);
+    setTimeout(() => addBotMessage({ text: `✅ ${product.name} agregado al carrito. ¿Quieres ver más productos similares?` }), 300);
   };
 
   const handleButtonClick = (action: string) => {
-    if (action === 'switches') {
-      handleSend('switches');
-    } else if (action === 'routers') {
-      handleSend('routers');
-    } else if (action === 'catalogo') {
-      handleSend('productos');
-    }
+    handleSend(action === 'catalogo' ? 'productos' : action);
   };
 
   return (
     <>
-      {/* Chat button */}
+      {/* Floating button */}
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
-          className="fixed bottom-6 right-6 z-[90] w-14 h-14 sm:w-16 sm:h-16 rounded-full gradient-brand shadow-2xl shadow-sky-500/30 flex items-center justify-center hover:scale-110 active:scale-95 transition-all group"
+          className="fixed bottom-6 right-6 z-[90] w-14 h-14 sm:w-16 sm:h-16 rounded-full gradient-brand shadow-2xl shadow-violet-500/40 flex items-center justify-center hover:scale-110 active:scale-95 transition-all group"
           aria-label="Abrir chat"
         >
           <MessageCircle className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
           <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full border-2 border-gray-950 animate-pulse" />
-          
-          <div className="absolute bottom-full right-0 mb-2 px-3 py-1.5 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none shadow-xl">
+          <div className="absolute bottom-full right-0 mb-2 px-3 py-1.5 bg-gray-800 border border-white/10 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none shadow-xl">
             ¿Necesitas ayuda?
           </div>
         </button>
       )}
 
-      {/* Chat window */}
+      {/* Chat window — fondo sólido, sin transparencia */}
       {isOpen && (
-        <div className="fixed bottom-6 right-6 z-[90] w-[calc(100vw-3rem)] sm:w-[420px] h-[85vh] sm:h-[600px] glass-strong rounded-2xl shadow-2xl shadow-black/40 flex flex-col overflow-hidden animate-slide-up border border-white/10">
+        <div className="fixed bottom-6 right-6 z-[90] w-[calc(100vw-3rem)] sm:w-[420px] h-[85vh] sm:h-[600px] bg-gray-900 border border-white/10 rounded-2xl shadow-2xl shadow-black/60 flex flex-col overflow-hidden animate-slide-up">
+
           {/* Header */}
           <div className="gradient-brand px-4 sm:px-5 py-3 sm:py-4 flex items-center justify-between shrink-0">
             <div className="flex items-center gap-3">
@@ -364,25 +206,23 @@ export default function Chatbot() {
           </div>
 
           {/* Messages */}
-          <div className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3 sm:space-y-4 bg-gray-950/50">
+          <div className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3 sm:space-y-4 bg-gray-950">
             {messages.map(msg => (
               <div key={msg.id}>
                 {msg.type === 'text' && (
                   <div className={`flex gap-2 sm:gap-3 ${msg.sender === 'user' ? 'flex-row-reverse' : 'flex-row'}`}>
                     <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center shrink-0 ${
-                      msg.sender === 'bot' ? 'bg-sky-500/20' : 'bg-indigo-500/20'
+                      msg.sender === 'bot' ? 'bg-violet-500/20' : 'bg-violet-600/30'
                     }`}>
-                      {msg.sender === 'bot' ? (
-                        <Bot className="w-4 h-4 text-sky-400" />
-                      ) : (
-                        <User className="w-4 h-4 text-indigo-400" />
-                      )}
+                      {msg.sender === 'bot'
+                        ? <Bot className="w-4 h-4 text-violet-400" />
+                        : <User className="w-4 h-4 text-violet-300" />
+                      }
                     </div>
-
-                    <div className={`max-w-[75%] ${msg.sender === 'user' ? 'items-end' : 'items-start'} flex flex-col gap-1`}>
+                    <div className={`max-w-[75%] flex flex-col gap-1 ${msg.sender === 'user' ? 'items-end' : 'items-start'}`}>
                       <div className={`px-3 sm:px-4 py-2 sm:py-2.5 rounded-2xl text-xs sm:text-sm whitespace-pre-line ${
                         msg.sender === 'bot'
-                          ? 'bg-white/5 text-gray-200 rounded-tl-sm'
+                          ? 'bg-gray-800 text-gray-200 rounded-tl-sm border border-white/5'
                           : 'gradient-brand text-white rounded-tr-sm'
                       }`}>
                         {msg.text}
@@ -395,12 +235,12 @@ export default function Chatbot() {
                 )}
 
                 {msg.type === 'products' && msg.data && (
-                  <div className="space-y-2">
+                  <div className="space-y-2 ml-10">
                     {msg.data.map((product: any) => (
-                      <div key={product.id} className="glass rounded-xl p-3 flex gap-3 card-hover">
+                      <div key={product.id} className="bg-gray-800 border border-white/8 rounded-xl p-3 flex gap-3">
                         <img src={product.image} alt={product.name} className="w-16 h-16 rounded-lg object-cover shrink-0" />
                         <div className="flex-1 min-w-0">
-                          <p className="text-xs text-sky-400 font-semibold mb-0.5">{product.category}</p>
+                          <p className="text-xs text-violet-400 font-semibold mb-0.5">{product.category}</p>
                           <h4 className="text-white text-xs font-semibold line-clamp-2 mb-1">{product.name}</h4>
                           <div className="flex items-center gap-1 mb-2">
                             <Star className="w-3 h-3 text-yellow-400 fill-yellow-400" />
@@ -409,19 +249,12 @@ export default function Chatbot() {
                           <div className="flex items-center justify-between gap-2">
                             <span className="text-sm font-bold text-white">{formatShort(product.price)}</span>
                             <div className="flex gap-1">
-                              <Link
-                                to={`/producto/${product.id}`}
-                                onClick={() => setIsOpen(false)}
-                                className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 transition-colors"
-                                title="Ver detalles"
-                              >
+                              <Link to={`/producto/${product.id}`} onClick={() => setIsOpen(false)}
+                                className="p-1.5 rounded-lg bg-white/8 hover:bg-white/15 transition-colors" title="Ver detalles">
                                 <ExternalLink className="w-3.5 h-3.5 text-gray-400" />
                               </Link>
-                              <button
-                                onClick={() => handleAddToCart(product)}
-                                className="p-1.5 rounded-lg gradient-brand hover:opacity-90 transition-opacity"
-                                title="Agregar al carrito"
-                              >
+                              <button onClick={() => handleAddToCart(product)}
+                                className="p-1.5 rounded-lg gradient-brand hover:opacity-90 transition-opacity" title="Agregar al carrito">
                                 <ShoppingCart className="w-3.5 h-3.5 text-white" />
                               </button>
                             </div>
@@ -429,18 +262,15 @@ export default function Chatbot() {
                         </div>
                       </div>
                     ))}
-                    <Link
-                      to="/productos"
-                      onClick={() => setIsOpen(false)}
-                      className="block text-center py-2 text-xs text-sky-400 hover:text-sky-300 transition-colors"
-                    >
-                      Ver todos los productos
+                    <Link to="/productos" onClick={() => setIsOpen(false)}
+                      className="block text-center py-2 text-xs text-violet-400 hover:text-violet-300 transition-colors">
+                      Ver todos los productos →
                     </Link>
                   </div>
                 )}
 
                 {msg.type === 'card' && msg.data && (
-                  <div className="glass rounded-xl p-4 space-y-3">
+                  <div className="ml-10 bg-gray-800 border border-white/8 rounded-xl p-4 space-y-3">
                     <h4 className="text-white font-bold text-sm">{msg.data.title}</h4>
                     <div className="space-y-2">
                       {msg.data.items.map((item: any, i: number) => (
@@ -451,19 +281,16 @@ export default function Chatbot() {
                       ))}
                     </div>
                     {msg.data.footer && (
-                      <p className="text-xs text-sky-400 pt-2 border-t border-white/10">{msg.data.footer}</p>
+                      <p className="text-xs text-violet-400 pt-2 border-t border-white/10">{msg.data.footer}</p>
                     )}
                   </div>
                 )}
 
                 {msg.type === 'buttons' && msg.data && (
-                  <div className="flex flex-wrap gap-2 pl-11">
+                  <div className="flex flex-wrap gap-2 pl-10">
                     {msg.data.buttons.map((btn: any, i: number) => (
-                      <button
-                        key={i}
-                        onClick={() => handleButtonClick(btn.action)}
-                        className="px-4 py-2 rounded-lg bg-sky-500/20 hover:bg-sky-500/30 text-sky-400 text-xs font-medium transition-colors border border-sky-500/30"
-                      >
+                      <button key={i} onClick={() => handleButtonClick(btn.action)}
+                        className="px-4 py-2 rounded-lg bg-violet-500/20 hover:bg-violet-500/30 text-violet-400 text-xs font-medium transition-colors border border-violet-500/30">
                         {btn.text}
                       </button>
                     ))}
@@ -474,34 +301,30 @@ export default function Chatbot() {
 
             {isTyping && (
               <div className="flex gap-2 sm:gap-3">
-                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-sky-500/20 flex items-center justify-center shrink-0">
-                  <Bot className="w-4 h-4 text-sky-400" />
+                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-violet-500/20 flex items-center justify-center shrink-0">
+                  <Bot className="w-4 h-4 text-violet-400" />
                 </div>
-                <div className="px-4 py-3 bg-white/5 rounded-2xl rounded-tl-sm flex gap-1.5">
+                <div className="px-4 py-3 bg-gray-800 border border-white/5 rounded-2xl rounded-tl-sm flex gap-1.5">
                   <span className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
                   <span className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
                   <span className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
                 </div>
               </div>
             )}
-
             <div ref={messagesEndRef} />
           </div>
 
           {/* Quick replies */}
           {messages.length <= 2 && (
-            <div className="px-3 sm:px-4 py-2 border-t border-white/10 bg-gray-950/30">
+            <div className="px-3 sm:px-4 py-2.5 border-t border-white/8 bg-gray-900">
               <p className="text-xs text-gray-500 mb-2">Respuestas rápidas:</p>
               <div className="grid grid-cols-2 gap-2">
                 {quickReplies.map((reply, i) => {
                   const Icon = reply.icon;
                   return (
-                    <button
-                      key={i}
-                      onClick={() => handleQuickReply(reply)}
-                      className="flex items-center gap-2 px-2.5 sm:px-3 py-2 bg-white/5 hover:bg-white/10 rounded-lg text-xs text-gray-300 hover:text-white transition-colors border border-white/10"
-                    >
-                      <Icon className="w-3.5 h-3.5 shrink-0" />
+                    <button key={i} onClick={() => handleQuickReply(reply)}
+                      className="flex items-center gap-2 px-2.5 sm:px-3 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg text-xs text-gray-300 hover:text-white transition-colors border border-white/8">
+                      <Icon className="w-3.5 h-3.5 shrink-0 text-violet-400" />
                       <span className="truncate">{reply.text}</span>
                     </button>
                   );
@@ -511,25 +334,18 @@ export default function Chatbot() {
           )}
 
           {/* Input */}
-          <form
-            onSubmit={e => { e.preventDefault(); handleSend(); }}
-            className="p-3 sm:p-4 border-t border-white/10 bg-gray-950/50 shrink-0"
-          >
+          <form onSubmit={e => { e.preventDefault(); handleSend(); }}
+            className="p-3 sm:p-4 border-t border-white/8 bg-gray-900 shrink-0">
             <div className="flex gap-2">
               <input
-                type="text"
-                value={inputValue}
-                onChange={e => setInputValue(e.target.value)}
+                type="text" value={inputValue} onChange={e => setInputValue(e.target.value)}
                 placeholder="Escribe tu mensaje..."
-                className="flex-1 px-3 sm:px-4 py-2 sm:py-2.5 bg-white/5 border border-white/10 rounded-xl text-xs sm:text-sm text-gray-200 placeholder-gray-600 focus:outline-none focus:border-sky-500/50"
+                className="flex-1 px-3 sm:px-4 py-2 sm:py-2.5 bg-gray-800 border border-white/10 rounded-xl text-xs sm:text-sm text-gray-200 placeholder-gray-600 focus:outline-none focus:border-violet-500/50 transition-colors"
               />
-              <button
-                type="submit"
-                disabled={!inputValue.trim()}
-                className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl gradient-brand flex items-center justify-center hover:opacity-90 active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100"
-                aria-label="Enviar mensaje"
-              >
-                <Send className="w-4 h-4 sm:w-4.5 sm:h-4.5 text-white" />
+              <button type="submit" disabled={!inputValue.trim()}
+                className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl gradient-brand flex items-center justify-center hover:opacity-90 active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                aria-label="Enviar">
+                <Send className="w-4 h-4 text-white" />
               </button>
             </div>
           </form>
@@ -538,5 +354,3 @@ export default function Chatbot() {
     </>
   );
 }
-
-

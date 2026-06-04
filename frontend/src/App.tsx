@@ -14,6 +14,9 @@ import ProductDetail from "./pages/ProductDetail";
 import Cart from "./pages/Cart";
 import Checkout from "./pages/Checkout";
 import Contact from "./pages/Contact";
+import Nosotros from "./pages/Nosotros";
+import Proyectos from "./pages/Proyectos";
+import Ubicacion from "./pages/Ubicacion";
 import Terminos from "./pages/Terminos";
 import Privacidad from "./pages/Privacidad";
 import NotFound from "./pages/NotFound";
@@ -35,7 +38,7 @@ function AdminGuard({ children }: { children: React.ReactNode }) {
   if (isVerifying) {
     return (
       <div className="min-h-screen bg-gray-950 flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-sky-500/30 border-t-sky-500 rounded-full animate-spin" />
+        <div className="w-8 h-8 border-2 border-violet-500/30 border-t-violet-500 rounded-full animate-spin" />
       </div>
     );
   }
@@ -54,6 +57,9 @@ function StoreLayout() {
           <Route path="/carrito" element={<Cart />} />
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/contacto" element={<Contact />} />
+          <Route path="/nosotros" element={<Nosotros />} />
+          <Route path="/proyectos" element={<Proyectos />} />
+          <Route path="/ubicacion" element={<Ubicacion />} />
           <Route path="/terminos" element={<Terminos />} />
           <Route path="/privacidad" element={<Privacidad />} />
           <Route path="*" element={<NotFound />} />
