@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS products (
   price        DECIMAL(10,2) NOT NULL DEFAULT 0.00,
   original_price DECIMAL(10,2) DEFAULT NULL,
   image        VARCHAR(500) NOT NULL DEFAULT '',
-  description  TEXT NOT NULL DEFAULT '',
+  description  TEXT NOT NULL,
   specs        JSON NOT NULL DEFAULT (JSON_ARRAY()),
   stock        INT NOT NULL DEFAULT 0,
   rating       DECIMAL(3,2) NOT NULL DEFAULT 4.50,

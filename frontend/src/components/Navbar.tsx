@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { ShoppingCart, Search, Menu, X, ChevronDown } from 'lucide-react';
 import { useCart } from '../context/CartContext';
+import { useAdmin } from '../context/AdminContext';
 
 const navLinks = [
   { to: '/',          label: 'Inicio' },
@@ -19,6 +20,7 @@ const productCategories = [
 
 export default function Navbar() {
   const { totalItems } = useCart();
+  const { settings } = useAdmin();
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const navigate = useNavigate();
@@ -71,7 +73,7 @@ export default function Navbar() {
             <div className="w-9 h-9 rounded-xl gradient-brand flex items-center justify-center shadow-lg shadow-violet-500/25 group-hover:scale-105 transition-transform">
               <img src="/favicon.svg" alt="TecomRed" className="w-5 h-5" />
             </div>
-            <span className="text-xl font-extrabold gradient-text tracking-tight">TecomRed</span>
+            <span className="text-xl font-extrabold gradient-text tracking-tight">{settings.storeName}</span>
           </Link>
 
           {/* Nav links — desktop */}

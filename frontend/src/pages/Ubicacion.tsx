@@ -1,4 +1,5 @@
 import { MapPin, Clock, Phone, Mail, Navigation } from 'lucide-react';
+import { useAdmin } from '../context/AdminContext';
 
 const horarios = [
   { dia: 'Lunes — Viernes', hora: '9:00 am — 7:00 pm' },
@@ -7,6 +8,10 @@ const horarios = [
 ];
 
 export default function Ubicacion() {
+  const { settings } = useAdmin();
+  const phone = settings.storePhone || 'No configurado';
+  const email = settings.storeEmail || 'No configurado';
+  const address = settings.storeAddress || 'No configurada';
   return (
     <main className="min-h-screen">
       {/* Hero */}
@@ -53,8 +58,7 @@ export default function Ubicacion() {
                 </div>
                 <div>
                   <h3 className="text-white font-bold mb-1">Dirección</h3>
-                  <p className="text-gray-400 text-sm">Av. Tecnología 1234, Oficina 305</p>
-                  <p className="text-gray-400 text-sm">Lima, Perú</p>
+                  <p className="text-gray-400 text-sm">{address}</p>
                   <a
                     href="https://maps.google.com/?q=-12.0464,-77.0428"
                     target="_blank"
@@ -98,8 +102,8 @@ export default function Ubicacion() {
                 </div>
                 <div>
                   <h3 className="text-white font-bold mb-1">Teléfono</h3>
-                  <a href="tel:+51999888777" className="text-violet-400 hover:text-violet-300 transition-colors text-sm">
-                    +51 999 888 777
+                  <a href={`tel:${phone}`} className="text-violet-400 hover:text-violet-300 transition-colors text-sm">
+                    {phone}
                   </a>
                   <p className="text-gray-500 text-xs mt-0.5">WhatsApp disponible</p>
                 </div>
@@ -114,8 +118,8 @@ export default function Ubicacion() {
                 </div>
                 <div>
                   <h3 className="text-white font-bold mb-1">Correo Electrónico</h3>
-                  <a href="mailto:ventas@tecomred.com" className="text-violet-400 hover:text-violet-300 transition-colors text-sm">
-                    ventas@tecomred.com
+                  <a href={`mailto:${email}`} className="text-violet-400 hover:text-violet-300 transition-colors text-sm">
+                    {email}
                   </a>
                   <p className="text-gray-500 text-xs mt-0.5">Respondemos en menos de 24 h</p>
                 </div>

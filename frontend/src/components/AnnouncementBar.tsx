@@ -1,15 +1,18 @@
 import { useState } from 'react';
 import { X, Truck, Tag, Phone } from 'lucide-react';
-
-const messages = [
-  { icon: Truck, text: '🚚 Envío gratis en pedidos mayores a S/ 300' },
-  { icon: Tag,   text: '🔥 Hasta 25% de descuento en productos seleccionados' },
-  { icon: Phone, text: '📞 Soporte técnico especializado: +51 1 234-5678' },
-];
+import { useAdmin } from '../context/AdminContext';
+import { useCurrency } from '../hooks/useCurrency';
 
 export default function AnnouncementBar() {
   const [visible, setVisible] = useState(true);
   const [current, setCurrent] = useState(0);
+  const { settings } = useAdmin();
+  const { formatShort } = useCurrency();
+  const messages = [
+    { icon: Truck, text: `Envío gratis en pedidos mayores a ${formatShort(Number(settings.freeShippingMin) || 0)}` },
+    { icon: Tag, text: 'Hasta 25% de descuento en productos seleccionados' },
+    { icon: Phone, text: `Soporte técnico especializado: ${settings.storePhone}` },
+  ];
 
   if (!visible) return null;
 

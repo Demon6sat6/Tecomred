@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS orders (
   status ENUM('Pendiente', 'Procesando', 'Enviado', 'Entregado', 'Cancelado') NOT NULL DEFAULT 'Pendiente',
   city VARCHAR(100) NOT NULL,
   address VARCHAR(500) NOT NULL,
-  notes TEXT DEFAULT '',
+  notes TEXT NOT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

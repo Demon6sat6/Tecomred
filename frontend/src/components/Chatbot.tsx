@@ -5,6 +5,20 @@ import { useStore } from '../context/StoreContext';
 import { useCart } from '../context/CartContext';
 import { useCurrency } from '../hooks/useCurrency';
 import { useToast } from '../context/ToastContext';
+import { useAdmin } from '../context/AdminContext';
+import type { Product } from '../types';
+
+interface CardData {
+  title: string;
+  items: { label: string; value: string }[];
+  footer?: string;
+}
+
+interface ButtonsData {
+  buttons: { text: string; action: string }[];
+}
+
+type MessageData = Product[] | CardData | ButtonsData;
 
 interface Message {
   id: number;
@@ -12,7 +26,7 @@ interface Message {
   sender: 'user' | 'bot';
   timestamp: Date;
   type?: 'text' | 'products' | 'card' | 'buttons';
-  data?: any;
+  data?: MessageData;
 }
 
 const quickReplies = [
@@ -21,6 +35,12 @@ const quickReplies = [
   { icon: CreditCard, text: 'Métodos de pago',   action: 'pago'    },
   { icon: Headphones, text: 'Soporte técnico',   action: 'soporte' },
 ];
+
+const isProductList = (data: MessageData | undefined): data is Product[] => Array.isArray(data);
+const isCardData = (data: MessageData | undefined): data is CardData =>
+  !!data && !Array.isArray(data) && 'items' in data;
+const isButtonsData = (data: MessageData | undefined): data is ButtonsData =>
+  !!data && !Array.isArray(data) && 'buttons' in data;
 
 export default function Chatbot() {
   const [isOpen, setIsOpen] = useState(false);
@@ -38,6 +58,7 @@ export default function Chatbot() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { addToCart } = useCart();
   const { products } = useStore();
+  const { settings } = useAdmin();
   const { formatShort } = useCurrency();
   const { showToast } = useToast();
 
@@ -93,9 +114,9 @@ export default function Chatbot() {
           addBotMessage({ type: 'card', data: {
             title: '🎧 Soporte Técnico',
             items: [
-              { label: 'Teléfono', value: '+51 999 888 777' },
-              { label: 'Email', value: 'soporte@tecomred.com' },
-              { label: 'Horario', value: 'Lun-Vie 9am-7pm' },
+              { label: 'Teléfono', value: settings.storePhone },
+              { label: 'Email', value: settings.storeEmail },
+              { label: 'Horario', value: settings.supportHours },
               { label: 'Emergencias', value: '24/7 disponible' },
             ],
             footer: 'Asesoría técnica especializada incluida',
@@ -148,10 +169,10 @@ export default function Chatbot() {
       } else {
         addBotMessage({ text: 'Puedo ayudarte con:\n\n- Ver productos por categoría\n- Info de stock y envío\n- Métodos de pago\n- Soporte técnico\n\n¿Qué te gustaría saber?' });
       }
-    }, 800 + Math.random() * 400);
+    }, 1000);
   };
 
-  const handleAddToCart = (product: any) => {
+  const handleAddToCart = (product: Product) => {
     addToCart(product);
     showToast(product.name, product.image);
     setTimeout(() => addBotMessage({ text: `✅ ${product.name} agregado al carrito. ¿Quieres ver más productos similares?` }), 300);
@@ -167,7 +188,7 @@ export default function Chatbot() {
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
-          className="fixed bottom-6 right-6 z-[90] w-14 h-14 sm:w-16 sm:h-16 rounded-full gradient-brand shadow-2xl shadow-violet-500/40 flex items-center justify-center hover:scale-110 active:scale-95 transition-all group"
+          className="fixed bottom-[calc(1rem+env(safe-area-inset-bottom))] right-4 sm:bottom-6 sm:right-6 z-[90] w-14 h-14 sm:w-16 sm:h-16 rounded-full gradient-brand shadow-2xl shadow-violet-500/40 flex items-center justify-center hover:scale-110 active:scale-95 transition-transform group"
           aria-label="Abrir chat"
         >
           <MessageCircle className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
@@ -178,9 +199,9 @@ export default function Chatbot() {
         </button>
       )}
 
-      {/* Chat window — fondo sólido, sin transparencia */}
+      {/* Chat window — superficie opaca para conservar el contraste en cualquier fondo */}
       {isOpen && (
-        <div className="fixed bottom-6 right-6 z-[90] w-[calc(100vw-3rem)] sm:w-[420px] h-[85vh] sm:h-[600px] bg-gray-900 border border-white/10 rounded-2xl shadow-2xl shadow-black/60 flex flex-col overflow-hidden animate-slide-up">
+        <div className="fixed inset-x-3 bottom-[calc(0.75rem+env(safe-area-inset-bottom))] sm:inset-x-auto sm:bottom-6 sm:right-6 z-[90] w-auto sm:w-[420px] h-[min(720px,calc(100dvh-1.5rem))] sm:h-[600px] max-h-[calc(100dvh-0.75rem)] bg-[#08111f] border border-sky-200/15 rounded-2xl shadow-2xl shadow-black/70 flex flex-col overflow-hidden animate-slide-up">
 
           {/* Header */}
           <div className="gradient-brand px-4 sm:px-5 py-3 sm:py-4 flex items-center justify-between shrink-0">
@@ -189,7 +210,7 @@ export default function Chatbot() {
                 <Bot className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
               </div>
               <div>
-                <h3 className="text-white font-bold text-sm sm:text-base">Asistente TecomRed</h3>
+                <h3 className="text-white font-bold text-sm sm:text-base">Asistente {settings.storeName}</h3>
                 <p className="text-white/70 text-xs flex items-center gap-1">
                   <span className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
                   En línea
@@ -206,7 +227,7 @@ export default function Chatbot() {
           </div>
 
           {/* Messages */}
-          <div className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3 sm:space-y-4 bg-gray-950">
+          <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain p-3 sm:p-4 space-y-3 sm:space-y-4 bg-[#050b16]" aria-live="polite">
             {messages.map(msg => (
               <div key={msg.id}>
                 {msg.type === 'text' && (
@@ -234,9 +255,9 @@ export default function Chatbot() {
                   </div>
                 )}
 
-                {msg.type === 'products' && msg.data && (
+                {msg.type === 'products' && isProductList(msg.data) && (
                   <div className="space-y-2 ml-10">
-                    {msg.data.map((product: any) => (
+                    {msg.data.map(product => (
                       <div key={product.id} className="bg-gray-800 border border-white/8 rounded-xl p-3 flex gap-3">
                         <img src={product.image} alt={product.name} className="w-16 h-16 rounded-lg object-cover shrink-0" />
                         <div className="flex-1 min-w-0">
@@ -269,11 +290,11 @@ export default function Chatbot() {
                   </div>
                 )}
 
-                {msg.type === 'card' && msg.data && (
+                {msg.type === 'card' && isCardData(msg.data) && (
                   <div className="ml-10 bg-gray-800 border border-white/8 rounded-xl p-4 space-y-3">
                     <h4 className="text-white font-bold text-sm">{msg.data.title}</h4>
                     <div className="space-y-2">
-                      {msg.data.items.map((item: any, i: number) => (
+                      {msg.data.items.map((item, i) => (
                         <div key={i} className="flex justify-between text-xs">
                           <span className="text-gray-400">{item.label}:</span>
                           <span className="text-gray-200 font-medium">{item.value}</span>
@@ -286,9 +307,9 @@ export default function Chatbot() {
                   </div>
                 )}
 
-                {msg.type === 'buttons' && msg.data && (
+                {msg.type === 'buttons' && isButtonsData(msg.data) && (
                   <div className="flex flex-wrap gap-2 pl-10">
-                    {msg.data.buttons.map((btn: any, i: number) => (
+                    {msg.data.buttons.map((btn, i) => (
                       <button key={i} onClick={() => handleButtonClick(btn.action)}
                         className="px-4 py-2 rounded-lg bg-violet-500/20 hover:bg-violet-500/30 text-violet-400 text-xs font-medium transition-colors border border-violet-500/30">
                         {btn.text}
@@ -322,7 +343,7 @@ export default function Chatbot() {
                 {quickReplies.map((reply, i) => {
                   const Icon = reply.icon;
                   return (
-                    <button key={i} onClick={() => handleQuickReply(reply)}
+                    <button key={i} onClick={() => handleQuickReply(reply)} disabled={isTyping}
                       className="flex items-center gap-2 px-2.5 sm:px-3 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg text-xs text-gray-300 hover:text-white transition-colors border border-white/8">
                       <Icon className="w-3.5 h-3.5 shrink-0 text-violet-400" />
                       <span className="truncate">{reply.text}</span>
@@ -335,11 +356,13 @@ export default function Chatbot() {
 
           {/* Input */}
           <form onSubmit={e => { e.preventDefault(); handleSend(); }}
-            className="p-3 sm:p-4 border-t border-white/8 bg-gray-900 shrink-0">
+            className="p-3 sm:p-4 pb-[calc(0.75rem+env(safe-area-inset-bottom))] sm:pb-4 border-t border-sky-200/10 bg-[#08111f] shrink-0">
             <div className="flex gap-2">
               <input
                 type="text" value={inputValue} onChange={e => setInputValue(e.target.value)}
                 placeholder="Escribe tu mensaje..."
+                maxLength={500}
+                enterKeyHint="send"
                 className="flex-1 px-3 sm:px-4 py-2 sm:py-2.5 bg-gray-800 border border-white/10 rounded-xl text-xs sm:text-sm text-gray-200 placeholder-gray-600 focus:outline-none focus:border-violet-500/50 transition-colors"
               />
               <button type="submit" disabled={!inputValue.trim()}

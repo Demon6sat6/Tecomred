@@ -50,6 +50,7 @@ export interface StoreSettings {
   storeEmail: string;
   storePhone: string;
   storeAddress: string;
+  supportHours: string;
   storeWebsite: string;
   freeShippingMin: string;
   currency: string;
@@ -124,6 +125,7 @@ const defaultSettings: StoreSettings = {
   storeEmail: 'ventas@tecomred.pe',
   storePhone: '+51 1 234-5678',
   storeAddress: 'Av. Javier Prado Este 4200, San Isidro, Lima',
+  supportHours: 'Lun-Vie 9am-7pm',
   storeWebsite: 'https://tecomred.pe',
   freeShippingMin: '300',
   currency: 'PEN',

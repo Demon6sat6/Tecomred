@@ -101,7 +101,7 @@ export default function Footer() {
               <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl gradient-brand flex items-center justify-center">
                 <Wifi className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
               </div>
-              <span className="text-lg sm:text-xl font-bold gradient-text">TecomRed</span>
+              <span className="text-lg sm:text-xl font-bold gradient-text">{settings.storeName}</span>
             </div>
             <p className="text-gray-400 text-xs sm:text-sm leading-relaxed mb-3 sm:mb-4">
               Tu tienda especializada en redes, componentes de computadoras y tecnología profesional.
@@ -179,7 +179,7 @@ export default function Footer() {
 
         <div className="border-t border-white/10 mt-8 sm:mt-10 pt-5 sm:pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4">
           <p className="text-gray-500 text-xs sm:text-sm text-center sm:text-left">
-            © 2026 TecomRed. Todos los derechos reservados.
+            © 2026 {settings.storeName}. Todos los derechos reservados.
           </p>
           <div className="flex gap-3 sm:gap-4">
             <Link to="/privacidad" className="text-gray-500 hover:text-gray-400 text-xs sm:text-sm transition-colors">Privacidad</Link>

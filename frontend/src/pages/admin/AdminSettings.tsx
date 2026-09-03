@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Check, Store, Mail, Phone, MapPin, Globe, Save, Lock, Eye, EyeOff, AlertCircle, BarChart2 } from 'lucide-react';
+import { Check, Store, Mail, Phone, MapPin, Globe, Save, Lock, Eye, EyeOff, AlertCircle, BarChart2, Clock } from 'lucide-react';
 import { useAdmin, type StoreSettings } from '../../context/AdminContext';
 import { useCurrency } from '../../hooks/useCurrency';
 
@@ -106,6 +106,7 @@ export default function AdminSettings() {
           <InputField label="Correo electrónico" name="storeEmail" value={form.storeEmail} icon={Mail} onChange={handleInputChange} />
           <InputField label="Teléfono" name="storePhone" value={form.storePhone} icon={Phone} onChange={handleInputChange} />
           <InputField label="Dirección" name="storeAddress" value={form.storeAddress} icon={MapPin} onChange={handleInputChange} />
+          <InputField label="Horario de atención" name="supportHours" value={form.supportHours} icon={Clock} onChange={handleInputChange} />
           <InputField label="Sitio web" name="storeWebsite" value={form.storeWebsite} icon={Globe} onChange={handleInputChange} />
         </div>
 
