@@ -23,16 +23,20 @@ const SEEDS      = resolve(__dirname, '../seeds');
 const args      = process.argv.slice(2);
 const runSeed   = args.includes('--seed') || args.includes('--seed-only');
 const seedOnly  = args.includes('--seed-only');
+const mysqlHost = process.env.MYSQL_HOST || process.env.MYSQLHOST || 'localhost';
+const mysqlUser = process.env.MYSQL_USER || process.env.MYSQLUSER || 'root';
+const mysqlPassword = process.env.MYSQL_PASSWORD || process.env.MYSQLPASSWORD || '';
+const mysqlDatabase = process.env.MYSQL_DATABASE || process.env.MYSQLDATABASE || 'tecomred';
 
 const conn = await mysql.createConnection({
-  host:     process.env.MYSQL_HOST     || 'localhost',
-  user:     process.env.MYSQL_USER     || 'root',
-  password: process.env.MYSQL_PASSWORD || '',
-  database: process.env.MYSQL_DATABASE || 'tecomred',
+  host:     mysqlHost,
+  user:     mysqlUser,
+  password: mysqlPassword,
+  database: mysqlDatabase,
   multipleStatements: true,
 });
 
-console.log(`\n📦 Conectado a MySQL — base de datos: ${process.env.MYSQL_DATABASE || 'tecomred'}\n`);
+console.log(`\n📦 Conectado a MySQL — base de datos: ${mysqlDatabase}\n`);
 
 // ── Migraciones ──────────────────────────────────────────────
 if (!seedOnly) {

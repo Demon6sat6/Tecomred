@@ -3,6 +3,11 @@ import { z } from "zod";
 
 config();
 
+process.env.MYSQL_HOST ??= process.env.MYSQLHOST;
+process.env.MYSQL_USER ??= process.env.MYSQLUSER;
+process.env.MYSQL_PASSWORD ??= process.env.MYSQLPASSWORD;
+process.env.MYSQL_DATABASE ??= process.env.MYSQLDATABASE;
+
 const envSchema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
   PORT: z.coerce.number().int().positive().default(4000),

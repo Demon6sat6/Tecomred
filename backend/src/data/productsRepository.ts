@@ -2,10 +2,10 @@ import mysql, { type RowDataPacket } from "mysql2/promise";
 import type { Product, ProductInput } from "../types/product.js";
 
 const pool = mysql.createPool({
-  host:             process.env.MYSQL_HOST     || "localhost",
-  user:             process.env.MYSQL_USER     || "root",
-  password:         process.env.MYSQL_PASSWORD || "",
-  database:         process.env.MYSQL_DATABASE || "tecomred",
+  host:             process.env.MYSQL_HOST || process.env.MYSQLHOST || "localhost",
+  user:             process.env.MYSQL_USER || process.env.MYSQLUSER || "root",
+  password:         process.env.MYSQL_PASSWORD || process.env.MYSQLPASSWORD || "",
+  database:         process.env.MYSQL_DATABASE || process.env.MYSQLDATABASE || "tecomred",
   waitForConnections: true,
   connectionLimit:  10,
 });
