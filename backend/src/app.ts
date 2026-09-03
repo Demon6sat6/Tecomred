@@ -12,6 +12,7 @@ import { productsRouter }   from "./routes/products.js";
 import { mediaRouter }      from "./routes/media.js";
 import { contactRouter }    from "./routes/contact.js";
 import { newsletterRouter } from "./routes/newsletter.js";
+import { administratorsRouter } from "./routes/administrators.js";
 
 export const app = express();
 
@@ -50,6 +51,7 @@ app.use("/api/products",    productsRouter);
 app.use("/api/media",       mediaRouter);
 app.use("/api/contact",     contactRouter);
 app.use("/api/newsletter",  newsletterRouter);
+app.use("/api/administrators", administratorsRouter);
 
 // 404
 app.use((_req, res, next) => {

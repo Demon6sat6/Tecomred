@@ -19,6 +19,7 @@ import Proyectos from "./pages/Proyectos";
 import Ubicacion from "./pages/Ubicacion";
 import Terminos from "./pages/Terminos";
 import Privacidad from "./pages/Privacidad";
+import Account from "./pages/Account";
 import NotFound from "./pages/NotFound";
 import AdminLogin from "./pages/admin/AdminLogin";
 import AdminLayout from "./pages/admin/AdminLayout";
@@ -32,6 +33,7 @@ import AdminCategories from "./pages/admin/AdminCategories";
 import AdminCustomers from "./pages/admin/AdminCustomers";
 import AdminReviewsPage from "./pages/admin/AdminReviewsPage";
 import AdminCoupons from "./pages/admin/AdminCoupons";
+import AdminAdministrators from "./pages/admin/AdminAdministrators";
 
 function AdminGuard({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isVerifying } = useAdmin();
@@ -62,6 +64,7 @@ function StoreLayout() {
           <Route path="/ubicacion" element={<Ubicacion />} />
           <Route path="/terminos" element={<Terminos />} />
           <Route path="/privacidad" element={<Privacidad />} />
+          <Route path="/cuenta" element={<Account />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </main>
@@ -92,6 +95,7 @@ export default function App() {
                     <Route path="clientes"   element={<AdminCustomers />} />
                     <Route path="resenas"    element={<AdminReviewsPage />} />
                     <Route path="cupones"    element={<AdminCoupons />} />
+                    <Route path="administradores" element={<AdminAdministrators />} />
                     <Route path="ajustes"    element={<AdminSettings />} />
                   </Route>
                   <Route path="/*" element={<StoreLayout />} />

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { ShoppingCart, Search, Menu, X, ChevronDown } from 'lucide-react';
+import { ShoppingCart, Search, Menu, X, ChevronDown, UserRound } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useAdmin } from '../context/AdminContext';
 
@@ -162,6 +162,10 @@ export default function Navbar() {
                   {totalItems > 9 ? '9+' : totalItems}
                 </span>
               )}
+            </Link>
+
+            <Link to="/cuenta" className="p-2.5 rounded-xl hover:bg-white/8 transition-colors" aria-label="Mi cuenta">
+              <UserRound className="w-5 h-5 text-gray-400" />
             </Link>
 
             {/* Mobile menu button */}

@@ -45,6 +45,16 @@ export interface Coupon {
   active: boolean;
 }
 
+export interface Administrator {
+  id: number;
+  name: string;
+  username: string;
+  email: string | null;
+  role: 'admin' | 'editor';
+  isActive: boolean;
+  createdAt: string;
+}
+
 export interface StoreSettings {
   storeName: string;
   storeEmail: string;
@@ -86,6 +96,11 @@ interface AdminContextType {
   logout: () => void;
   settings: StoreSettings;
   saveSettings: (s: StoreSettings) => void;
+  administrators: Administrator[];
+  loadAdministrators: () => Promise<void>;
+  addAdministrator: (data: { name: string; username: string; email: string; password: string; role: Administrator['role'] }) => Promise<void>;
+  updateAdministrator: (id: number, data: { name: string; email: string; password?: string; role: Administrator['role']; isActive: boolean }) => Promise<void>;
+  deleteAdministrator: (id: number) => Promise<void>;
   // Products (shared with store)
   products: Product[];
   addProduct: (p: Omit<Product, 'id'>) => Promise<void>;
@@ -157,11 +172,12 @@ const API_URL = (import.meta.env.VITE_API_URL as string | undefined) ?? '/api';
 
 function makeApiCall(apiKey: string) {
   return async function apiCall<T>(endpoint: string, options?: RequestInit): Promise<T> {
+    const token = localStorage.getItem('admin_token') ?? apiKey;
     const response = await fetch(`${API_URL}${endpoint}`, {
       ...options,
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${apiKey}`,
+        Authorization: `Bearer ${token}`,
         ...(options?.headers || {}),
       },
     });
@@ -214,6 +230,7 @@ export function AdminProvider({ children }: { children: ReactNode }) {
   const [customers, setCustomers]             = useLocalStorage<Customer[]>('admin_customers', initialCustomers);
   const [reviewList, setReviewList]           = useLocalStorage<Review[]>('admin_reviews', initialReviewsWithApproval);
   const [coupons, setCoupons]                 = useLocalStorage<Coupon[]>('admin_coupons', initialCoupons);
+  const [administrators, setAdministrators]   = useState<Administrator[]>([]);
   const [isBackendAvailable, setIsBackendAvailable] = useState<boolean | null>(null);
   const [isVerifying, setIsVerifying] = useState(() => isAuthenticated as boolean);
   const apiCall = makeApiCall(settings.apiKey);
@@ -289,6 +306,26 @@ export function AdminProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem('admin_token');
   };
   const saveSettings = (s: StoreSettings) => setSettings(s);
+
+  const loadAdministrators = async () => {
+    const data = await apiCall<{ data: Administrator[] }>('/administrators');
+    setAdministrators(data.data);
+  };
+
+  const addAdministrator = async (data: { name: string; username: string; email: string; password: string; role: Administrator['role'] }) => {
+    await apiCall('/administrators', { method: 'POST', body: JSON.stringify(data) });
+    await loadAdministrators();
+  };
+
+  const updateAdministrator = async (id: number, data: { name: string; email: string; password?: string; role: Administrator['role']; isActive: boolean }) => {
+    await apiCall(`/administrators/${id}`, { method: 'PUT', body: JSON.stringify(data) });
+    await loadAdministrators();
+  };
+
+  const deleteAdministrator = async (id: number) => {
+    await apiCall(`/administrators/${id}`, { method: 'DELETE' });
+    await loadAdministrators();
+  };
 
   // Products — CRUD contra MySQL cuando el backend está disponible
   const addProduct = async (p: Omit<Product, 'id'>): Promise<void> => {
@@ -440,6 +477,7 @@ export function AdminProvider({ children }: { children: ReactNode }) {
   return (
     <AdminContext.Provider value={{
       isAuthenticated, isVerifying, apiKey: settings.apiKey, login, logout, settings, saveSettings,
+      administrators, loadAdministrators, addAdministrator, updateAdministrator, deleteAdministrator,
       products: productList, addProduct, updateProduct, deleteProduct,
       categoryList, addCategory, deleteCategory,
       orders, addOrder, updateOrder, updateOrderStatus, deleteOrder, loadOrders,
