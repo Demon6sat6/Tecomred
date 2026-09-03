@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { LockKeyhole, Mail, UserRound, Phone, UserPlus } from 'lucide-react';
 
-const API_URL = (import.meta.env.VITE_API_URL as string | undefined) ?? '/api';
+const API_URL = (import.meta.env.VITE_API_URL as string | undefined)
+  ?? (import.meta.env.DEV ? '/api' : 'https://tecomred-production-910c.up.railway.app/api');
 
 type Mode = 'login' | 'register';
 

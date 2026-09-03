@@ -16,7 +16,8 @@ export default function AdminLogin() {
     setError('');
     setLoading(true);
     try {
-      const apiBase = (import.meta.env.VITE_API_URL as string | undefined) ?? '/api';
+      const apiBase = (import.meta.env.VITE_API_URL as string | undefined)
+        ?? (import.meta.env.DEV ? '/api' : 'https://tecomred-production-910c.up.railway.app/api');
       const response = await fetch(`${apiBase}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

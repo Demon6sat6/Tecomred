@@ -168,7 +168,8 @@ const defaultSettings: StoreSettings = {
   stat4Value: '24',   stat4Suffix: '/7',    stat4Label: 'Soporte técnico',
 };
 
-const API_URL = (import.meta.env.VITE_API_URL as string | undefined) ?? '/api';
+const API_URL = (import.meta.env.VITE_API_URL as string | undefined)
+  ?? (import.meta.env.DEV ? '/api' : 'https://tecomred-production-910c.up.railway.app/api');
 
 function makeApiCall(apiKey: string) {
   return async function apiCall<T>(endpoint: string, options?: RequestInit): Promise<T> {
