@@ -9,6 +9,7 @@
  */
 
 import mysql from 'mysql2/promise';
+import bcrypt from 'bcryptjs';
 import { readFileSync, readdirSync } from 'fs';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
@@ -56,6 +57,24 @@ if (!seedOnly) {
       await conn.end();
       process.exit(1);
     }
+  }
+}
+
+// Crea el administrador inicial una sola vez, con contraseña cifrada.
+if (!seedOnly) {
+  const [admins] = await conn.query(
+    'SELECT id FROM administrators WHERE username = ? LIMIT 1',
+    [process.env.ADMIN_USER || 'admin'],
+  );
+  if (admins.length === 0) {
+    const passwordHash = await bcrypt.hash(process.env.ADMIN_PASSWORD || 'change-this-password', 12);
+    await conn.query(
+      "INSERT INTO administrators (name, username, password_hash, role) VALUES (?, ?, ?, 'admin')",
+      ['Administrador principal', process.env.ADMIN_USER || 'admin', passwordHash],
+    );
+    console.log('   ✅ Administrador inicial creado');
+  } else {
+    console.log('   ℹ️ Administrador inicial ya existe');
   }
 }
 
