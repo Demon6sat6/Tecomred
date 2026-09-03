@@ -92,7 +92,7 @@ export default function Navbar() {
                     {link.label}
                     <ChevronDown className="w-3.5 h-3.5 group-hover:rotate-180 transition-transform duration-200" />
                   </Link>
-                  <div className="absolute top-full left-0 mt-1 w-52 glass-strong rounded-2xl shadow-2xl shadow-black/40 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 py-2 border border-white/10">
+                  <div className="absolute top-full left-0 mt-1 w-52 rounded-2xl bg-[#111827] shadow-2xl shadow-black/60 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 py-2 border border-sky-200/15">
                     <div className="px-3 py-1.5 mb-1">
                       <span className="text-xs text-gray-500 font-semibold uppercase tracking-wider">Categorías</span>
                     </div>
