@@ -9,6 +9,3 @@ CREATE TABLE IF NOT EXISTS order_items (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- Índice para búsquedas por orden
-CREATE INDEX idx_order_items_order_id ON order_items(order_id);
