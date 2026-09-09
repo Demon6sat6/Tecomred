@@ -8,16 +8,16 @@ import { useAdmin } from '../context/AdminContext';
 type Step = 'envio' | 'pago' | 'confirmacion';
 interface FormErrors { [key: string]: string; }
 
-function Field({ label, name, value, onChange, placeholder, type = 'text', error, className = '' }: {
+function Field({ label, name, value, onChange, placeholder, type = 'text', inputMode, error, className = '' }: {
   label: string; name: string; value: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  placeholder: string; type?: string; error?: string; className?: string;
+  placeholder: string; type?: string; inputMode?: 'text' | 'decimal' | 'numeric' | 'tel' | 'search' | 'email' | 'url'; error?: string; className?: string;
 }) {
   return (
     <div className={className}>
       <label className="block text-sm text-gray-400 mb-1.5 font-medium">{label}</label>
-      <input type={type} name={name} value={value} onChange={onChange} placeholder={placeholder}
-        className={`w-full px-4 py-2.5 bg-white/5 border rounded-xl text-gray-200 placeholder-gray-600 focus:outline-none text-sm transition-all ${
+      <input type={type} name={name} value={value} onChange={onChange} placeholder={placeholder} inputMode={inputMode}
+        className={`w-full min-h-[44px] px-4 py-2.5 bg-white/5 border rounded-xl text-gray-200 placeholder-gray-600 focus:outline-none text-sm transition-all ${
           error ? 'border-red-500/60 focus:border-red-500 bg-red-500/5' : 'border-white/10 focus:border-sky-500/60'
         }`} />
       {error && <p className="flex items-center gap-1 mt-1 text-xs text-red-400"><AlertCircle className="w-3 h-3 shrink-0" /> {error}</p>}
@@ -270,15 +270,15 @@ export default function Checkout() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <Field name="nombre"    label="Nombre *"             value={form.nombre}    onChange={handleChange} placeholder="Juan"              error={errors.nombre} />
                   <Field name="apellido"  label="Apellido *"           value={form.apellido}  onChange={handleChange} placeholder="Pérez"             error={errors.apellido} />
-                  <Field name="email"     label="Correo electrónico *" value={form.email}     onChange={handleChange} placeholder="juan@email.com"    type="email" error={errors.email} />
-                  <Field name="telefono"  label="Teléfono *"           value={form.telefono}  onChange={handleChange} placeholder="+1 234 567 890"    type="tel" error={errors.telefono} />
+                  <Field name="email"     label="Correo electrónico *" value={form.email}     onChange={handleChange} placeholder="juan@email.com"    type="email" inputMode="email" error={errors.email} />
+                  <Field name="telefono"  label="Teléfono *"           value={form.telefono}  onChange={handleChange} placeholder="+51 987 654 321"    type="tel" inputMode="tel" error={errors.telefono} />
                   <Field name="direccion" label="Dirección *"          value={form.direccion} onChange={handleChange} placeholder="Av. Principal 123" error={errors.direccion} className="sm:col-span-2" />
-                  <Field name="ciudad"    label="Ciudad *"             value={form.ciudad}    onChange={handleChange} placeholder="Caracas"           error={errors.ciudad} />
-                  <Field name="codigo"    label="Código postal"        value={form.codigo}    onChange={handleChange} placeholder="1010" />
+                  <Field name="ciudad"    label="Ciudad *"             value={form.ciudad}    onChange={handleChange} placeholder="Lima"              error={errors.ciudad} />
+                  <Field name="codigo"    label="Código postal"        value={form.codigo}    onChange={handleChange} placeholder="15001" inputMode="numeric" />
                   <div>
                     <label className="block text-sm text-gray-400 mb-1.5 font-medium">Departamento</label>
                     <select name="pais" value={form.pais} onChange={e => setForm(f => ({ ...f, pais: e.target.value }))}
-                      className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-gray-200 focus:outline-none focus:border-sky-500/60 text-sm">
+                      className="w-full min-h-[44px] px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-gray-200 focus:outline-none focus:border-sky-500/60 text-sm">
                       {['Lima','Arequipa','Trujillo','Chiclayo','Piura','Cusco','Iquitos','Huancayo','Tacna','Puno'].map(p => (
                         <option key={p} value={p} className="bg-gray-900">{p}</option>
                       ))}
@@ -286,7 +286,7 @@ export default function Checkout() {
                   </div>
                 </div>
                 <button onClick={handleNextShipping}
-                  className="mt-6 w-full py-3 rounded-xl gradient-brand text-white font-bold hover:opacity-90 active:scale-95 transition-all shadow-lg shadow-sky-500/20">
+                  className="mt-6 w-full min-h-[46px] py-3 rounded-xl gradient-brand text-white font-bold hover:opacity-90 active:scale-95 transition-all shadow-lg shadow-sky-500/20 touch-manipulation">
                   Continuar al pago
                 </button>
               </div>
@@ -318,10 +318,10 @@ export default function Checkout() {
                 </div>
                 <div className="space-y-4">
                   <Field name="cardName"   label="Nombre en la tarjeta *" value={form.cardName}   onChange={handleChange} placeholder="JUAN PEREZ"          error={errors.cardName} />
-                  <Field name="cardNumber" label="Número de tarjeta *"    value={form.cardNumber} onChange={handleChange} placeholder="1234 5678 9012 3456" error={errors.cardNumber} />
+                  <Field name="cardNumber" label="Número de tarjeta *"    value={form.cardNumber} onChange={handleChange} placeholder="1234 5678 9012 3456" inputMode="numeric" error={errors.cardNumber} />
                   <div className="grid grid-cols-2 gap-4">
-                    <Field name="cardExpiry" label="Vencimiento *" value={form.cardExpiry} onChange={handleChange} placeholder="MM/AA" error={errors.cardExpiry} />
-                    <Field name="cardCvv"    label="CVV *"         value={form.cardCvv}    onChange={handleChange} placeholder="123"   error={errors.cardCvv} />
+                    <Field name="cardExpiry" label="Vencimiento *" value={form.cardExpiry} onChange={handleChange} placeholder="MM/AA" inputMode="numeric" error={errors.cardExpiry} />
+                    <Field name="cardCvv"    label="CVV *"         value={form.cardCvv}    onChange={handleChange} placeholder="123"   inputMode="numeric" error={errors.cardCvv} />
                   </div>
                 </div>
                 <div className="flex items-center gap-2 mt-4 p-3 bg-emerald-500/5 border border-emerald-500/20 rounded-xl">
@@ -330,11 +330,11 @@ export default function Checkout() {
                 </div>
                 <div className="flex gap-3 mt-6">
                   <button onClick={() => { setErrors({}); setStep('envio'); }}
-                    className="px-5 py-3 rounded-xl bg-white/5 border border-white/10 text-gray-300 font-semibold hover:bg-white/10 transition-colors">
-                    Atras
+                    className="px-5 py-3 min-h-[46px] rounded-xl bg-white/5 border border-white/10 text-gray-300 font-semibold hover:bg-white/10 transition-colors touch-manipulation">
+                    Atrás
                   </button>
                   <button onClick={handleOrder}
-                    className="flex-1 py-3 rounded-xl gradient-brand text-white font-bold hover:opacity-90 active:scale-95 transition-all shadow-lg shadow-sky-500/20">
+                    className="flex-1 min-h-[46px] py-3 rounded-xl gradient-brand text-white font-bold hover:opacity-90 active:scale-95 transition-all shadow-lg shadow-sky-500/20 touch-manipulation">
                     Confirmar pedido - {formatShort(finalTotal)}
                   </button>
                 </div>

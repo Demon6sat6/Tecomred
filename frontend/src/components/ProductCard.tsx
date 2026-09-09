@@ -59,7 +59,7 @@ export default function ProductCard({ product }: Props) {
         {/* Quick view — estilo píldora */}
         <Link
           to={`/producto/${product.id}`}
-          className="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-1.5 px-4 py-1.5 bg-white text-gray-900 text-xs font-black rounded-full opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-300 whitespace-nowrap shadow-xl"
+          className="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-1.5 px-3 sm:px-4 py-1.5 bg-white text-gray-900 text-xs font-black rounded-full opacity-90 sm:opacity-0 sm:group-hover:opacity-100 sm:translate-y-2 sm:group-hover:translate-y-0 transition-all duration-300 whitespace-nowrap shadow-xl"
         >
           <Eye className="w-3.5 h-3.5" /> Vista rápida
         </Link>
@@ -124,7 +124,7 @@ export default function ProductCard({ product }: Props) {
         <button
           onClick={handleAdd}
           disabled={product.stock === 0}
-          className={`w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-black transition-all duration-200 active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed disabled:active:scale-100 ${
+          className={`w-full min-h-[44px] flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl text-sm font-black transition-all duration-200 active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed disabled:active:scale-100 touch-manipulation ${
             justAdded
               ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/25'
               : product.stock === 0

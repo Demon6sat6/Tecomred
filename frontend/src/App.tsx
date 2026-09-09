@@ -4,6 +4,7 @@ import { ToastProvider } from "./context/ToastContext";
 import { AdminProvider, useAdmin } from "./context/AdminContext";
 import { AnalyticsProvider } from "./context/AnalyticsContext";
 import ErrorBoundary from "./components/ErrorBoundary";
+import AnnouncementBar from "./components/AnnouncementBar";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import ToastContainer from "./components/ToastContainer";
@@ -50,6 +51,7 @@ function AdminGuard({ children }: { children: React.ReactNode }) {
 function StoreLayout() {
   return (
     <div className="min-h-screen flex flex-col">
+      <AnnouncementBar />
       <Navbar />
       <main className="flex-1">
         <Routes>

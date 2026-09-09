@@ -130,12 +130,13 @@ export default function AdminLayout() {
 
       {/* Mobile sidebar overlay */}
       {sidebarOpen && (
-        <div className="lg:hidden fixed inset-0 z-40 flex">
-          <div className="fixed inset-0 bg-black/60" onClick={() => setSidebarOpen(false)} />
-          <aside className="relative w-64 flex flex-col z-50">
+        <div className="lg:hidden fixed inset-0 z-50 flex animate-fade-in">
+          <div className="fixed inset-0 bg-black/75 backdrop-blur-sm transition-opacity" onClick={() => setSidebarOpen(false)} />
+          <aside className="relative w-72 max-w-[85vw] flex flex-col z-50 shadow-2xl">
             <button
               onClick={() => setSidebarOpen(false)}
-              className={`absolute top-4 right-4 p-1.5 rounded-lg ${lightMode ? 'hover:bg-slate-100 text-slate-500' : 'hover:bg-white/10 text-gray-400'}`}
+              className={`absolute top-4 right-4 p-2 rounded-xl min-w-[40px] min-h-[40px] flex items-center justify-center ${lightMode ? 'hover:bg-slate-100 text-slate-500' : 'hover:bg-white/10 text-gray-300'} transition-colors touch-manipulation`}
+              aria-label="Cerrar panel lateral"
             >
               <X className="w-5 h-5" />
             </button>

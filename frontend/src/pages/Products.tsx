@@ -104,8 +104,114 @@ export default function Products() {
       </div>
 
       <div className="flex gap-8">
-        {/* Sidebar */}
-        <aside className={`${showFilters ? 'block' : 'hidden'} lg:block w-64 shrink-0`}>
+        {/* Mobile Filters Drawer Modal */}
+        {showFilters && (
+          <div className="fixed inset-0 z-50 lg:hidden flex">
+            {/* Backdrop */}
+            <div
+              className="fixed inset-0 bg-black/70 backdrop-blur-sm transition-opacity"
+              onClick={() => setShowFilters(false)}
+            />
+            {/* Drawer */}
+            <aside className="relative w-full max-w-xs bg-gray-900 border-r border-white/10 h-full overflow-y-auto p-5 z-10 flex flex-col shadow-2xl">
+              <div className="flex items-center justify-between pb-4 border-b border-white/10 mb-4">
+                <h2 className="text-white font-bold text-lg flex items-center gap-2">
+                  <SlidersHorizontal className="w-5 h-5 text-violet-400" />
+                  Filtros
+                  {activeFiltersCount > 0 && (
+                    <span className="w-5 h-5 rounded-full gradient-brand text-[10px] font-bold flex items-center justify-center text-white">
+                      {activeFiltersCount}
+                    </span>
+                  )}
+                </h2>
+                <button
+                  onClick={() => setShowFilters(false)}
+                  className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-gray-300 transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="space-y-6 flex-1">
+                {/* Search */}
+                <div>
+                  <label className="text-xs text-gray-400 mb-2 block font-semibold uppercase tracking-wider">Buscar</label>
+                  <form onSubmit={handleSearch} className="relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                    <input
+                      type="text" value={localSearch} onChange={e => setLocalSearch(e.target.value)}
+                      placeholder="Nombre, categoría..."
+                      className="w-full pl-9 pr-8 py-2.5 bg-white/5 border border-white/10 rounded-xl text-sm text-gray-200 placeholder-gray-500 focus:outline-none focus:border-violet-500/50 transition-colors"
+                    />
+                    {localSearch && (
+                      <button type="button" onClick={() => setLocalSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2">
+                        <X className="w-3.5 h-3.5 text-gray-400" />
+                      </button>
+                    )}
+                  </form>
+                </div>
+
+                {/* Categories */}
+                <div>
+                  <label className="text-xs text-gray-400 mb-2 block font-semibold uppercase tracking-wider">Categoría</label>
+                  <div className="space-y-1">
+                    {categories.map(cat => (
+                      <button key={cat} onClick={() => handleCategoryChange(cat)}
+                        className={`w-full text-left px-3 py-2.5 rounded-xl text-sm transition-colors ${
+                          selectedCategory === cat
+                            ? 'bg-violet-500/20 text-violet-400 font-semibold border border-violet-500/30'
+                            : 'text-gray-400 hover:bg-white/5 hover:text-gray-200'
+                        }`}>
+                        {cat}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Price Presets */}
+                <div>
+                  <label className="text-xs text-gray-400 mb-2 block font-semibold uppercase tracking-wider">Rango de precio</label>
+                  <div className="space-y-1">
+                    {pricePresets.map((preset, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => activePreset === idx ? clearPreset() : applyPreset(idx)}
+                        className={`w-full text-left px-3 py-2 rounded-xl text-sm transition-colors ${
+                          activePreset === idx
+                            ? 'bg-violet-500/20 text-violet-400 font-semibold'
+                            : 'text-gray-400 hover:bg-white/5 hover:text-gray-200'
+                        }`}
+                      >
+                        {preset.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Bottom buttons in drawer */}
+              <div className="pt-4 border-t border-white/10 mt-6 flex gap-2">
+                {activeFiltersCount > 0 && (
+                  <button
+                    onClick={clearAll}
+                    className="flex-1 py-3 px-3 rounded-xl border border-white/15 text-xs text-gray-300 font-bold hover:bg-white/5 transition-colors"
+                  >
+                    Limpiar
+                  </button>
+                )}
+                <button
+                  onClick={() => setShowFilters(false)}
+                  className="flex-1 py-3 px-3 rounded-xl gradient-brand text-xs text-white font-bold hover:opacity-90 transition-opacity text-center shadow-lg shadow-violet-500/20"
+                >
+                  Ver {filtered.length} productos
+                </button>
+              </div>
+            </aside>
+          </div>
+        )}
+
+        {/* Desktop Sidebar */}
+        <aside className="hidden lg:block w-64 shrink-0">
           <div className="glass rounded-2xl p-5 sticky top-24 space-y-6">
             <div className="flex items-center justify-between">
               <h2 className="text-white font-semibold flex items-center gap-2">

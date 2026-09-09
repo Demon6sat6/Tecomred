@@ -321,27 +321,29 @@ export default function ProductDetail() {
             )}
           </div>
 
-          {/* Quantity + Add to cart */}
+          {/* Quantity + Add to cart (Desktop / normal view) */}
           {product.stock > 0 && (
             <div className="flex items-center gap-3 mb-5">
               <div className="flex items-center glass rounded-xl overflow-hidden shrink-0">
                 <button
                   onClick={() => setQty(q => Math.max(1, q - 1))}
-                  className="w-11 h-11 flex items-center justify-center text-gray-300 hover:text-white hover:bg-white/10 transition-colors text-xl font-bold"
+                  className="w-11 h-11 flex items-center justify-center text-gray-300 hover:text-white hover:bg-white/10 transition-colors text-xl font-bold touch-manipulation"
+                  aria-label="Reducir cantidad"
                 >
                   -
                 </button>
                 <span className="w-10 text-center text-white font-bold text-lg">{qty}</span>
                 <button
                   onClick={() => setQty(q => Math.min(product.stock, q + 1))}
-                  className="w-11 h-11 flex items-center justify-center text-gray-300 hover:text-white hover:bg-white/10 transition-colors text-xl font-bold"
+                  className="w-11 h-11 flex items-center justify-center text-gray-300 hover:text-white hover:bg-white/10 transition-colors text-xl font-bold touch-manipulation"
+                  aria-label="Aumentar cantidad"
                 >
                   +
                 </button>
               </div>
               <button
                 onClick={handleAddToCart}
-                className={`flex-1 flex items-center justify-center gap-2 h-11 rounded-xl font-bold text-sm transition-all active:scale-95 shadow-lg ${
+                className={`flex-1 flex items-center justify-center gap-2 h-11 rounded-xl font-bold text-sm transition-all active:scale-95 shadow-lg touch-manipulation ${
                   added
                     ? 'bg-emerald-500 text-white shadow-emerald-500/20'
                     : 'gradient-brand text-white hover:opacity-90 shadow-violet-500/20'
@@ -580,6 +582,30 @@ export default function ProductDetail() {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
             {related.map(p => <ProductCard key={p.id} product={p} />)}
           </div>
+        </div>
+      )}
+
+      {/* Floating Bottom Bar for Mobile Devices */}
+      {product.stock > 0 && (
+        <div className="sm:hidden fixed bottom-0 inset-x-0 z-40 bg-gray-950/95 border-t border-white/10 p-3 backdrop-blur-xl flex items-center gap-3 shadow-2xl">
+          <div className="flex flex-col min-w-0">
+            <span className="text-[10px] text-gray-400 uppercase font-semibold">Total</span>
+            <span className="text-lg font-black text-white">{formatShort(product.price * qty)}</span>
+          </div>
+          <button
+            onClick={handleAddToCart}
+            className={`flex-1 min-h-[44px] flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-sm font-bold transition-all active:scale-95 shadow-lg touch-manipulation ${
+              added
+                ? 'bg-emerald-500 text-white'
+                : 'gradient-brand text-white hover:opacity-90 shadow-violet-500/20'
+            }`}
+          >
+            {added ? (
+              <><Check className="w-4 h-4" /> ¡Agregado!</>
+            ) : (
+              <><ShoppingCart className="w-4 h-4" /> Comprar ahora</>
+            )}
+          </button>
         </div>
       )}
     </div>

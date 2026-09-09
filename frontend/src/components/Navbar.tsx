@@ -133,7 +133,7 @@ export default function Navbar() {
           </div>
 
           {/* Search + Cart + Mobile toggle */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2">
             <form onSubmit={handleSearch} className="hidden sm:flex items-center" role="search">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" aria-hidden="true" />
@@ -143,20 +143,20 @@ export default function Navbar() {
                   onChange={e => setSearchQuery(e.target.value)}
                   placeholder="Buscar productos..."
                   aria-label="Buscar productos"
-                  className="pl-9 pr-4 py-2 bg-white/5 border border-white/10 rounded-xl text-sm text-gray-200 placeholder-gray-600 focus:outline-none focus:border-violet-500/50 focus:bg-white/8 transition-all w-40 focus:w-52"
+                  className="pl-9 pr-4 py-2 bg-white/5 border border-white/10 rounded-xl text-sm text-gray-200 placeholder-gray-600 focus:outline-none focus:border-violet-500/50 focus:bg-white/8 transition-all w-40 focus:w-56"
                 />
               </div>
             </form>
 
             <Link
               to="/carrito"
-              className="relative p-2.5 rounded-xl hover:bg-white/8 transition-colors group"
+              className="relative p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl hover:bg-white/8 active:bg-white/12 transition-colors group"
               aria-label={`Carrito${totalItems > 0 ? `, ${totalItems} producto${totalItems !== 1 ? 's' : ''}` : ''}`}
             >
               <ShoppingCart className={`w-5 h-5 transition-colors ${totalItems > 0 ? 'text-violet-400' : 'text-gray-400 group-hover:text-gray-200'}`} />
               {totalItems > 0 && (
                 <span
-                  className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] gradient-brand rounded-full text-[10px] font-bold flex items-center justify-center text-white px-1 shadow-lg shadow-violet-500/30 animate-slide-up"
+                  className="absolute top-1 right-1 min-w-[18px] h-[18px] gradient-brand rounded-full text-[10px] font-bold flex items-center justify-center text-white px-1 shadow-lg shadow-violet-500/30 animate-slide-up"
                   aria-hidden="true"
                 >
                   {totalItems > 9 ? '9+' : totalItems}
@@ -164,14 +164,18 @@ export default function Navbar() {
               )}
             </Link>
 
-            <Link to="/cuenta" className="p-2.5 rounded-xl hover:bg-white/8 transition-colors" aria-label="Mi cuenta">
-              <UserRound className="w-5 h-5 text-gray-400" />
+            <Link
+              to="/cuenta"
+              className="p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl hover:bg-white/8 active:bg-white/12 transition-colors"
+              aria-label="Mi cuenta"
+            >
+              <UserRound className="w-5 h-5 text-gray-400 hover:text-white" />
             </Link>
 
             {/* Mobile menu button */}
             <button
               onClick={() => setMenuOpen(prev => !prev)}
-              className="lg:hidden p-2.5 rounded-xl hover:bg-white/8 transition-colors"
+              className="lg:hidden p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl hover:bg-white/8 active:bg-white/12 transition-colors"
               aria-label={menuOpen ? 'Cerrar menú' : 'Abrir menú'}
               aria-expanded={menuOpen}
               aria-controls="mobile-menu"

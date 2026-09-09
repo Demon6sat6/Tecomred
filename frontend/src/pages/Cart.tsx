@@ -108,28 +108,28 @@ export default function Cart() {
               <div className="flex flex-col items-end justify-between shrink-0">
                 <button
                   onClick={() => removeFromCart(product.id)}
-                  className="p-1 sm:p-1.5 rounded-lg hover:bg-red-500/20 text-gray-400 hover:text-red-400 transition-colors"
+                  className="p-2 sm:p-1.5 min-w-[36px] min-h-[36px] flex items-center justify-center rounded-lg hover:bg-red-500/20 active:bg-red-500/30 text-gray-400 hover:text-red-400 transition-colors touch-manipulation"
                   aria-label="Eliminar producto"
                 >
-                  <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                  <Trash2 className="w-4 h-4" />
                 </button>
                 <div className="flex items-center glass rounded-lg sm:rounded-xl overflow-hidden">
                   <button
                     onClick={() => updateQuantity(product.id, quantity - 1)}
-                    className="px-2 sm:px-3 py-1.5 sm:py-2 text-gray-300 hover:text-white hover:bg-white/10 transition-colors"
+                    className="p-2 sm:px-3 sm:py-2 min-w-[36px] min-h-[36px] flex items-center justify-center text-gray-300 hover:text-white hover:bg-white/10 active:bg-white/20 transition-colors touch-manipulation"
                     aria-label="Disminuir cantidad"
                   >
-                    <Minus className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+                    <Minus className="w-3.5 h-3.5" />
                   </button>
                   <span className="px-2 sm:px-3 py-1.5 sm:py-2 text-white font-semibold text-xs sm:text-sm min-w-[2rem] sm:min-w-[2.5rem] text-center">
                     {quantity}
                   </span>
                   <button
                     onClick={() => updateQuantity(product.id, quantity + 1)}
-                    className="px-2 sm:px-3 py-1.5 sm:py-2 text-gray-300 hover:text-white hover:bg-white/10 transition-colors"
+                    className="p-2 sm:px-3 sm:py-2 min-w-[36px] min-h-[36px] flex items-center justify-center text-gray-300 hover:text-white hover:bg-white/10 active:bg-white/20 transition-colors touch-manipulation"
                     aria-label="Aumentar cantidad"
                   >
-                    <Plus className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+                    <Plus className="w-3.5 h-3.5" />
                   </button>
                 </div>
               </div>
@@ -170,7 +170,7 @@ export default function Cart() {
 
             <Link
               to="/checkout"
-              className="w-full flex items-center justify-center gap-2 py-2.5 sm:py-3 rounded-xl gradient-brand text-white text-sm sm:text-base font-semibold hover:opacity-90 active:scale-95 transition-all shadow-lg shadow-sky-500/20"
+              className="w-full min-h-[48px] flex items-center justify-center gap-2 py-3 px-4 rounded-xl gradient-brand text-white text-sm sm:text-base font-bold hover:opacity-90 active:scale-95 transition-all shadow-lg shadow-violet-500/20 touch-manipulation"
             >
               Proceder al pago <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" />
             </Link>

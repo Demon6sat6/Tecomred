@@ -110,5 +110,5 @@ VALUES
  157.50, 206.25,
  'https://images.unsplash.com/photo-1597872200969-2b65d56bd16b?w=400&h=300&fit=crop',
  'SSD SATA económico para actualizar laptops y PCs de escritorio.',
- '["480GB SATA III","Lectura 500MB/s","Escritura 450MB/s","Factor 2.5\""]',
+'["480GB SATA III","Lectura 500MB/s","Escritura 450MB/s","Factor 2.5 pulgadas"]',
  40, 4.5, 567, 'Oferta', 1);
