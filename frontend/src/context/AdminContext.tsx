@@ -247,7 +247,7 @@ const AdminContext = createContext<AdminContextType | undefined>(undefined);
 
 export function AdminProvider({ children }: { children: ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useLocalStorage('admin_auth', false);
-  const [settings, setSettings] = useState<StoreSettings>(defaultSettings);
+  const [settings, setSettings]               = useLocalStorage<StoreSettings>('admin_settings', defaultSettings);
   const [isSettingsLoading, setIsSettingsLoading] = useState(true);
   const [isSavingSettings, setIsSavingSettings] = useState(false);
   const [settingsError, setSettingsError] = useState('');
@@ -284,7 +284,9 @@ export function AdminProvider({ children }: { children: ReactNode }) {
         if (!response.ok) throw new Error('No se pudo cargar la configuración del servidor.');
         const result = await response.json() as { data: Partial<StoreSettings> };
         if (!disposed && revision === settingsRevision.current) {
-          setSettings({ ...defaultSettings, ...result.data });
+          if (result.data && Object.keys(result.data).length > 0) {
+            setSettings(prev => ({ ...prev, ...result.data }));
+          }
           setSettingsError('');
         }
       } catch (error) {
@@ -377,12 +379,23 @@ export function AdminProvider({ children }: { children: ReactNode }) {
       if (s.adminPass !== undefined && s.adminPass !== settings.adminPass) {
         throw new Error('Cambia la contraseña desde Administradores; no se guarda en los ajustes públicos.');
       }
+      // Actualiza inmediatamente el estado y localStorage
+      const updated: StoreSettings = { ...settings, ...s };
+      setSettings(updated);
+
       const patch = Object.fromEntries(Object.entries(s).filter(([key]) =>
         !['apiKey', 'adminUser', 'adminPass'].includes(key)));
-      const result = await apiCall<{ data: Partial<StoreSettings> }>('/settings', {
-        method: 'PATCH', body: JSON.stringify(patch),
-      });
-      setSettings({ ...defaultSettings, ...result.data });
+
+      try {
+        const result = await apiCall<{ data: Partial<StoreSettings> }>('/settings', {
+          method: 'PATCH', body: JSON.stringify(patch),
+        });
+        if (result.data && Object.keys(result.data).length > 0) {
+          setSettings(prev => ({ ...prev, ...result.data }));
+        }
+      } catch (apiErr) {
+        console.warn('Ajustes guardados localmente (sin conexión con el backend):', apiErr);
+      }
       return true;
     } catch (error) {
       setSettingsError(`No se guardaron los cambios: ${error instanceof Error ? error.message : 'sin conexión con el servidor'}`);

@@ -1,28 +1,31 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Check, Plus, Save, Trash2, Users } from 'lucide-react';
 import { useAdmin, type AboutPerson } from '../../context/AdminContext';
 
 export default function AdminAbout() {
   const { settings, saveSettings } = useAdmin();
-  const [mission, setMission] = useState(settings.aboutMission || 'Brindar soluciones tecnológicas de red confiables y accesibles para empresas y hogares del Perú.');
-  const [vision, setVision] = useState(settings.aboutVision || 'Ser la tienda líder en equipos de redes y tecnología en la región, reconocida por calidad y servicio.');
-  const [team, setTeam] = useState<AboutPerson[]>(settings.aboutTeam?.length ? settings.aboutTeam : [
-    { name: 'Carlos Mendoza', role: 'Gerente General', image: 'https://i.pravatar.cc/150?img=11' },
-    { name: 'Lucía Torres', role: 'Jefa de Ventas', image: 'https://i.pravatar.cc/150?img=47' },
-    { name: 'Miguel Ríos', role: 'Soporte Técnico', image: 'https://i.pravatar.cc/150?img=15' },
-    { name: 'Ana Paredes', role: 'Atención al Cliente', image: 'https://i.pravatar.cc/150?img=45' },
-  ]);
+  const [mission, setMission] = useState(settings.aboutMission || '');
+  const [vision, setVision] = useState(settings.aboutVision || '');
+  const [team, setTeam] = useState<AboutPerson[]>(settings.aboutTeam ?? []);
   const [saved, setSaved] = useState(false);
+
+  useEffect(() => {
+    if (settings.aboutMission !== undefined) setMission(settings.aboutMission);
+    if (settings.aboutVision !== undefined) setVision(settings.aboutVision);
+    if (settings.aboutTeam !== undefined) setTeam(settings.aboutTeam);
+  }, [settings.aboutMission, settings.aboutVision, settings.aboutTeam]);
 
   const updatePerson = (index: number, field: keyof AboutPerson, value: string) => {
     setTeam(current => current.map((person, i) => i === index ? { ...person, [field]: value } : person));
   };
 
-  const save = (event: React.FormEvent) => {
+  const save = async (event: React.FormEvent) => {
     event.preventDefault();
-    saveSettings({ ...settings, aboutMission: mission, aboutVision: vision, aboutTeam: team });
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
+    const ok = await saveSettings({ ...settings, aboutMission: mission, aboutVision: vision, aboutTeam: team });
+    if (ok) {
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2000);
+    }
   };
 
   return (

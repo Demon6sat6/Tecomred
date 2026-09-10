@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Check, Store, Mail, Phone, MapPin, Globe, Save, Lock, Eye, EyeOff, AlertCircle, BarChart2, Clock } from 'lucide-react';
 import { useAdmin, type StoreSettings } from '../../context/AdminContext';
 import { useCurrency } from '../../hooks/useCurrency';
@@ -57,6 +57,10 @@ export default function AdminSettings() {
   const [saved, setSaved] = useState(false);
   const [form, setForm] = useState<StoreSettings>({ ...settings });
 
+  useEffect(() => {
+    setForm({ ...settings });
+  }, [settings]);
+
   // Password change
   const [showPassSection, setShowPassSection] = useState(false);
   const [passForm, setPassForm] = useState({ current: '', newPass: '', confirm: '' });
@@ -65,11 +69,13 @@ export default function AdminSettings() {
   const [showCurrent, setShowCurrent] = useState(false);
   const [showNew, setShowNew] = useState(false);
 
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    saveSettings(form);
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2500);
+    const ok = await saveSettings(form);
+    if (ok) {
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2500);
+    }
   };
 
   const handleChangePass = () => {

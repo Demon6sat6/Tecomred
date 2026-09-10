@@ -16,7 +16,7 @@ export default function Nosotros() {
     { icon: Users, title: 'Equipo', desc: 'Contamos con técnicos certificados y apasionados por la tecnología listos para asesorarte.' },
     { icon: Cpu, title: 'Experiencia', desc: 'Más de 5 años conectando empresas y hogares con las mejores marcas del mercado.' },
   ];
-  const equipo = settings.aboutTeam?.length ? settings.aboutTeam : equipoBase;
+  const equipo = settings.aboutTeam !== undefined ? settings.aboutTeam : equipoBase;
 
   return (
     <main className="min-h-screen">
