@@ -188,7 +188,7 @@ export default function Chatbot() {
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
-          className="fixed bottom-[calc(1rem+env(safe-area-inset-bottom))] right-4 sm:bottom-6 sm:right-6 z-[90] w-14 h-14 sm:w-16 sm:h-16 rounded-full gradient-brand shadow-2xl shadow-violet-500/40 flex items-center justify-center hover:scale-110 active:scale-95 transition-transform group"
+          className="fixed bottom-[calc(0.75rem+env(safe-area-inset-bottom))] right-3 sm:bottom-6 sm:right-6 z-[90] w-14 h-14 sm:w-16 sm:h-16 rounded-full gradient-brand shadow-2xl shadow-violet-500/40 flex items-center justify-center hover:scale-110 active:scale-95 transition-transform group touch-manipulation"
           aria-label="Abrir chat"
         >
           <MessageCircle className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
@@ -201,7 +201,7 @@ export default function Chatbot() {
 
       {/* Chat window — superficie opaca para conservar el contraste en cualquier fondo */}
       {isOpen && (
-        <div className="fixed inset-x-3 bottom-[calc(0.75rem+env(safe-area-inset-bottom))] sm:inset-x-auto sm:bottom-6 sm:right-6 z-[90] w-auto sm:w-[420px] h-[min(720px,calc(100dvh-1.5rem))] sm:h-[600px] max-h-[calc(100dvh-0.75rem)] bg-[#08111f] border border-sky-200/15 rounded-2xl shadow-2xl shadow-black/70 flex flex-col overflow-hidden animate-slide-up">
+        <div className="fixed inset-x-2 bottom-[env(safe-area-inset-bottom)] sm:inset-x-auto sm:bottom-6 sm:right-6 z-[90] w-auto sm:w-[420px] h-[min(720px,calc(100dvh-0.5rem))] sm:h-[600px] max-h-[calc(100dvh-0.5rem)] bg-[#08111f] border border-sky-200/15 rounded-t-2xl sm:rounded-2xl shadow-2xl shadow-black/70 flex flex-col overflow-hidden animate-slide-up">
 
           {/* Header */}
           <div className="gradient-brand px-4 sm:px-5 py-3 sm:py-4 flex items-center justify-between shrink-0">
@@ -219,7 +219,7 @@ export default function Chatbot() {
             </div>
             <button
               onClick={() => setIsOpen(false)}
-              className="w-8 h-8 rounded-lg hover:bg-white/20 flex items-center justify-center transition-colors"
+              className="w-10 h-10 rounded-lg hover:bg-white/20 flex items-center justify-center transition-colors touch-manipulation"
               aria-label="Cerrar chat"
             >
               <X className="w-5 h-5 text-white" />
@@ -241,7 +241,7 @@ export default function Chatbot() {
                       }
                     </div>
                     <div className={`max-w-[75%] flex flex-col gap-1 ${msg.sender === 'user' ? 'items-end' : 'items-start'}`}>
-                      <div className={`px-3 sm:px-4 py-2 sm:py-2.5 rounded-2xl text-xs sm:text-sm whitespace-pre-line ${
+                      <div className={`px-3 sm:px-4 py-2 sm:py-2.5 rounded-2xl text-xs sm:text-sm whitespace-pre-line break-words ${
                         msg.sender === 'bot'
                           ? 'bg-gray-800 text-gray-200 rounded-tl-sm border border-white/5'
                           : 'gradient-brand text-white rounded-tr-sm'
@@ -344,7 +344,7 @@ export default function Chatbot() {
                   const Icon = reply.icon;
                   return (
                     <button key={i} onClick={() => handleQuickReply(reply)} disabled={isTyping}
-                      className="flex items-center gap-2 px-2.5 sm:px-3 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg text-xs text-gray-300 hover:text-white transition-colors border border-white/8">
+                      className="flex items-center gap-2 min-h-[42px] px-2.5 sm:px-3 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg text-xs text-gray-300 hover:text-white transition-colors border border-white/8">
                       <Icon className="w-3.5 h-3.5 shrink-0 text-violet-400" />
                       <span className="truncate">{reply.text}</span>
                     </button>
@@ -363,10 +363,10 @@ export default function Chatbot() {
                 placeholder="Escribe tu mensaje..."
                 maxLength={500}
                 enterKeyHint="send"
-                className="flex-1 px-3 sm:px-4 py-2 sm:py-2.5 bg-gray-800 border border-white/10 rounded-xl text-xs sm:text-sm text-gray-200 placeholder-gray-600 focus:outline-none focus:border-violet-500/50 transition-colors"
+                className="flex-1 min-w-0 min-h-[44px] px-3 sm:px-4 py-2 sm:py-2.5 bg-gray-800 border border-white/10 rounded-xl text-xs sm:text-sm text-gray-200 placeholder-gray-600 focus:outline-none focus:border-violet-500/50 transition-colors"
               />
               <button type="submit" disabled={!inputValue.trim()}
-                className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl gradient-brand flex items-center justify-center hover:opacity-90 active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                className="w-11 h-11 sm:w-10 sm:h-10 shrink-0 rounded-xl gradient-brand flex items-center justify-center hover:opacity-90 active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed touch-manipulation"
                 aria-label="Enviar">
                 <Send className="w-4 h-4 text-white" />
               </button>

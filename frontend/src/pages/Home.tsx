@@ -61,7 +61,7 @@ export default function Home() {
   return (
     <div>
       {/* ââ HERO ââ */}
-      <section className="relative overflow-hidden py-16 sm:py-24 px-4">
+      <section className="relative overflow-hidden py-10 sm:py-24 px-3 sm:px-4">
         {/* Animated background glows */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute -top-60 -right-60 w-[600px] h-[600px] bg-sky-500/8 rounded-full blur-3xl animate-pulse-glow" />
@@ -70,7 +70,7 @@ export default function Home() {
         </div>
 
         <div className="max-w-7xl mx-auto relative">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 items-center">
             {/* Left — text */}
             <div>
               <div className="animate-fade-in-up inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-sky-500/10 border border-sky-500/20 text-sky-400 text-sm font-medium mb-6">
@@ -78,13 +78,13 @@ export default function Home() {
                 Tecnología profesional al mejor precio
               </div>
 
-              <h1 className="animate-fade-in-up animate-delay-100 text-4xl sm:text-5xl xl:text-6xl font-extrabold text-white leading-[1.1] mb-6">
+              <h1 className="animate-fade-in-up animate-delay-100 text-[2.15rem] leading-[1.08] sm:text-5xl xl:text-6xl font-extrabold text-white mb-5 sm:mb-6">
                 Tu tienda de{' '}
                 <span className="gradient-text">redes y<br />componentes</span>{' '}
                 de confianza
               </h1>
 
-              <p className="animate-fade-in-up animate-delay-200 text-lg text-gray-400 mb-8 leading-relaxed max-w-lg">
+              <p className="animate-fade-in-up animate-delay-200 text-base sm:text-lg text-gray-400 mb-6 sm:mb-8 leading-relaxed max-w-lg">
                 Switches, routers, procesadores, memorias y todo lo que necesitas para construir
                 infraestructuras de red profesionales y equipos de alto rendimiento.
               </p>
@@ -102,7 +102,7 @@ export default function Home() {
               <div className="animate-fade-in-up animate-delay-400 flex flex-wrap gap-4">
                 <Link
                   to="/productos"
-                  className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl gradient-brand text-white font-semibold hover:opacity-90 active:scale-95 transition-all shadow-lg shadow-sky-500/25"
+                  className="w-full sm:w-auto inline-flex justify-center items-center gap-2 px-5 sm:px-7 py-3.5 min-h-[48px] rounded-xl gradient-brand text-white font-semibold hover:opacity-90 active:scale-95 transition-all shadow-lg shadow-sky-500/25 touch-manipulation"
                 >
                   Ver catálogo <ArrowRight className="w-5 h-5" />
                 </Link>

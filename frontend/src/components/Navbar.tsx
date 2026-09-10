@@ -65,15 +65,15 @@ export default function Navbar() {
 
   return (
     <nav className="sticky top-0 z-50 glass border-b border-white/10" ref={mobileMenuRef}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
+      <div className="max-w-7xl mx-auto px-2.5 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between min-h-16 h-16 gap-1">
 
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-2.5 group shrink-0">
-            <div className="w-9 h-9 rounded-xl gradient-brand flex items-center justify-center shadow-lg shadow-violet-500/25 group-hover:scale-105 transition-transform">
+          <Link to="/" className="flex items-center gap-2 group shrink-0 min-w-0">
+            <div className="w-9 h-9 rounded-xl gradient-brand flex items-center justify-center shadow-lg shadow-violet-500/25 group-hover:scale-105 transition-transform shrink-0">
               <img src="/favicon.svg" alt="TecomRed" className="w-5 h-5" />
             </div>
-            <span className="text-xl font-extrabold gradient-text tracking-tight">{settings.storeName}</span>
+            <span className="text-lg sm:text-xl font-extrabold gradient-text tracking-tight truncate max-w-[105px] sm:max-w-none">{settings.storeName}</span>
           </Link>
 
           {/* Nav links — desktop */}
@@ -166,7 +166,7 @@ export default function Navbar() {
 
             <Link
               to="/cuenta"
-              className="p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl hover:bg-white/8 active:bg-white/12 transition-colors"
+              className="hidden sm:flex p-2.5 min-w-[44px] min-h-[44px] items-center justify-center rounded-xl hover:bg-white/8 active:bg-white/12 transition-colors"
               aria-label="Mi cuenta"
             >
               <UserRound className="w-5 h-5 text-gray-400 hover:text-white" />
@@ -190,7 +190,7 @@ export default function Navbar() {
 
         {/* Mobile menu */}
         {menuOpen && (
-          <div id="mobile-menu" className="lg:hidden py-4 border-t border-white/10 space-y-1">
+          <div id="mobile-menu" className="lg:hidden py-3 sm:py-4 border-t border-white/10 space-y-1 max-h-[calc(100dvh-4rem)] overflow-y-auto overscroll-contain">
             <form onSubmit={handleSearch} className="mb-3" role="search">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" aria-hidden="true" />

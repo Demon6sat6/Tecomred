@@ -183,3 +183,21 @@
     padding-bottom: env(safe-area-inset-bottom);
   }
 }
+
+/* Ajustes para teléfonos estrechos (320–380px) */
+@media (max-width: 380px) {
+  html { font-size: 15px; }
+  .mobile-safe-x { padding-left: 0.75rem; padding-right: 0.75rem; }
+}
+
+/* Evita que inputs y selects provoquen zoom automático en iOS */
+@media (max-width: 640px) {
+  input, select, textarea, button { font-size: 16px; }
+  input[type="number"], input[type="tel"], input[type="email"] { font-size: 16px; }
+}
+
+/* Reduce efectos pesados en teléfonos para mejorar fluidez */
+@media (max-width: 640px) {
+  .backdrop-blur-xl, .backdrop-blur-2xl { backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+  .card-hover:hover { transform: none; }
+}

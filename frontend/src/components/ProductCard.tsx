@@ -41,7 +41,7 @@ export default function ProductCard({ product }: Props) {
         style={{ background: 'radial-gradient(ellipse at 50% 0%, rgba(134,59,255,0.08) 0%, transparent 70%)' }} />
 
       {/* Image */}
-      <div className="relative overflow-hidden h-48 bg-gray-800 shrink-0">
+      <div className="relative overflow-hidden h-40 sm:h-48 bg-gray-800 shrink-0">
         {!imgLoaded && (
           <div className="absolute inset-0 bg-gray-800 animate-pulse" />
         )}
@@ -106,7 +106,7 @@ export default function ProductCard({ product }: Props) {
 
         {/* Precio */}
         <div className="flex items-end gap-2 mb-2.5 mt-auto">
-          <span className="text-2xl font-black text-white tracking-tight">{formatShort(product.price)}</span>
+          <span className="text-xl sm:text-2xl font-black text-white tracking-tight">{formatShort(product.price)}</span>
           {product.originalPrice && (
             <span className="text-sm text-gray-600 line-through mb-0.5">{formatShort(product.originalPrice)}</span>
           )}
