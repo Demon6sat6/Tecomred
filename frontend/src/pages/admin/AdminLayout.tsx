@@ -119,7 +119,7 @@ export default function AdminLayout() {
   const handleLogout = () => { logout(); navigate('/admin'); };
 
   const mainBg   = lightMode ? 'bg-slate-100' : 'bg-gray-950';
-  const headerBg = lightMode ? 'bg-white/90 border-slate-200' : 'bg-gray-950/80 border-white/8';
+  const headerBg = lightMode ? 'bg-white border-slate-200' : 'bg-gray-950 border-white/8';
   const titleCol = lightMode ? 'text-slate-800' : 'text-white';
 
   return (
@@ -132,7 +132,7 @@ export default function AdminLayout() {
       {/* Mobile sidebar overlay */}
       {sidebarOpen && (
         <div className="lg:hidden fixed inset-0 z-50 flex animate-fade-in">
-          <div className="fixed inset-0 bg-black/75 backdrop-blur-sm transition-opacity" onClick={() => setSidebarOpen(false)} />
+          <div className="fixed inset-0 bg-black transition-opacity" onClick={() => setSidebarOpen(false)} />
           <aside className="relative w-72 max-w-[85vw] flex flex-col z-50 shadow-2xl">
             <button
               onClick={() => setSidebarOpen(false)}
@@ -149,7 +149,7 @@ export default function AdminLayout() {
       {/* Main content */}
       <div className="flex-1 lg:ml-60 flex flex-col min-h-screen">
         {/* Top bar */}
-        <header className={`sticky top-0 z-20 backdrop-blur-xl border-b px-4 sm:px-6 h-14 flex items-center justify-between ${headerBg}`}>
+        <header className={`sticky top-0 z-20 border-b px-4 sm:px-6 h-14 flex items-center justify-between ${headerBg}`}>
           <div className="flex items-center gap-3">
             <button
               onClick={() => setSidebarOpen(true)}
