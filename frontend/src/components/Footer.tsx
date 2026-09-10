@@ -163,7 +163,12 @@ export default function Footer() {
               </li>
               <li className="flex items-center gap-2 sm:gap-3">
                 <Phone className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-sky-400 shrink-0" />
-                <a href={`tel:${settings.storePhone}`} className="text-gray-400 hover:text-sky-400 text-xs sm:text-sm transition-colors">
+                <a
+                  href={`https://wa.me/${settings.storePhone.replace(/\D/g, '')}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-gray-400 hover:text-emerald-400 text-xs sm:text-sm transition-colors"
+                >
                   {settings.storePhone}
                 </a>
               </li>

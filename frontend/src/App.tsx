@@ -4,7 +4,6 @@ import { ToastProvider } from "./context/ToastContext";
 import { AdminProvider, useAdmin } from "./context/AdminContext";
 import { AnalyticsProvider } from "./context/AnalyticsContext";
 import ErrorBoundary from "./components/ErrorBoundary";
-import AnnouncementBar from "./components/AnnouncementBar";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import ToastContainer from "./components/ToastContainer";
@@ -35,6 +34,7 @@ import AdminCustomers from "./pages/admin/AdminCustomers";
 import AdminReviewsPage from "./pages/admin/AdminReviewsPage";
 import AdminCoupons from "./pages/admin/AdminCoupons";
 import AdminAdministrators from "./pages/admin/AdminAdministrators";
+import AdminTracking from "./pages/admin/AdminTracking";
 
 function AdminGuard({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isVerifying } = useAdmin();
@@ -51,7 +51,6 @@ function AdminGuard({ children }: { children: React.ReactNode }) {
 function StoreLayout() {
   return (
     <div className="min-h-screen flex flex-col">
-      <AnnouncementBar />
       <Navbar />
       <main className="flex-1">
         <Routes>
@@ -98,6 +97,7 @@ export default function App() {
                     <Route path="resenas"    element={<AdminReviewsPage />} />
                     <Route path="cupones"    element={<AdminCoupons />} />
                     <Route path="administradores" element={<AdminAdministrators />} />
+                    <Route path="seguimiento" element={<AdminTracking />} />
                     <Route path="ajustes"    element={<AdminSettings />} />
                   </Route>
                   <Route path="/*" element={<StoreLayout />} />

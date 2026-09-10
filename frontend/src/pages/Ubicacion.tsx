@@ -102,7 +102,7 @@ export default function Ubicacion() {
                 </div>
                 <div>
                   <h3 className="text-white font-bold mb-1">Teléfono</h3>
-                  <a href={`tel:${phone}`} className="text-violet-400 hover:text-violet-300 transition-colors text-sm">
+                  <a href={`https://wa.me/${phone.replace(/\D/g, '')}`} target="_blank" rel="noopener noreferrer" className="text-emerald-400 hover:text-emerald-300 transition-colors text-sm">
                     {phone}
                   </a>
                   <p className="text-gray-500 text-xs mt-0.5">WhatsApp disponible</p>

@@ -4,7 +4,7 @@ import {
   LayoutDashboard, Package, ShoppingBag,
   LogOut, Menu, X, ChevronRight, Bell, Settings,
   Users, Tag, Star, FolderOpen, BarChart2, ImageIcon,
-  UserCog,
+  UserCog, MapPinned,
   Sun, Moon, Store,
 } from 'lucide-react';
 import { useAdmin } from '../../context/AdminContext';
@@ -20,6 +20,7 @@ const navItems = [
   { to: '/admin/administradores', icon: UserCog,     label: 'Administradores' },
   { to: '/admin/resenas',    icon: Star,             label: 'Reseñas' },
   { to: '/admin/cupones',    icon: Tag,              label: 'Cupones' },
+  { to: '/admin/seguimiento', icon: MapPinned,       label: 'Seguimiento' },
   { to: '/admin/ajustes',    icon: Settings,         label: 'Ajustes' },
 ];
 

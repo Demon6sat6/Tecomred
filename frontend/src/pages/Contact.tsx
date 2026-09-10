@@ -57,6 +57,7 @@ export default function Contact() {
   const phone   = settings.storePhone  || '+51 999 888 777';
   const email   = settings.storeEmail  || 'ventas@tecomred.com';
   const address = settings.storeAddress || 'Av. Tecnología 1234, Lima, Perú';
+  const whatsappUrl = `https://wa.me/${phone.replace(/\D/g, '')}`;
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
@@ -87,7 +88,12 @@ export default function Contact() {
               <div>
                 <p className="text-gray-500 text-xs mb-0.5 font-medium uppercase tracking-wide">{label}</p>
                 {href ? (
-                  <a href={href} className="text-white font-medium text-sm hover:text-violet-400 transition-colors">{value}</a>
+                  <a
+                    href={label === 'Teléfono' ? whatsappUrl : href}
+                    target={label === 'Teléfono' ? '_blank' : undefined}
+                    rel={label === 'Teléfono' ? 'noopener noreferrer' : undefined}
+                    className="text-white font-medium text-sm hover:text-violet-400 transition-colors"
+                  >{value}</a>
                 ) : (
                   <p className="text-white font-medium text-sm">{value}</p>
                 )}
@@ -97,7 +103,7 @@ export default function Contact() {
 
           {/* WhatsApp CTA */}
           <a
-            href={`https://wa.me/${phone.replace(/\D/g, '')}`}
+            href={whatsappUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-3 px-5 py-4 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/15 transition-colors group"

@@ -27,8 +27,10 @@ function Field({ label, name, value, onChange, placeholder, type = 'text', input
 
 export default function Checkout() {
   const { items, totalPrice, clearCart } = useCart();
-  const { addOrder, applyCoupon, incrementCouponUse } = useAdmin();
+  const { addOrder, applyCoupon, incrementCouponUse, settings } = useAdmin();
   const { formatShort } = useCurrency();
+
+  const whatsappUrl = `https://wa.me/${(settings.storePhone || '').replace(/\D/g, '')}`;
 
   const [step, setStep] = useState<Step>('envio');
   const [errors, setErrors] = useState<FormErrors>({});
@@ -124,6 +126,8 @@ export default function Checkout() {
     }));
     const discount = appliedCoupon?.discount ?? 0;
     const couponCode = appliedCoupon?.code ?? '';
+    const whatsappLines = checkoutItems.map(item => `• ${item.name} x${item.qty} - ${formatShort(item.price * item.qty)}`).join('\n');
+    const whatsappMessage = `Hola, quiero realizar el pedido ${orderId}.\n\nCliente: ${form.nombre} ${form.apellido}\nTeléfono: ${form.telefono}\nCorreo: ${form.email}\nDirección: ${form.direccion}, ${form.ciudad}, ${form.pais}\n\nProductos:\n${whatsappLines}\n\nTotal: ${formatShort(finalTotal)}${couponCode ? `\nCupón: ${couponCode}` : ''}`;
 
     // Register order in admin
     addOrder({
@@ -150,6 +154,7 @@ export default function Checkout() {
     });
     if (appliedCoupon) incrementCouponUse(appliedCoupon.code);
     clearCart();
+    window.open(`${whatsappUrl}?text=${encodeURIComponent(whatsappMessage)}`, '_blank', 'noopener,noreferrer');
     setStep('confirmacion');
   };
 
