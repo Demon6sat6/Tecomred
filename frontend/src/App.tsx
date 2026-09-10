@@ -35,6 +35,7 @@ import AdminReviewsPage from "./pages/admin/AdminReviewsPage";
 import AdminCoupons from "./pages/admin/AdminCoupons";
 import AdminAdministrators from "./pages/admin/AdminAdministrators";
 import AdminTracking from "./pages/admin/AdminTracking";
+import AdminAbout from "./pages/admin/AdminAbout";
 
 function AdminGuard({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isVerifying } = useAdmin();
@@ -98,6 +99,7 @@ export default function App() {
                     <Route path="cupones"    element={<AdminCoupons />} />
                     <Route path="administradores" element={<AdminAdministrators />} />
                     <Route path="seguimiento" element={<AdminTracking />} />
+                    <Route path="nosotros" element={<AdminAbout />} />
                     <Route path="ajustes"    element={<AdminSettings />} />
                   </Route>
                   <Route path="/*" element={<StoreLayout />} />

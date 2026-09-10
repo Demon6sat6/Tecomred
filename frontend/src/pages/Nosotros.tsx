@@ -1,20 +1,23 @@
 import { Users, Target, Award, Cpu } from 'lucide-react';
+import { useAdmin } from '../context/AdminContext';
 
-const valores = [
-  { icon: Target, title: 'Misión', desc: 'Brindar soluciones tecnológicas de red confiables y accesibles para empresas y hogares del Perú.' },
-  { icon: Award, title: 'Visión', desc: 'Ser la tienda líder en equipos de redes y tecnología en la región, reconocida por calidad y servicio.' },
-  { icon: Users, title: 'Equipo', desc: 'Contamos con técnicos certificados y apasionados por la tecnología listos para asesorarte.' },
-  { icon: Cpu, title: 'Experiencia', desc: 'Más de 5 años conectando empresas y hogares con las mejores marcas del mercado.' },
-];
-
-const equipo = [
-  { nombre: 'Carlos Mendoza', cargo: 'Gerente General', img: 'https://i.pravatar.cc/150?img=11' },
-  { nombre: 'Lucía Torres', cargo: 'Jefa de Ventas', img: 'https://i.pravatar.cc/150?img=47' },
-  { nombre: 'Miguel Ríos', cargo: 'Soporte Técnico', img: 'https://i.pravatar.cc/150?img=15' },
-  { nombre: 'Ana Paredes', cargo: 'Atención al Cliente', img: 'https://i.pravatar.cc/150?img=45' },
+const equipoBase = [
+  { name: 'Carlos Mendoza', role: 'Gerente General', image: 'https://i.pravatar.cc/150?img=11' },
+  { name: 'Lucía Torres', role: 'Jefa de Ventas', image: 'https://i.pravatar.cc/150?img=47' },
+  { name: 'Miguel Ríos', role: 'Soporte Técnico', image: 'https://i.pravatar.cc/150?img=15' },
+  { name: 'Ana Paredes', role: 'Atención al Cliente', image: 'https://i.pravatar.cc/150?img=45' },
 ];
 
 export default function Nosotros() {
+  const { settings } = useAdmin();
+  const valores = [
+    { icon: Target, title: 'Misión', desc: settings.aboutMission || 'Brindar soluciones tecnológicas de red confiables y accesibles para empresas y hogares del Perú.' },
+    { icon: Award, title: 'Visión', desc: settings.aboutVision || 'Ser la tienda líder en equipos de redes y tecnología en la región, reconocida por calidad y servicio.' },
+    { icon: Users, title: 'Equipo', desc: 'Contamos con técnicos certificados y apasionados por la tecnología listos para asesorarte.' },
+    { icon: Cpu, title: 'Experiencia', desc: 'Más de 5 años conectando empresas y hogares con las mejores marcas del mercado.' },
+  ];
+  const equipo = settings.aboutTeam?.length ? settings.aboutTeam : equipoBase;
+
   return (
     <main className="min-h-screen">
       {/* Hero */}
@@ -59,11 +62,11 @@ export default function Nosotros() {
             Nuestro <span className="gradient-text">Equipo</span>
           </h2>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {equipo.map(({ nombre, cargo, img }) => (
-              <div key={nombre} className="glass rounded-2xl p-6 text-center card-hover">
-                <img src={img} alt={nombre} className="w-20 h-20 rounded-full mx-auto mb-4 object-cover ring-2 ring-violet-500/30" />
-                <h4 className="text-white font-semibold">{nombre}</h4>
-                <p className="text-violet-400 text-sm mt-1">{cargo}</p>
+            {equipo.map(({ name, role, image }) => (
+              <div key={name} className="glass rounded-2xl p-6 text-center card-hover">
+                <img src={image} alt={name} className="w-20 h-20 rounded-full mx-auto mb-4 object-cover ring-2 ring-violet-500/30" />
+                <h4 className="text-white font-semibold">{name}</h4>
+                <p className="text-violet-400 text-sm mt-1">{role}</p>
               </div>
             ))}
           </div>

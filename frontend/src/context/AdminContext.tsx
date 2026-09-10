@@ -55,6 +55,12 @@ export interface Administrator {
   createdAt: string;
 }
 
+export interface AboutPerson {
+  name: string;
+  role: string;
+  image: string;
+}
+
 export interface StoreSettings {
   storeName: string;
   storeEmail: string;
@@ -73,6 +79,9 @@ export interface StoreSettings {
   adminUser: string;
   adminPass: string;
   brands: { name: string; colorClass: string }[];
+  aboutMission: string;
+  aboutVision: string;
+  aboutTeam: AboutPerson[];
   // Hero stats
   stat1Value: string;
   stat1Suffix: string;
@@ -161,6 +170,14 @@ const defaultSettings: StoreSettings = {
     { name: 'Kingston', colorClass: 'text-red-500' },
     { name: 'TP-Link',  colorClass: 'text-green-400' },
     { name: 'Seagate',  colorClass: 'text-emerald-400' },
+  ],
+  aboutMission: 'Brindar soluciones tecnológicas de red confiables y accesibles para empresas y hogares del Perú.',
+  aboutVision: 'Ser la tienda líder en equipos de redes y tecnología en la región, reconocida por calidad y servicio.',
+  aboutTeam: [
+    { name: 'Carlos Mendoza', role: 'Gerente General', image: 'https://i.pravatar.cc/150?img=11' },
+    { name: 'Lucía Torres', role: 'Jefa de Ventas', image: 'https://i.pravatar.cc/150?img=47' },
+    { name: 'Miguel Ríos', role: 'Soporte Técnico', image: 'https://i.pravatar.cc/150?img=15' },
+    { name: 'Ana Paredes', role: 'Atención al Cliente', image: 'https://i.pravatar.cc/150?img=45' },
   ],
   stat1Value: '500',  stat1Suffix: '+',     stat1Label: 'Productos en stock',
   stat2Value: '2000', stat2Suffix: '+',     stat2Label: 'Clientes satisfechos',
