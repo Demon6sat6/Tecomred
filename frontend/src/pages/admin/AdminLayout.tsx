@@ -102,7 +102,7 @@ function Sidebar({ light, onLogout, pendingOrders }: {
 }
 
 export default function AdminLayout() {
-  const { logout, orders } = useAdmin();
+  const { logout, orders, isSettingsLoading, isSavingSettings, settingsError } = useAdmin();
   const location = useLocation();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -187,7 +187,13 @@ export default function AdminLayout() {
 
         {/* Page content */}
         <main className="flex-1 p-4 sm:p-6">
-          <Outlet />
+          {settingsError && <p role="alert" className="mb-4 p-3 rounded-xl bg-red-500/10 text-red-400 text-sm">{settingsError}</p>}
+          {isSettingsLoading ? <p role="status" className="text-gray-400">Cargando configuración del servidor…</p> : (
+            <fieldset disabled={isSavingSettings} className="min-w-0">
+              {isSavingSettings && <p role="status" className="mb-3 text-sky-400 text-sm">Guardando en el servidor…</p>}
+              <Outlet />
+            </fieldset>
+          )}
         </main>
       </div>
     </div>

@@ -1,4 +1,4 @@
-import { createContext, useContext, type ReactNode, useEffect, useState } from 'react';
+import { createContext, useContext, type ReactNode, useEffect, useState, useRef } from 'react';
 import type { Product } from '../types';
 import { products as initialProducts, categories as initialCategories } from '../data/products';
 import { reviews as initialReviews } from '../data/reviews';
@@ -79,6 +79,7 @@ export interface StoreSettings {
   adminUser: string;
   adminPass: string;
   brands: { name: string; colorClass: string }[];
+  categories: string[];
   aboutMission: string;
   aboutVision: string;
   aboutTeam: AboutPerson[];
@@ -104,7 +105,10 @@ interface AdminContextType {
   login: () => void;
   logout: () => void;
   settings: StoreSettings;
-  saveSettings: (s: StoreSettings) => void;
+  saveSettings: (s: Partial<StoreSettings>) => Promise<boolean>;
+  isSettingsLoading: boolean;
+  isSavingSettings: boolean;
+  settingsError: string;
   administrators: Administrator[];
   loadAdministrators: () => Promise<void>;
   addAdministrator: (data: { name: string; username: string; email: string; password: string; role: Administrator['role'] }) => Promise<void>;
@@ -117,8 +121,8 @@ interface AdminContextType {
   deleteProduct: (id: number) => Promise<void>;
   // Categories
   categoryList: string[];
-  addCategory: (name: string) => void;
-  deleteCategory: (name: string) => void;
+  addCategory: (name: string) => Promise<boolean>;
+  deleteCategory: (name: string) => Promise<boolean>;
   // Orders
   orders: Order[];
   addOrder: (o: Omit<Order, 'id'> & { id?: string }) => Promise<string>;
@@ -171,6 +175,7 @@ const defaultSettings: StoreSettings = {
     { name: 'TP-Link',  colorClass: 'text-green-400' },
     { name: 'Seagate',  colorClass: 'text-emerald-400' },
   ],
+  categories: initialCategories.filter(c => c !== 'Todos'),
   aboutMission: 'Brindar soluciones tecnológicas de red confiables y accesibles para empresas y hogares del Perú.',
   aboutVision: 'Ser la tienda líder en equipos de redes y tecnología en la región, reconocida por calidad y servicio.',
   aboutTeam: [
@@ -192,6 +197,7 @@ function makeApiCall(apiKey: string) {
   return async function apiCall<T>(endpoint: string, options?: RequestInit): Promise<T> {
     const token = localStorage.getItem('admin_token') ?? apiKey;
     const response = await fetch(`${API_URL}${endpoint}`, {
+      cache: 'no-store',
       ...options,
       headers: {
         'Content-Type': 'application/json',
@@ -241,9 +247,14 @@ const AdminContext = createContext<AdminContextType | undefined>(undefined);
 
 export function AdminProvider({ children }: { children: ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useLocalStorage('admin_auth', false);
-  const [settings, setSettings]               = useLocalStorage<StoreSettings>('admin_settings', defaultSettings);
+  const [settings, setSettings] = useState<StoreSettings>(defaultSettings);
+  const [isSettingsLoading, setIsSettingsLoading] = useState(true);
+  const [isSavingSettings, setIsSavingSettings] = useState(false);
+  const [settingsError, setSettingsError] = useState('');
+  const settingsRevision = useRef(0);
+  const settingsSaving = useRef(false);
   const [productList, setProductList]         = useLocalStorage<Product[]>('admin_products', initialProducts);
-  const [categoryList, setCategoryList]       = useLocalStorage<string[]>('admin_categories', initialCategories.filter(c => c !== 'Todos'));
+  const categoryList = settings.categories;
   const [orders, setOrders]                   = useLocalStorage<Order[]>('admin_orders', []);
   const [customers, setCustomers]             = useLocalStorage<Customer[]>('admin_customers', initialCustomers);
   const [reviewList, setReviewList]           = useLocalStorage<Review[]>('admin_reviews', initialReviewsWithApproval);
@@ -260,6 +271,39 @@ export function AdminProvider({ children }: { children: ReactNode }) {
     } else {
       checkBackend();
     }
+  }, []);
+
+  // Actualiza también una tienda que ya estaba abierta en otro dispositivo.
+  useEffect(() => {
+    let disposed = false;
+    const refresh = async () => {
+      if (settingsSaving.current) return;
+      const revision = settingsRevision.current;
+      try {
+        const response = await fetch(`${API_URL}/settings`, { cache: 'no-store' });
+        if (!response.ok) throw new Error('No se pudo cargar la configuración del servidor.');
+        const result = await response.json() as { data: Partial<StoreSettings> };
+        if (!disposed && revision === settingsRevision.current) {
+          setSettings({ ...defaultSettings, ...result.data });
+          setSettingsError('');
+        }
+      } catch (error) {
+        if (!disposed) setSettingsError(error instanceof Error ? error.message : 'Error de conexión');
+      } finally {
+        if (!disposed) setIsSettingsLoading(false);
+      }
+    };
+    const onFocus = () => { void refresh(); void fetchProducts(); };
+    void refresh();
+    const timer = window.setInterval(() => {
+      if (document.visibilityState === 'visible') onFocus();
+    }, 60000);
+    window.addEventListener('focus', onFocus);
+    return () => {
+      disposed = true;
+      window.clearInterval(timer);
+      window.removeEventListener('focus', onFocus);
+    };
   }, []);
 
   async function verifySession() {
@@ -323,7 +367,32 @@ export function AdminProvider({ children }: { children: ReactNode }) {
     setIsAuthenticated(false);
     localStorage.removeItem('admin_token');
   };
-  const saveSettings = (s: StoreSettings) => setSettings(s);
+  const saveSettings = async (s: Partial<StoreSettings>): Promise<boolean> => {
+    if (settingsSaving.current) return false;
+    settingsSaving.current = true;
+    settingsRevision.current += 1;
+    setIsSavingSettings(true);
+    setSettingsError('');
+    try {
+      if (s.adminPass !== undefined && s.adminPass !== settings.adminPass) {
+        throw new Error('Cambia la contraseña desde Administradores; no se guarda en los ajustes públicos.');
+      }
+      const patch = Object.fromEntries(Object.entries(s).filter(([key]) =>
+        !['apiKey', 'adminUser', 'adminPass'].includes(key)));
+      const result = await apiCall<{ data: Partial<StoreSettings> }>('/settings', {
+        method: 'PATCH', body: JSON.stringify(patch),
+      });
+      setSettings({ ...defaultSettings, ...result.data });
+      return true;
+    } catch (error) {
+      setSettingsError(`No se guardaron los cambios: ${error instanceof Error ? error.message : 'sin conexión con el servidor'}`);
+      return false;
+    } finally {
+      settingsRevision.current += 1;
+      settingsSaving.current = false;
+      setIsSavingSettings(false);
+    }
+  };
 
   const loadAdministrators = async () => {
     const data = await apiCall<{ data: Administrator[] }>('/administrators');
@@ -345,45 +414,29 @@ export function AdminProvider({ children }: { children: ReactNode }) {
     await loadAdministrators();
   };
 
-  // Products — CRUD contra MySQL cuando el backend está disponible
+  // No confirmar cambios locales cuando el servidor rechaza el guardado.
   const addProduct = async (p: Omit<Product, 'id'>): Promise<void> => {
-    if (isBackendAvailable) {
-      try {
-        const result = await apiCall<{ data: Product }>('/products', {
-          method: 'POST',
-          body: JSON.stringify({ ...p, isActive: true }),
-        });
-        setProductList(prev => [...prev, result.data]);
-        return;
-      } catch { /* fallback */ }
-    }
-    setProductList(prev => [...prev, { ...p, id: Date.now() }]);
+    const result = await apiCall<{ data: Product }>('/products', {
+      method: 'POST', body: JSON.stringify({ ...p, isActive: true }),
+    });
+    setProductList(prev => [...prev, result.data]);
   };
 
   const updateProduct = async (p: Product): Promise<void> => {
-    if (isBackendAvailable) {
-      try {
-        await apiCall(`/products/${p.id}`, {
-          method: 'PUT',
-          body: JSON.stringify({ ...p, isActive: true }),
-        });
-      } catch { /* fallback */ }
-    }
-    setProductList(prev => prev.map(x => x.id === p.id ? p : x));
+    const result = await apiCall<{ data: Product }>(`/products/${p.id}`, {
+      method: 'PUT', body: JSON.stringify({ ...p, isActive: true }),
+    });
+    setProductList(prev => prev.map(x => x.id === p.id ? result.data : x));
   };
 
   const deleteProduct = async (id: number): Promise<void> => {
-    if (isBackendAvailable) {
-      try {
-        await apiCall(`/products/${id}`, { method: 'DELETE' });
-      } catch { /* fallback */ }
-    }
+    await apiCall(`/products/${id}`, { method: 'DELETE' });
     setProductList(prev => prev.filter(x => x.id !== id));
   };
 
-  // Categories
-  const addCategory    = (name: string) => setCategoryList(prev => [...prev, name]);
-  const deleteCategory = (name: string) => setCategoryList(prev => prev.filter(c => c !== name));
+  // Categories — compartidas por el panel y todos los visitantes.
+  const addCategory = (name: string) => saveSettings({ categories: [...categoryList, name] });
+  const deleteCategory = (name: string) => saveSettings({ categories: categoryList.filter(c => c !== name) });
 
   // Orders — CRUD contra MySQL cuando el backend está disponible
   const addOrder = async (o: Omit<Order, 'id'> & { id?: string }): Promise<string> => {
@@ -495,6 +548,7 @@ export function AdminProvider({ children }: { children: ReactNode }) {
   return (
     <AdminContext.Provider value={{
       isAuthenticated, isVerifying, apiKey: settings.apiKey, login, logout, settings, saveSettings,
+      isSettingsLoading, isSavingSettings, settingsError,
       administrators, loadAdministrators, addAdministrator, updateAdministrator, deleteAdministrator,
       products: productList, addProduct, updateProduct, deleteProduct,
       categoryList, addCategory, deleteCategory,
