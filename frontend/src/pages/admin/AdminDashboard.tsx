@@ -7,6 +7,7 @@ import {
 import { useAdmin } from '../../context/AdminContext';
 import { useAnalytics } from '../../context/AnalyticsContext';
 import { useCurrency } from '../../hooks/useCurrency';
+import { parseFlexibleDate, isSameDay } from '../../utils/dateUtils';
 
 const statusColors: Record<string, string> = {
   Pendiente:  'bg-yellow-500/15 text-yellow-400 border-yellow-500/20',
@@ -15,15 +16,6 @@ const statusColors: Record<string, string> = {
   Entregado:  'bg-emerald-500/15 text-emerald-400 border-emerald-500/20',
   Cancelado:  'bg-red-500/15 text-red-400 border-red-500/20',
 };
-
-// Build last 7 days labels
-function getLast7Days() {
-  return Array.from({ length: 7 }, (_, i) => {
-    const d = new Date();
-    d.setDate(d.getDate() - (6 - i));
-    return d.toLocaleDateString('es', { weekday: 'short', day: 'numeric' });
-  });
-}
 
 export default function AdminDashboard() {
   const { products, orders, customers } = useAdmin();
@@ -44,15 +36,28 @@ export default function AdminDashboard() {
   const topCategories = Object.entries(byCategory).sort((a, b) => b[1] - a[1]).slice(0, 5);
   const maxCat = Math.max(...topCategories.map(c => c[1]), 1);
 
-  // Fake sales chart data (last 7 days)
-  const days = getLast7Days();
-  const salesData = days.map((_, i) => {
-    // Simulate some variation based on orders
-    const base = totalRevenue / 7;
-    const variation = [0.8, 1.2, 0.9, 1.4, 1.1, 0.7, 1.3][i] ?? 1;
-    return Math.round(base * variation);
+  // Real sales chart data (last 7 days from actual orders)
+  const today = new Date();
+  const last7DaysList = Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(today);
+    d.setDate(d.getDate() - (6 - i));
+    d.setHours(0, 0, 0, 0);
+    return d;
   });
-  const maxSales = Math.max(...salesData, 1);
+
+  const days = last7DaysList.map((d) =>
+    d.toLocaleDateString('es', { weekday: 'short', day: 'numeric' })
+  );
+
+  const salesData = last7DaysList.map((dayDate) => {
+    const dayOrders = orders.filter((o) => {
+      if (o.status === 'Cancelado') return false;
+      const orderDate = parseFlexibleDate(o.date);
+      return isSameDay(orderDate, dayDate);
+    });
+    return Math.round(dayOrders.reduce((sum, o) => sum + o.total, 0));
+  });
+  const maxSales = Math.max(...salesData, 100);
 
   // Export orders to CSV
   const exportOrdersCSV = () => {

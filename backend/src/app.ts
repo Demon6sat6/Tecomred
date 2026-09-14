@@ -14,6 +14,7 @@ import { contactRouter }    from "./routes/contact.js";
 import { newsletterRouter } from "./routes/newsletter.js";
 import { administratorsRouter } from "./routes/administrators.js";
 import { settingsRouter } from "./routes/settings.js";
+import { analyticsRouter } from "./routes/analytics.js";
 
 export const app = express();
 
@@ -22,6 +23,7 @@ const limiter = rateLimit({
   max: 100,
   standardHeaders: true,
   legacyHeaders: false,
+  skip: (req) => req.path.startsWith("/analytics"),
   message: { error: "Demasiadas solicitudes, intenta de nuevo en 15 minutos" },
 });
 
@@ -54,6 +56,7 @@ app.use("/api/contact",     contactRouter);
 app.use("/api/newsletter",  newsletterRouter);
 app.use("/api/administrators", administratorsRouter);
 app.use("/api/settings", settingsRouter);
+app.use("/api/analytics", analyticsRouter);
 
 // 404
 app.use((_req, res, next) => {
