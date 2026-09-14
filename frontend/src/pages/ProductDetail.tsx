@@ -134,13 +134,15 @@ export default function ProductDetail() {
     );
   }
 
-  // Multiple images (use same image with different crops to simulate gallery)
-  const images = [
-    product.image,
-    product.image.replace('w=400&h=300', 'w=400&h=300&crop=entropy'),
-    product.image.replace('w=400&h=300', 'w=400&h=300&crop=faces'),
-    product.image.replace('w=400&h=300', 'w=400&h=300&crop=center'),
-  ];
+  // Multiple images (support both SVG illustrations and remote images)
+  const images = product.image.startsWith('/products/')
+    ? [product.image]
+    : [
+        product.image,
+        product.image.replace('w=400&h=300', 'w=400&h=300&crop=entropy'),
+        product.image.replace('w=400&h=300', 'w=400&h=300&crop=faces'),
+        product.image.replace('w=400&h=300', 'w=400&h=300&crop=center'),
+      ];
 
   const productReviews = reviews.filter(r => r.productId === product.id);
   const avgRating = productReviews.length

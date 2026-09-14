@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 450" width="600" height="450">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0b1120" />
+      <stop offset="100%" stop-color="#050811" />
+    </linearGradient>
+    <linearGradient id="gridGlow" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.2" />
+      <stop offset="50%" stop-color="#818cf8" stop-opacity="0.3" />
+      <stop offset="100%" stop-color="#c084fc" stop-opacity="0.2" />
+    </linearGradient>
+    <radialGradient id="cardGlow" cx="50%" cy="45%" r="50%">
+      <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.18" />
+      <stop offset="100%" stop-color="#050811" stop-opacity="0" />
+    </radialGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="6" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+  <rect width="100%" height="100%" fill="url(#bgGrad)" />
+  <circle cx="300" cy="205" r="180" fill="url(#cardGlow)" />
+  
+  <!-- Subtle technical grid background -->
+  <g stroke="#ffffff" stroke-opacity="0.04" stroke-width="1">
+    <line x1="0" y1="0" x2="600" y2="0" /><line x1="0" y1="50" x2="600" y2="50" /><line x1="0" y1="100" x2="600" y2="100" /><line x1="0" y1="150" x2="600" y2="150" /><line x1="0" y1="200" x2="600" y2="200" /><line x1="0" y1="250" x2="600" y2="250" /><line x1="0" y1="300" x2="600" y2="300" /><line x1="0" y1="350" x2="600" y2="350" /><line x1="0" y1="400" x2="600" y2="400" />
+    <line x1="0" y1="0" x2="0" y2="450" /><line x1="50" y1="0" x2="50" y2="450" /><line x1="100" y1="0" x2="100" y2="450" /><line x1="150" y1="0" x2="150" y2="450" /><line x1="200" y1="0" x2="200" y2="450" /><line x1="250" y1="0" x2="250" y2="450" /><line x1="300" y1="0" x2="300" y2="450" /><line x1="350" y1="0" x2="350" y2="450" /><line x1="400" y1="0" x2="400" y2="450" /><line x1="450" y1="0" x2="450" y2="450" /><line x1="500" y1="0" x2="500" y2="450" /><line x1="550" y1="0" x2="550" y2="450" /><line x1="600" y1="0" x2="600" y2="450" />
+  </g>
+  
+  <!-- Box / Reel -->
+  <rect x="170" y="110" width="260" height="230" rx="16" fill="#1e293b" stroke="#38bdf8" stroke-width="3" />
+  
+  <!-- Handle -->
+  <rect x="250" y="80" width="100" height="40" rx="8" fill="#0f172a" stroke="#38bdf8" stroke-width="2" />
+  <rect x="265" y="95" width="70" height="15" rx="4" fill="#1e293b" />
+
+  <!-- Box graphics -->
+  <circle cx="300" cy="220" r="65" fill="#0f172a" stroke="#334155" stroke-width="3" />
+  <circle cx="300" cy="220" r="30" fill="#020617" />
+  <path d="M300 190 Q340 220 300 250" stroke="#38bdf8" stroke-width="6" fill="none" stroke-linecap="round" />
+
+  <!-- Cable coming out of hole -->
+  <path d="M300 220 C240 280, 160 260, 120 320 C100 350, 140 390, 200 370" stroke="#0284c7" stroke-width="10" fill="none" stroke-linecap="round" />
+  
+  <!-- RJ45 connector head -->
+  <rect x="190" y="355" width="45" height="30" rx="4" fill="#38bdf8" stroke="#0284c7" stroke-width="2" transform="rotate(-15 190 355)" />
+  <rect x="230" y="360" width="8" height="18" fill="#f59e0b" transform="rotate(-15 190 355)" />
+
+  <text x="300" y="150" fill="#f8fafc" font-family="system-ui, sans-serif" font-weight="900" font-size="18" text-anchor="middle">CAT6 UTP</text>
+  <text x="300" y="170" fill="#38bdf8" font-family="system-ui, sans-serif" font-weight="700" font-size="12" text-anchor="middle">BOBINA 305 METROS</text>
+
+  <!-- Badge -->
+  <rect x="180" y="375" width="240" height="36" rx="18" fill="#1e293b" stroke="#38bdf8" stroke-opacity="0.4" stroke-width="1.5" />
+  <text x="300" y="398" fill="#f8fafc" font-family="system-ui, sans-serif" font-weight="700" font-size="12" text-anchor="middle">100% Cobre | 23AWG Gigabit</text>
+
+</svg>

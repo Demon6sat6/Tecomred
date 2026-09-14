@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import {
   ArrowRight, Shield, Truck, Headphones, Zap,
   Network, Cpu, HardDrive, Cable, Wifi, Server,
-  CheckCircle, Tag, type LucideIcon,
+  CheckCircle, Tag, CircuitBoard, Wrench, Layers, type LucideIcon,
 } from 'lucide-react';
 import { useStore } from '../context/StoreContext';
 import { useAdmin } from '../context/AdminContext';
@@ -12,24 +12,29 @@ import Testimonials from '../components/Testimonials';
 import { useScrollReveal } from '../hooks/useScrollReveal';
 import { useCountUp } from '../hooks/useCountUp';
 
-function AnimatedStat({ value, suffix, label }: { value: number; suffix: string; label: string }) {
-  const { count, ref } = useCountUp(value, 1600);
+function AnimatedStat({ value, suffix, label, isStatic = false }: { value: number; suffix: string; label: string; isStatic?: boolean }) {
+  const { count, ref } = useCountUp(value, 800);
   return (
     <div ref={ref as React.RefObject<HTMLDivElement>} className="text-center py-2">
-      <div className="text-3xl font-extrabold gradient-text">{count}{suffix}</div>
-      <div className="text-gray-400 text-sm mt-1">{label}</div>
+      <div className="text-3xl sm:text-4xl font-extrabold gradient-text">
+        {isStatic ? `${value}${suffix}` : `${count.toLocaleString('es-PE')}${suffix}`}
+      </div>
+      <div className="text-gray-400 text-xs sm:text-sm mt-1 font-medium">{label}</div>
     </div>
   );
 }
 
 type CatStyle = { icon: LucideIcon; color: string; bg: string; border: string };
 const CATEGORY_STYLES: Record<string, CatStyle> = {
-  'Switches':       { icon: Network,   color: 'text-sky-400',     bg: 'bg-sky-500/10',     border: 'hover:border-sky-500/40' },
-  'Routers':        { icon: Wifi,      color: 'text-indigo-400',  bg: 'bg-indigo-500/10',  border: 'hover:border-indigo-500/40' },
-  'Procesadores':   { icon: Cpu,       color: 'text-purple-400',  bg: 'bg-purple-500/10',  border: 'hover:border-purple-500/40' },
-  'Almacenamiento': { icon: HardDrive, color: 'text-emerald-400', bg: 'bg-emerald-500/10', border: 'hover:border-emerald-500/40' },
-  'Cables':         { icon: Cable,     color: 'text-orange-400',  bg: 'bg-orange-500/10',  border: 'hover:border-orange-500/40' },
-  'Access Points':  { icon: Server,    color: 'text-pink-400',    bg: 'bg-pink-500/10',    border: 'hover:border-pink-500/40' },
+  'Switches':       { icon: Network,      color: 'text-sky-400',     bg: 'bg-sky-500/10',     border: 'hover:border-sky-500/40' },
+  'Routers':        { icon: Wifi,         color: 'text-indigo-400',  bg: 'bg-indigo-500/10',  border: 'hover:border-indigo-500/40' },
+  'Procesadores':   { icon: Cpu,          color: 'text-purple-400',  bg: 'bg-purple-500/10',  border: 'hover:border-purple-500/40' },
+  'Memorias RAM':   { icon: CircuitBoard, color: 'text-cyan-400',    bg: 'bg-cyan-500/10',    border: 'hover:border-cyan-500/40' },
+  'Almacenamiento': { icon: HardDrive,    color: 'text-emerald-400', bg: 'bg-emerald-500/10', border: 'hover:border-emerald-500/40' },
+  'Cables':         { icon: Cable,        color: 'text-orange-400',  bg: 'bg-orange-500/10',  border: 'hover:border-orange-500/40' },
+  'Access Points':  { icon: Server,       color: 'text-pink-400',    bg: 'bg-pink-500/10',    border: 'hover:border-pink-500/40' },
+  'Herramientas':   { icon: Wrench,       color: 'text-amber-400',   bg: 'bg-amber-500/10',   border: 'hover:border-amber-500/40' },
+  'Componentes':    { icon: Layers,       color: 'text-rose-400',    bg: 'bg-rose-500/10',    border: 'hover:border-rose-500/40' },
 };
 const DEFAULT_CAT_STYLE: CatStyle = { icon: Tag, color: 'text-gray-400', bg: 'bg-gray-500/10', border: 'hover:border-gray-500/40' };
 
@@ -118,31 +123,37 @@ export default function Home() {
             {/* Right — visual card */}
             <div className="hidden lg:block relative">
               {/* Main image card */}
-              <div className="relative glass-strong rounded-3xl overflow-hidden shadow-2xl shadow-sky-500/10">
+              <div className="relative glass-strong rounded-3xl overflow-hidden shadow-2xl shadow-sky-500/10 border border-white/10 group">
                 <img
-                  src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&h=420&fit=crop"
-                  alt="Equipos de red profesionales"
-                  className="w-full h-72 object-cover"
+                  src="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=800&h=520&fit=crop"
+                  alt="Equipos de red profesionales Cisco y Datacenter"
+                  className="w-full h-80 object-cover group-hover:scale-105 transition-transform duration-700"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-gray-950/80 via-transparent to-transparent" />
-                <div className="absolute bottom-4 left-4 right-4">
-                  <p className="text-white font-semibold text-sm">Cisco Catalyst 2960-X</p>
-                  <p className="text-sky-400 text-xs">Switch Gestionable 24 Puertos</p>
+                <div className="absolute inset-0 bg-gradient-to-t from-gray-950 via-gray-950/40 to-transparent" />
+                <div className="absolute bottom-5 left-5 max-w-[62%] z-10">
+                  <span className="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-sky-500/20 text-sky-400 border border-sky-500/30 mb-1.5 backdrop-blur-md">
+                    Hardware Empresarial
+                  </span>
+                  <p className="text-white font-bold text-base leading-tight">Cisco Catalyst 2960-X</p>
+                  <p className="text-sky-300 text-xs font-medium mt-0.5 line-clamp-1">Switch Gestionable 24 Puertos GbE</p>
                 </div>
               </div>
 
               {/* Floating stat cards */}
-              <div className="absolute -top-4 -right-4 glass-strong rounded-2xl px-4 py-3 shadow-xl">
-                <p className="text-2xl font-extrabold gradient-text">500+</p>
-                <p className="text-gray-400 text-xs">Productos</p>
+              <div className="absolute -top-4 -left-4 glass-strong rounded-2xl px-4 py-2.5 shadow-xl border border-white/10 flex items-center gap-2.5 z-20">
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
+                <div>
+                  <p className="text-base font-extrabold text-white leading-none">500+</p>
+                  <p className="text-gray-400 text-[10px] mt-0.5 font-medium">Equipos en Stock</p>
+                </div>
               </div>
-              <div className="absolute -bottom-4 -left-4 glass-strong rounded-2xl px-4 py-3 shadow-xl flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center">
-                  <CheckCircle className="w-4 h-4 text-emerald-400" />
+              <div className="absolute -top-4 -right-4 glass-strong rounded-2xl px-4 py-2.5 shadow-xl border border-white/10 flex items-center gap-2.5 z-20">
+                <div className="w-6 h-6 rounded-full bg-emerald-500/20 flex items-center justify-center shrink-0">
+                  <CheckCircle className="w-3.5 h-3.5 text-emerald-400" />
                 </div>
                 <div>
-                  <p className="text-white text-sm font-semibold">2,000+ clientes</p>
-                  <p className="text-gray-500 text-xs">satisfechos</p>
+                  <p className="text-white text-xs font-bold leading-tight">2,000+ Clientes</p>
+                  <p className="text-gray-400 text-[10px]">Garantía oficial en Perú</p>
                 </div>
               </div>
             </div>
@@ -153,10 +164,10 @@ export default function Home() {
       {/* ââ STATS ââ */}
       <SectionReveal className="py-8 px-4 border-y border-white/5">
         <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6">
-          <AnimatedStat value={Number(settings.stat1Value)} suffix={settings.stat1Suffix} label={settings.stat1Label} />
-          <AnimatedStat value={Number(settings.stat2Value)} suffix={settings.stat2Suffix} label={settings.stat2Label} />
-          <AnimatedStat value={Number(settings.stat3Value)} suffix={settings.stat3Suffix} label={settings.stat3Label} />
-          <AnimatedStat value={Number(settings.stat4Value)} suffix={settings.stat4Suffix} label={settings.stat4Label} />
+          <AnimatedStat value={Number(settings.stat1Value) || 500} suffix={settings.stat1Suffix || '+'} label={settings.stat1Label || 'Productos en stock'} />
+          <AnimatedStat value={Number(settings.stat2Value) || 2000} suffix={settings.stat2Suffix || '+'} label={settings.stat2Label || 'Clientes satisfechos'} />
+          <AnimatedStat value={Number(settings.stat3Value) || 10} suffix={settings.stat3Suffix || ' años'} label={settings.stat3Label || 'De experiencia'} />
+          <AnimatedStat value={24} suffix="/7" label={settings.stat4Label || 'Soporte técnico'} isStatic={true} />
         </div>
       </SectionReveal>
 

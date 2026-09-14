@@ -1,0 +1,153 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 450" width="600" height="450">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0b1120" />
+      <stop offset="100%" stop-color="#050811" />
+    </linearGradient>
+    <linearGradient id="gridGlow" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.2" />
+      <stop offset="50%" stop-color="#818cf8" stop-opacity="0.3" />
+      <stop offset="100%" stop-color="#c084fc" stop-opacity="0.2" />
+    </linearGradient>
+    <radialGradient id="cardGlow" cx="50%" cy="45%" r="50%">
+      <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.18" />
+      <stop offset="100%" stop-color="#050811" stop-opacity="0" />
+    </radialGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="6" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+  <rect width="100%" height="100%" fill="url(#bgGrad)" />
+  <circle cx="300" cy="205" r="180" fill="url(#cardGlow)" />
+  
+  <!-- Subtle technical grid background -->
+  <g stroke="#ffffff" stroke-opacity="0.04" stroke-width="1">
+    <line x1="0" y1="0" x2="600" y2="0" /><line x1="0" y1="50" x2="600" y2="50" /><line x1="0" y1="100" x2="600" y2="100" /><line x1="0" y1="150" x2="600" y2="150" /><line x1="0" y1="200" x2="600" y2="200" /><line x1="0" y1="250" x2="600" y2="250" /><line x1="0" y1="300" x2="600" y2="300" /><line x1="0" y1="350" x2="600" y2="350" /><line x1="0" y1="400" x2="600" y2="400" />
+    <line x1="0" y1="0" x2="0" y2="450" /><line x1="50" y1="0" x2="50" y2="450" /><line x1="100" y1="0" x2="100" y2="450" /><line x1="150" y1="0" x2="150" y2="450" /><line x1="200" y1="0" x2="200" y2="450" /><line x1="250" y1="0" x2="250" y2="450" /><line x1="300" y1="0" x2="300" y2="450" /><line x1="350" y1="0" x2="350" y2="450" /><line x1="400" y1="0" x2="400" y2="450" /><line x1="450" y1="0" x2="450" y2="450" /><line x1="500" y1="0" x2="500" y2="450" /><line x1="550" y1="0" x2="550" y2="450" /><line x1="600" y1="0" x2="600" y2="450" />
+  </g>
+  
+  <!-- PCB -->
+  <rect x="60" y="170" width="480" height="130" rx="6" fill="#0f172a" stroke="#334155" stroke-width="2" />
+
+  <!-- Heat spreader shield -->
+  <path d="M70 170 h460 l-15 45 h-430 z" fill="#1e293b" stroke="#475569" stroke-width="1" />
+  <rect x="70" y="210" width="460" height="65" fill="#111827" stroke="#334155" stroke-width="1" />
+
+  <!-- RGB Lightbar at the top -->
+  <rect x="80" y="165" width="440" height="12" rx="4" fill="url(#gridGlow)" filter="url(#glow)" />
+
+  <!-- Kingston Fury Logo -->
+  <text x="140" y="245" fill="#ef4444" font-family="system-ui, sans-serif" font-weight="900" font-size="20" letter-spacing="2">FURY</text>
+  <text x="215" y="245" fill="#ffffff" font-family="system-ui, sans-serif" font-weight="800" font-size="16">BEAST</text>
+  <text x="370" y="245" fill="#38bdf8" font-family="system-ui, sans-serif" font-weight="700" font-size="14">DDR5 32GB</text>
+  <text x="370" y="262" fill="#94a3b8" font-family="monospace" font-size="11">5600MT/s CL36 XMP 3.0</text>
+
+  <!-- Gold Pins (Bottom edge) -->
+  <g fill="#f59e0b">
+    
+      <rect x="75" y="278" width="5.5" height="18" rx="1" />
+    
+      <rect x="84.5" y="278" width="5.5" height="18" rx="1" />
+    
+      <rect x="94" y="278" width="5.5" height="18" rx="1" />
+    
+      <rect x="103.5" y="278" width="5.5" height="18" rx="1" />
+    
+      <rect x="113" y="278" width="5.5" height="18" rx="1" />
+    
+      <rect x="122.5" y="278" width="5.5" height="18" rx="1" />
+    
+      <rect x="132" y="278" width="5.5" height="18" rx="1" />
+    
+      <rect x="141.5" y="278" width="5.5" height="18" rx="1" />
+    
+      <rect x="151" y="278" width="5.5" height="18" rx="1" />
+    
+      <rect x="160.5" y="278" width="5.5" height="18" rx="1" />
+    
+      <rect x="170" y="278" width="5.5" height="18" rx="1" />
+    
+      <rect x="179.5" y="278" width="5.5" height="18" rx="1" />
+    
+      <rect x="189" y="278" width="5.5" height="18" rx="1" />
+    
+      <rect x="198.5" y="278" width="5.5" height="18" rx="1" />
+    
+      <rect x="208" y="278" width="5.5" height="18" rx="1" />
+    
+      <rect x="217.5" y="278" width="5.5" height="18" rx="1" />
+    
+      <rect x="227" y="278" width="5.5" height="18" rx="1" />
+    
+      <rect x="236.5" y="278" width="5.5" height="18" rx="1" />
+    
+      <rect x="246" y="278" width="5.5" height="18" rx="1" />
+    
+      <rect x="255.5" y="278" width="5.5" height="18" rx="1" />
+    
+      <rect x="265" y="278" width="5.5" height="18" rx="1" />
+    
+      <rect x="274.5" y="278" width="5.5" height="18" rx="1" />
+    
+      <rect x="284" y="278" width="5.5" height="18" rx="1" />
+    
+      <rect x="293.5" y="278" width="5.5" height="18" rx="1" />
+    
+      <rect x="303" y="278" width="5.5" height="18" rx="1" />
+    
+      <rect x="312.5" y="278" width="5.5" height="18" rx="1" />
+    
+      <rect x="322" y="278" width="5.5" height="18" rx="1" />
+    
+      <rect x="331.5" y="278" width="5.5" height="18" rx="1" />
+    
+      <rect x="341" y="278" width="5.5" height="18" rx="1" />
+    
+      <rect x="350.5" y="278" width="5.5" height="18" rx="1" />
+    
+      <rect x="360" y="278" width="5.5" height="18" rx="1" />
+    
+      <rect x="369.5" y="278" width="5.5" height="18" rx="1" />
+    
+      <rect x="379" y="278" width="5.5" height="18" rx="1" />
+    
+      <rect x="388.5" y="278" width="5.5" height="18" rx="1" />
+    
+      <rect x="398" y="278" width="5.5" height="18" rx="1" />
+    
+      <rect x="407.5" y="278" width="5.5" height="18" rx="1" />
+    
+      <rect x="417" y="278" width="5.5" height="18" rx="1" />
+    
+      <rect x="426.5" y="278" width="5.5" height="18" rx="1" />
+    
+      <rect x="436" y="278" width="5.5" height="18" rx="1" />
+    
+      <rect x="445.5" y="278" width="5.5" height="18" rx="1" />
+    
+      <rect x="455" y="278" width="5.5" height="18" rx="1" />
+    
+      <rect x="464.5" y="278" width="5.5" height="18" rx="1" />
+    
+      <rect x="474" y="278" width="5.5" height="18" rx="1" />
+    
+      <rect x="483.5" y="278" width="5.5" height="18" rx="1" />
+    
+      <rect x="493" y="278" width="5.5" height="18" rx="1" />
+    
+      <rect x="502.5" y="278" width="5.5" height="18" rx="1" />
+    
+      <rect x="512" y="278" width="5.5" height="18" rx="1" />
+    
+      <rect x="521.5" y="278" width="5.5" height="18" rx="1" />
+    
+  </g>
+  <!-- Center Key Notch -->
+  <rect x="300" y="274" width="12" height="24" rx="2" fill="#050811" />
+
+  <!-- Badge -->
+  <rect x="180" y="340" width="240" height="36" rx="18" fill="#1e293b" stroke="#38bdf8" stroke-opacity="0.4" stroke-width="1.5" />
+  <text x="300" y="363" fill="#f8fafc" font-family="system-ui, sans-serif" font-weight="700" font-size="12" text-anchor="middle">32GB Dual Channel | 5600MHz</text>
+
+</svg>

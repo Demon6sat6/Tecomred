@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 
-export function useCountUp(target: number, duration = 1800, startOnVisible = true) {
-  const [count, setCount] = useState(0);
+export function useCountUp(target: number, duration = 1500, startOnVisible = true) {
+  const [count, setCount] = useState(target);
   const [started, setStarted] = useState(false);
   const ref = useRef<HTMLElement>(null);
 
@@ -9,12 +9,25 @@ export function useCountUp(target: number, duration = 1800, startOnVisible = tru
     if (!startOnVisible) { setStarted(true); return; }
     const el = ref.current;
     if (!el) return;
+
+    if (typeof window !== 'undefined') {
+      const rect = el.getBoundingClientRect();
+      if (rect.top < window.innerHeight + 100) {
+        setStarted(true);
+        return;
+      }
+    }
+
     const observer = new IntersectionObserver(
       ([entry]) => { if (entry.isIntersecting) { setStarted(true); observer.disconnect(); } },
-      { threshold: 0.3 }
+      { threshold: 0.05, rootMargin: '100px 0px' }
     );
     observer.observe(el);
-    return () => observer.disconnect();
+    const timer = setTimeout(() => setStarted(true), 1500);
+    return () => {
+      observer.disconnect();
+      clearTimeout(timer);
+    };
   }, [startOnVisible]);
 
   useEffect(() => {

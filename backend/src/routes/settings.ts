@@ -11,10 +11,10 @@ async function ensureSettingsTable() {
   if (tableEnsured) return;
   await pool.query(
     "CREATE TABLE IF NOT EXISTS store_settings (" +
-    "  id TINYINT UNSIGNED NOT NULL PRIMARY KEY," +
-    "  content JSON NOT NULL," +
-    "  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP" +
-    ")",
+      "  id TINYINT UNSIGNED NOT NULL PRIMARY KEY," +
+      "  content JSON NOT NULL," +
+      "  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP" +
+      ")",
   );
   tableEnsured = true;
 }

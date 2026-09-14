@@ -19,7 +19,6 @@ export default function ProductCard({ product }: Props) {
   const { addToCart } = useCart();
   const { showToast } = useToast();
   const { formatShort } = useCurrency();
-  const [imgLoaded, setImgLoaded] = useState(false);
   const [justAdded, setJustAdded] = useState(false);
 
   const discount = product.originalPrice
@@ -42,15 +41,13 @@ export default function ProductCard({ product }: Props) {
 
       {/* Image */}
       <div className="relative overflow-hidden h-40 sm:h-48 bg-gray-800 shrink-0">
-        {!imgLoaded && (
-          <div className="absolute inset-0 bg-gray-800 animate-pulse" />
-        )}
         <img
           src={product.image}
           alt={product.name}
-          onLoad={() => setImgLoaded(true)}
-          className={`w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ${imgLoaded ? 'opacity-100' : 'opacity-0'}`}
-          loading="lazy"
+          onError={(e) => {
+            (e.target as HTMLImageElement).src = '/products/cisco-2960.svg';
+          }}
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
         />
 
         {/* Gradiente inferior */}
