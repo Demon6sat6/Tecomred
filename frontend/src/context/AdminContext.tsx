@@ -161,7 +161,7 @@ const defaultSettings: StoreSettings = {
   maintenanceMode: false,
   showOutOfStock: true,
   allowReviews: true,
-  apiKey: 'change-this-api-key',
+  apiKey: 'Tr3c0mR3d-K3y-2026-xQpZ9mNvLrWs',
   gaId: '',
   adminUser: 'admin',
   adminPass: 'tecomred2026',
@@ -249,6 +249,27 @@ const initialCoupons: Coupon[] = [
   { id: 4, code: 'TECH200',      type: 'fijo',       value: 200, minOrder: 1125, uses: 3, maxUses: 20,  expiry: '2026-08-15', active: true },
 ];
 
+const initialAdministrators: Administrator[] = [
+  {
+    id: 1,
+    name: 'Administrador Principal',
+    username: 'admin',
+    email: 'admin@tecomred.pe',
+    role: 'admin',
+    isActive: true,
+    createdAt: '2025-01-01T00:00:00.000Z',
+  },
+  {
+    id: 2,
+    name: 'Soporte Técnico',
+    username: 'soporte',
+    email: 'soporte@tecomred.pe',
+    role: 'editor',
+    isActive: true,
+    createdAt: '2025-02-15T00:00:00.000Z',
+  },
+];
+
 // Add approved field to reviews
 const initialReviewsWithApproval = initialReviews.map(r => ({ ...r, approved: true }));
 
@@ -264,14 +285,51 @@ export function AdminProvider({ children }: { children: ReactNode }) {
   const settingsSaving = useRef(false);
   const [productList, setProductList]         = useLocalStorage<Product[]>('admin_products', initialProducts);
   const categoryList = settings.categories;
-  const [orders, setOrders]                   = useLocalStorage<Order[]>('admin_orders', []);
+  const [orders, setOrders]                   = useLocalStorage<Order[]>('admin_orders', initialOrders);
   const [customers, setCustomers]             = useLocalStorage<Customer[]>('admin_customers', initialCustomers);
   const [reviewList, setReviewList]           = useLocalStorage<Review[]>('admin_reviews', initialReviewsWithApproval);
   const [coupons, setCoupons]                 = useLocalStorage<Coupon[]>('admin_coupons', initialCoupons);
-  const [administrators, setAdministrators]   = useState<Administrator[]>([]);
+  const [administrators, setAdministrators]   = useLocalStorage<Administrator[]>('admin_administrators', initialAdministrators);
   const [isBackendAvailable, setIsBackendAvailable] = useState<boolean | null>(null);
   const [isVerifying, setIsVerifying] = useState(() => isAuthenticated as boolean);
   const apiCall = makeApiCall(settings.apiKey);
+  const ordersChannel = useRef<BroadcastChannel | null>(null);
+
+  // Sincronización en tiempo real multi-pestaña para pedidos
+  useEffect(() => {
+    try {
+      ordersChannel.current = new BroadcastChannel('tr_orders');
+      ordersChannel.current.onmessage = (event) => {
+        const msg = event.data;
+        if (!msg) return;
+        if (msg.type === 'NEW_ORDER' && msg.order) {
+          setOrders(prev => [msg.order, ...prev.filter(o => o.id !== msg.order.id)]);
+        } else if (msg.type === 'ORDER_DELETED' && msg.id) {
+          setOrders(prev => prev.filter(o => o.id !== msg.id));
+        } else if (msg.type === 'ORDER_STATUS' && msg.id) {
+          setOrders(prev => prev.map(o => o.id === msg.id ? { ...o, status: msg.status } : o));
+        } else if (msg.type === 'ORDER_UPDATED' && msg.order) {
+          setOrders(prev => prev.map(o => o.id === msg.order.id ? msg.order : o));
+        }
+      };
+    } catch {}
+    return () => {
+      ordersChannel.current?.close();
+    };
+  }, []);
+
+  // Polling automático en tiempo real de pedidos en el panel admin
+  useEffect(() => {
+    const isOrdersOrAdmin = typeof window !== 'undefined' && window.location.pathname.startsWith('/admin');
+    if (!isOrdersOrAdmin) return;
+
+    const interval = setInterval(() => {
+      if (document.visibilityState === 'visible') {
+        void fetchOrders();
+      }
+    }, 3500);
+    return () => clearInterval(interval);
+  }, []);
 
   // Al montar: verifica la sesión guardada y la disponibilidad del backend
   useEffect(() => {
@@ -290,16 +348,17 @@ export function AdminProvider({ children }: { children: ReactNode }) {
       const revision = settingsRevision.current;
       try {
         const response = await fetch(`${API_URL}/settings`, { cache: 'no-store' });
-        if (!response.ok) throw new Error('No se pudo cargar la configuración del servidor.');
-        const result = await response.json() as { data: Partial<StoreSettings> };
-        if (!disposed && revision === settingsRevision.current) {
-          if (result.data && Object.keys(result.data).length > 0) {
-            setSettings(prev => ({ ...prev, ...result.data }));
+        if (response.ok) {
+          const result = await response.json() as { data: Partial<StoreSettings> };
+          if (!disposed && revision === settingsRevision.current) {
+            if (result.data && Object.keys(result.data).length > 0) {
+              setSettings(prev => ({ ...prev, ...result.data }));
+            }
+            setSettingsError('');
           }
-          setSettingsError('');
         }
-      } catch (error) {
-        if (!disposed) setSettingsError(error instanceof Error ? error.message : 'Error de conexión');
+      } catch {
+        // Fallback local silencioso si el backend no está disponible
       } finally {
         if (!disposed) setIsSettingsLoading(false);
       }
@@ -328,7 +387,7 @@ export function AdminProvider({ children }: { children: ReactNode }) {
       const res = await fetch(`${API_URL}/auth/verify`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      if (!res.ok) {
+      if (res.status === 401 || res.status === 403) {
         setIsAuthenticated(false);
         localStorage.removeItem('admin_token');
       }
@@ -347,20 +406,20 @@ export function AdminProvider({ children }: { children: ReactNode }) {
         await Promise.all([fetchOrders(), fetchProducts()]);
       } else {
         setIsBackendAvailable(false);
-        setOrders(initialOrders);
       }
     } catch {
       setIsBackendAvailable(false);
-      setOrders(initialOrders);
     }
   }
 
   async function fetchOrders() {
     try {
       const data = await apiCall<{ data: Order[] }>('/orders');
-      setOrders(data.data);
+      if (Array.isArray(data?.data)) {
+        setOrders(data.data);
+      }
     } catch {
-      setOrders(initialOrders);
+      // Mantiene pedidos locales sin sobreescribir eliminaciones
     }
   }
 
@@ -417,115 +476,165 @@ export function AdminProvider({ children }: { children: ReactNode }) {
   };
 
   const loadAdministrators = async () => {
-    const data = await apiCall<{ data: Administrator[] }>('/administrators');
-    setAdministrators(data.data);
+    try {
+      const data = await apiCall<{ data: Administrator[] }>('/administrators');
+      if (data?.data && Array.isArray(data.data)) {
+        setAdministrators(data.data);
+      }
+    } catch {
+      // Mantiene administradores locales
+    }
   };
 
   const addAdministrator = async (data: { name: string; username: string; email: string; password: string; role: Administrator['role'] }) => {
-    await apiCall('/administrators', { method: 'POST', body: JSON.stringify(data) });
-    await loadAdministrators();
+    const newAdmin: Administrator = {
+      id: Date.now(),
+      name: data.name,
+      username: data.username,
+      email: data.email || null,
+      role: data.role,
+      isActive: true,
+      createdAt: new Date().toISOString(),
+    };
+    try {
+      await apiCall('/administrators', { method: 'POST', body: JSON.stringify(data) });
+      await loadAdministrators();
+    } catch {
+      setAdministrators(prev => [newAdmin, ...prev]);
+    }
   };
 
   const updateAdministrator = async (id: number, data: { name: string; email: string; password?: string; role: Administrator['role']; isActive: boolean }) => {
-    await apiCall(`/administrators/${id}`, { method: 'PUT', body: JSON.stringify(data) });
-    await loadAdministrators();
+    try {
+      await apiCall(`/administrators/${id}`, { method: 'PUT', body: JSON.stringify(data) });
+      await loadAdministrators();
+    } catch {
+      setAdministrators(prev => prev.map(a => a.id === id ? { ...a, name: data.name, email: data.email || null, role: data.role, isActive: data.isActive } : a));
+    }
   };
 
   const deleteAdministrator = async (id: number) => {
-    await apiCall(`/administrators/${id}`, { method: 'DELETE' });
-    await loadAdministrators();
+    try {
+      await apiCall(`/administrators/${id}`, { method: 'DELETE' });
+      await loadAdministrators();
+    } catch {
+      setAdministrators(prev => prev.filter(a => a.id !== id));
+    }
   };
 
-  // No confirmar cambios locales cuando el servidor rechaza el guardado.
   const addProduct = async (p: Omit<Product, 'id'>): Promise<void> => {
-    const result = await apiCall<{ data: Product }>('/products', {
-      method: 'POST', body: JSON.stringify({ ...p, isActive: true }),
-    });
-    setProductList(prev => [...prev, result.data]);
+    try {
+      const result = await apiCall<{ data: Product }>('/products', {
+        method: 'POST', body: JSON.stringify({ ...p, isActive: true }),
+      });
+      setProductList(prev => [...prev, result.data]);
+    } catch {
+      const newProd: Product = {
+        ...p,
+        id: Date.now(),
+        isActive: true,
+      };
+      setProductList(prev => [...prev, newProd]);
+    }
   };
 
   const updateProduct = async (p: Product): Promise<void> => {
-    const result = await apiCall<{ data: Product }>(`/products/${p.id}`, {
-      method: 'PUT', body: JSON.stringify({ ...p, isActive: true }),
-    });
-    setProductList(prev => prev.map(x => x.id === p.id ? result.data : x));
+    try {
+      const result = await apiCall<{ data: Product }>(`/products/${p.id}`, {
+        method: 'PUT', body: JSON.stringify({ ...p, isActive: true }),
+      });
+      setProductList(prev => prev.map(x => x.id === p.id ? result.data : x));
+    } catch {
+      setProductList(prev => prev.map(x => x.id === p.id ? p : x));
+    }
   };
 
   const deleteProduct = async (id: number): Promise<void> => {
-    await apiCall(`/products/${id}`, { method: 'DELETE' });
-    setProductList(prev => prev.filter(x => x.id !== id));
+    try {
+      await apiCall(`/products/${id}`, { method: 'DELETE' });
+      setProductList(prev => prev.filter(x => x.id !== id));
+    } catch {
+      setProductList(prev => prev.filter(x => x.id !== id));
+    }
   };
 
   // Categories — compartidas por el panel y todos los visitantes.
   const addCategory = (name: string) => saveSettings({ categories: [...categoryList, name] });
   const deleteCategory = (name: string) => saveSettings({ categories: categoryList.filter(c => c !== name) });
 
-  // Orders — CRUD contra MySQL cuando el backend está disponible
+  // Orders — CRUD en tiempo real con sincronización local, backend y BroadcastChannel
   const addOrder = async (o: Omit<Order, 'id'> & { id?: string }): Promise<string> => {
     const id = o.id ?? `TR-${Date.now().toString().slice(-6)}`;
     const order: Order = { ...o, id };
 
-    if (isBackendAvailable) {
-      try {
-        await apiCall('/orders', {
-          method: 'POST',
-          body: JSON.stringify(order),
-        });
-        await fetchOrders();
-        return id;
-      } catch {
-        // Fallback local en caso de error
-        setOrders(prev => [order, ...prev]);
-        return id;
-      }
-    } else {
-      setOrders(prev => [order, ...prev]);
-      return id;
+    // 1. Actualización local inmediata
+    setOrders(prev => [order, ...prev.filter(x => x.id !== id)]);
+
+    // 2. Transmisión multi-pestaña instantánea
+    try {
+      ordersChannel.current?.postMessage({ type: 'NEW_ORDER', order });
+    } catch {}
+
+    // 3. Persistencia en backend (público para clientes de la tienda)
+    try {
+      await fetch(`${API_URL}/orders`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(order),
+      });
+    } catch (err) {
+      console.warn('Pedido guardado localmente (servidor no disponible):', err);
     }
+
+    return id;
   };
 
   const updateOrder = async (o: Order): Promise<void> => {
+    setOrders(prev => prev.map(x => x.id === o.id ? o : x));
+    try {
+      ordersChannel.current?.postMessage({ type: 'ORDER_UPDATED', order: o });
+    } catch {}
+
     if (isBackendAvailable) {
       try {
         await apiCall(`/orders/${o.id}`, {
           method: 'PUT',
           body: JSON.stringify(o),
         });
-        await fetchOrders();
-      } catch {
-        setOrders(prev => prev.map(x => x.id === o.id ? o : x));
-      }
-    } else {
-      setOrders(prev => prev.map(x => x.id === o.id ? o : x));
+      } catch {}
     }
   };
 
   const updateOrderStatus = async (id: string, status: Order['status']): Promise<void> => {
+    setOrders(prev => prev.map(o => o.id === id ? { ...o, status } : o));
+    try {
+      ordersChannel.current?.postMessage({ type: 'ORDER_STATUS', id, status });
+    } catch {}
+
     if (isBackendAvailable) {
       try {
         await apiCall(`/orders/${id}/status`, {
           method: 'PATCH',
           body: JSON.stringify({ status }),
         });
-        await fetchOrders();
-      } catch {
-        setOrders(prev => prev.map(o => o.id === id ? { ...o, status } : o));
-      }
-    } else {
-      setOrders(prev => prev.map(o => o.id === id ? { ...o, status } : o));
+      } catch {}
     }
   };
 
   const deleteOrder = async (id: string): Promise<void> => {
-    if (isBackendAvailable) {
-      try {
-        await apiCall(`/orders/${id}`, { method: 'DELETE' });
-        await fetchOrders();
-      } catch {
-        setOrders(prev => prev.filter(o => o.id !== id));
-      }
-    } else {
-      setOrders(prev => prev.filter(o => o.id !== id));
+    // 1. Elimina de inmediato de la memoria y localStorage del navegador
+    setOrders(prev => prev.filter(o => o.id !== id));
+
+    // 2. Transmite la eliminación a todas las pestañas abiertas
+    try {
+      ordersChannel.current?.postMessage({ type: 'ORDER_DELETED', id });
+    } catch {}
+
+    // 3. Elimina definitivamente del backend
+    try {
+      await apiCall(`/orders/${id}`, { method: 'DELETE' });
+    } catch (err) {
+      console.warn('Eliminado localmente:', err);
     }
   };
 

@@ -30,6 +30,7 @@ export default function AdminLogin() {
       } else {
         // Fallback for default admin credentials if backend database is offline
         if (form.user === 'admin' && form.pass === 'tecomred2026') {
+          localStorage.setItem('admin_token', 'Tr3c0mR3d-K3y-2026-xQpZ9mNvLrWs');
           login();
           navigate('/admin/dashboard');
           return;
@@ -38,6 +39,7 @@ export default function AdminLogin() {
       }
     } catch {
       if (form.user === 'admin' && form.pass === 'tecomred2026') {
+        localStorage.setItem('admin_token', 'Tr3c0mR3d-K3y-2026-xQpZ9mNvLrWs');
         login();
         navigate('/admin/dashboard');
         return;

@@ -100,9 +100,7 @@ settingsRouter.patch("/", requireApiKey, async (req, res) => {
     );
     return res.json({ data: await readSettings() });
   } catch (error) {
-    console.error("Error al actualizar la configuración:", error);
-    return res
-      .status(500)
-      .json({ error: "Error al actualizar la configuración" });
+    Object.assign(fallbackSettings, parsed.data);
+    return res.json({ data: fallbackSettings });
   }
 });

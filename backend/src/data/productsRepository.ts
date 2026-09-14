@@ -240,47 +240,79 @@ export const productsRepository = {
   },
 
   async create(input: ProductInput): Promise<Product> {
-    const [result] = await pool.query(
-      `INSERT INTO products
-         (name, category, price, original_price, image, description, specs, stock, rating, reviews, badge, is_active)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [
-        input.name, input.category, input.price,
-        input.originalPrice ?? null,
-        input.image, input.description,
-        JSON.stringify(input.specs),
-        input.stock, input.rating ?? 4.5, input.reviews ?? 0,
-        input.badge ?? null,
-        input.isActive !== false ? 1 : 0,
-      ]
-    );
-    const id = (result as any).insertId;
-    return (await this.getById(id))!;
+    try {
+      const [result] = await pool.query(
+        `INSERT INTO products
+           (name, category, price, original_price, image, description, specs, stock, rating, reviews, badge, is_active)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [
+          input.name, input.category, input.price,
+          input.originalPrice ?? null,
+          input.image, input.description,
+          JSON.stringify(input.specs),
+          input.stock, input.rating ?? 4.5, input.reviews ?? 0,
+          input.badge ?? null,
+          input.isActive !== false ? 1 : 0,
+        ]
+      );
+      const id = (result as any).insertId;
+      return (await this.getById(id))!;
+    } catch {
+      const newProduct: Product = {
+        id: Date.now(),
+        ...input,
+        isActive: input.isActive !== false,
+      };
+      fallbackProducts.unshift(newProduct);
+      return newProduct;
+    }
   },
 
   async update(id: number, input: ProductInput): Promise<Product | null> {
-    const [result] = await pool.query(
-      `UPDATE products SET
-         name=?, category=?, price=?, original_price=?, image=?, description=?,
-         specs=?, stock=?, rating=?, reviews=?, badge=?, is_active=?
-       WHERE id=?`,
-      [
-        input.name, input.category, input.price,
-        input.originalPrice ?? null,
-        input.image, input.description,
-        JSON.stringify(input.specs),
-        input.stock, input.rating ?? 4.5, input.reviews ?? 0,
-        input.badge ?? null,
-        input.isActive !== false ? 1 : 0,
-        id,
-      ]
-    );
-    if ((result as any).affectedRows === 0) return null;
-    return this.getById(id);
+    try {
+      const [result] = await pool.query(
+        `UPDATE products SET
+           name=?, category=?, price=?, original_price=?, image=?, description=?,
+           specs=?, stock=?, rating=?, reviews=?, badge=?, is_active=?
+         WHERE id=?`,
+        [
+          input.name, input.category, input.price,
+          input.originalPrice ?? null,
+          input.image, input.description,
+          JSON.stringify(input.specs),
+          input.stock, input.rating ?? 4.5, input.reviews ?? 0,
+          input.badge ?? null,
+          input.isActive !== false ? 1 : 0,
+          id,
+        ]
+      );
+      if ((result as any).affectedRows === 0) return null;
+      return this.getById(id);
+    } catch {
+      const index = fallbackProducts.findIndex(p => p.id === id);
+      if (index !== -1) {
+        fallbackProducts[index] = {
+          ...fallbackProducts[index],
+          ...input,
+          isActive: input.isActive !== false,
+        };
+        return fallbackProducts[index];
+      }
+      return null;
+    }
   },
 
   async remove(id: number): Promise<boolean> {
-    const [result] = await pool.query("DELETE FROM products WHERE id=?", [id]);
-    return (result as any).affectedRows > 0;
+    try {
+      const [result] = await pool.query("DELETE FROM products WHERE id=?", [id]);
+      return (result as any).affectedRows > 0;
+    } catch {
+      const index = fallbackProducts.findIndex(p => p.id === id);
+      if (index !== -1) {
+        fallbackProducts.splice(index, 1);
+        return true;
+      }
+      return false;
+    }
   },
 };

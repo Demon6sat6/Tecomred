@@ -20,10 +20,15 @@ export const app = express();
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 100,
+  max: env.NODE_ENV === "production" ? 1000 : 10000,
   standardHeaders: true,
   legacyHeaders: false,
-  skip: (req) => req.path.startsWith("/analytics"),
+  skip: (req) =>
+    env.NODE_ENV !== "production" ||
+    req.path.startsWith("/analytics") ||
+    req.ip === "127.0.0.1" ||
+    req.ip === "::1" ||
+    req.ip === "::ffff:127.0.0.1",
   message: { error: "Demasiadas solicitudes, intenta de nuevo en 15 minutos" },
 });
 

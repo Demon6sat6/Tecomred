@@ -21,10 +21,13 @@ export const ordersController = {
     if (!parsed.success) {
       return res.status(400).json({ error: "Invalid payload", details: parsed.error.flatten() });
     }
+    const id = (typeof req.body.id === "string" && req.body.id.trim())
+      ? req.body.id.trim()
+      : `TR-${Date.now().toString().slice(-6)}`;
     const order: Order = {
       ...parsed.data,
-      id: `TR-${Date.now().toString().slice(-6)}`,
-      createdAt: new Date().toISOString(),
+      id,
+      createdAt: req.body.createdAt || new Date().toISOString(),
     };
     try {
       await ordersRepository.createOrder(order);

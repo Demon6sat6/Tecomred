@@ -11,6 +11,7 @@ export interface Product {
   rating: number;
   reviews: number;
   badge?: 'Nuevo' | 'Oferta' | 'Popular' | 'Agotado';
+  isActive?: boolean;
 }
 
 export interface CartItem {
