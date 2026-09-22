@@ -6,7 +6,9 @@ import {
 import { useStore } from '../context/StoreContext';
 import { reviews } from '../data/reviews';
 import { useCart } from '../context/CartContext';
+import { usePageTitle } from '../hooks/usePageTitle';
 import { useToast } from '../context/ToastContext';
+import { useAdmin } from '../context/AdminContext';
 import { useCurrency } from '../hooks/useCurrency';
 import ProductCard from '../components/ProductCard';
 import { useState } from 'react';
@@ -113,6 +115,7 @@ function StarRating({ rating, size = 'sm' }: { rating: number; size?: 'sm' | 'md
 export default function ProductDetail() {
   const { id } = useParams();
   const { products } = useStore();
+  const { settings } = useAdmin();
   const { addToCart } = useCart();
   const { showToast } = useToast();
   const { formatShort } = useCurrency();
@@ -120,9 +123,15 @@ export default function ProductDetail() {
   const [qty, setQty] = useState(1);
   const [activeTab, setActiveTab] = useState<Tab>('specs');
   const [activeImg, setActiveImg] = useState(0);
+  const [touchStartX, setTouchStartX] = useState<number | null>(null);
   const [localReviews, setLocalReviews] = useState<LocalReview[]>([]);
 
   const product = products.find(p => p.id === Number(id));
+
+  usePageTitle(
+    product ? product.name : 'Producto no encontrado',
+    product ? `${product.name} — ${product.description} Compra en TecomRed con envío a todo el Perú.` : undefined
+  );
 
   if (!product) {
     return (
@@ -213,8 +222,24 @@ export default function ProductDetail() {
 
         {/* IMAGE GALLERY */}
         <div className="space-y-3">
-          {/* Main image */}
-          <div className="relative glass rounded-2xl overflow-hidden aspect-square bg-gray-900 group">
+          {/* Main image con soporte de swipe táctil en celular */}
+          <div
+            onTouchStart={e => setTouchStartX(e.touches[0].clientX)}
+            onTouchEnd={e => {
+              if (touchStartX === null || images.length <= 1) return;
+              const touchEndX = e.changedTouches[0].clientX;
+              const diff = touchStartX - touchEndX;
+              if (diff > 45) {
+                // Deslizó hacia la izquierda -> siguiente
+                setActiveImg(i => (i + 1) % images.length);
+              } else if (diff < -45) {
+                // Deslizó hacia la derecha -> anterior
+                setActiveImg(i => (i - 1 + images.length) % images.length);
+              }
+              setTouchStartX(null);
+            }}
+            className="relative glass rounded-2xl overflow-hidden aspect-square bg-gray-900 group select-none touch-pan-y"
+          >
             <img
               src={images[activeImg]}
               alt={product.name}
@@ -236,19 +261,25 @@ export default function ProductDetail() {
                 -{discount}%
               </span>
             )}
-            {/* Prev/Next arrows */}
-            <button
-              onClick={() => setActiveImg(i => (i - 1 + images.length) % images.length)}
-              className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/40 hover:bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-            >
-              <ChevronLeft className="w-5 h-5 text-white" />
-            </button>
-            <button
-              onClick={() => setActiveImg(i => (i + 1) % images.length)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/40 hover:bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-            >
-              <ChevronRight className="w-5 h-5 text-white" />
-            </button>
+            {/* Prev/Next arrows — visibles siempre en móvil para facilitar el uso */}
+            {images.length > 1 && (
+              <>
+                <button
+                  onClick={() => setActiveImg(i => (i - 1 + images.length) % images.length)}
+                  className="absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-slate-900/80 hover:bg-slate-900 border border-slate-700 flex items-center justify-center opacity-85 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity active:scale-95 z-10"
+                  aria-label="Imagen anterior"
+                >
+                  <ChevronLeft className="w-5 h-5 text-white" />
+                </button>
+                <button
+                  onClick={() => setActiveImg(i => (i + 1) % images.length)}
+                  className="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-slate-900/80 hover:bg-slate-900 border border-slate-700 flex items-center justify-center opacity-85 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity active:scale-95 z-10"
+                  aria-label="Imagen siguiente"
+                >
+                  <ChevronRight className="w-5 h-5 text-white" />
+                </button>
+              </>
+            )}
           </div>
 
           {/* Thumbnails */}
@@ -363,7 +394,7 @@ export default function ProductDetail() {
           <div className="grid grid-cols-2 gap-2 mt-auto">
             {[
               { icon: Shield, text: 'Garantía oficial del fabricante' },
-              { icon: Truck,  text: 'Envío gratis en pedidos +$100' },
+              { icon: Truck,  text: `Envío gratis desde ${formatShort(Number(settings.freeShippingMin) || 300)}` },
               { icon: BadgeCheck, text: 'Producto 100% original' },
               { icon: Package,    text: 'Devolución en 30 días' },
             ].map(({ icon: Icon, text }) => (

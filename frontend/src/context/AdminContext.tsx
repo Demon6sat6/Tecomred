@@ -74,6 +74,7 @@ export interface StoreSettings {
   maintenanceMode: boolean;
   showOutOfStock: boolean;
   allowReviews: boolean;
+  showAnnouncementBar?: boolean;
   apiKey: string;
   gaId: string;
   adminUser: string;
@@ -161,6 +162,7 @@ const defaultSettings: StoreSettings = {
   maintenanceMode: false,
   showOutOfStock: true,
   allowReviews: true,
+  showAnnouncementBar: false,
   apiKey: 'Tr3c0mR3d-K3y-2026-xQpZ9mNvLrWs',
   gaId: '',
   adminUser: 'admin',

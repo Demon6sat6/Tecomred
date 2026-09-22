@@ -5,6 +5,7 @@ import { categories } from '../data/products';
 import { useStore } from '../context/StoreContext';
 import { useCurrency } from '../hooks/useCurrency';
 import ProductCard from '../components/ProductCard';
+import { usePageTitle } from '../hooks/usePageTitle';
 
 const PRICE_MAX = 5000;
 
@@ -30,6 +31,11 @@ export default function Products() {
   const [minPrice, setMinPrice] = useState(0);
   const [maxPrice, setMaxPrice] = useState(PRICE_MAX);
   const [activePreset, setActivePreset] = useState<number | null>(null);
+
+  usePageTitle(
+    selectedCategory !== 'Todos' ? `Catálogo: ${selectedCategory}` : 'Catálogo de Productos',
+    'Explora switches, routers, cables y componentes de cómputo con filtros por categoría y precio. Envíos a todo el Perú.'
+  );
 
   const filtered = useMemo(() => {
     let result = [...products];

@@ -35,7 +35,7 @@ export default function Testimonials() {
   const { ref, isVisible } = useScrollReveal();
 
   return (
-    <section ref={ref} className={`py-12 sm:py-16 px-4 transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+    <section ref={ref} className={`py-12 sm:py-16 px-4 bg-[#070c18] border-t border-slate-800/80 transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-8 sm:mb-12">
           <p className="text-sky-400 text-xs sm:text-sm font-semibold uppercase tracking-widest mb-2">Testimonios</p>

@@ -3,6 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { ShoppingCart, Search, Menu, X, ChevronDown, UserRound } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useAdmin } from '../context/AdminContext';
+import { useStore } from '../context/StoreContext';
 
 const navLinks = [
   { to: '/',          label: 'Inicio' },
@@ -21,8 +22,11 @@ const productCategories = [
 export default function Navbar() {
   const { totalItems } = useCart();
   const { settings } = useAdmin();
+  const { products } = useStore();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [scrollProgress, setScrollProgress] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
+  const [searchFocused, setSearchFocused] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const mobileMenuRef = useRef<HTMLDivElement>(null);
@@ -31,6 +35,17 @@ export default function Navbar() {
     path === '/' ? location.pathname === '/' : location.pathname.startsWith(path);
 
   useEffect(() => { setMenuOpen(false); }, [location.pathname]);
+
+  // Barra de progreso de lectura bajo la navbar (solo desktop)
+  useEffect(() => {
+    const onScroll = () => {
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      setScrollProgress(max > 0 ? (window.scrollY / max) * 100 : 0);
+    };
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -59,12 +74,22 @@ export default function Navbar() {
     if (searchQuery.trim()) {
       navigate(`/productos?q=${encodeURIComponent(searchQuery.trim())}`);
       setSearchQuery('');
+      setSearchFocused(false);
       setMenuOpen(false);
     }
   };
 
+  // Sugerencias en vivo mientras el usuario escribe (máximo 5)
+  const suggestions = searchQuery.trim().length >= 2
+    ? products.filter(p =>
+        p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        p.category.toLowerCase().includes(searchQuery.toLowerCase())
+      ).slice(0, 5)
+    : [];
+  const showSuggestions = suggestions.length > 0 && searchQuery.trim().length >= 2;
+
   return (
-    <nav className="sticky top-0 z-50 glass border-b border-white/10" ref={mobileMenuRef}>
+    <nav className="sticky top-0 z-50 bg-[#090e1a] border-b border-slate-800 shadow-lg shadow-black/40 relative" ref={mobileMenuRef}>
       <div className="max-w-7xl mx-auto px-2.5 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between min-h-16 h-16 gap-1">
 
@@ -141,10 +166,44 @@ export default function Navbar() {
                   type="search"
                   value={searchQuery}
                   onChange={e => setSearchQuery(e.target.value)}
+                  onFocus={() => setSearchFocused(true)}
+                  onBlur={() => setTimeout(() => setSearchFocused(false), 150)}
                   placeholder="Buscar productos..."
                   aria-label="Buscar productos"
+                  autoComplete="off"
                   className="pl-9 pr-4 py-2 bg-white/5 border border-white/10 rounded-xl text-sm text-gray-200 placeholder-gray-600 focus:outline-none focus:border-violet-500/50 focus:bg-white/8 transition-all w-40 focus:w-56"
                 />
+                {showSuggestions && searchFocused && (
+                  <ul className="absolute top-full left-0 mt-2 w-72 rounded-xl bg-[#111827] border border-white/10 shadow-2xl shadow-black/60 py-1 z-50 overflow-hidden">
+                    {suggestions.map(p => (
+                      <li key={p.id}>
+                        <button
+                          type="button"
+                          onMouseDown={() => {
+                            navigate(`/producto/${p.id}`);
+                            setSearchQuery('');
+                            setSearchFocused(false);
+                          }}
+                          className="w-full flex items-center gap-3 px-3 py-2 text-left hover:bg-white/5 transition-colors"
+                        >
+                          <img src={p.image} alt="" className="w-8 h-8 rounded-md object-cover shrink-0" />
+                          <span className="min-w-0">
+                            <span className="block text-sm text-gray-200 truncate">{p.name}</span>
+                            <span className="block text-xs text-gray-500">{p.category}</span>
+                          </span>
+                        </button>
+                      </li>
+                    ))}
+                    <li className="border-t border-white/10 mt-1">
+                      <button
+                        type="submit"
+                        className="w-full px-3 py-2 text-left text-xs text-violet-400 hover:bg-white/5 font-medium"
+                      >
+                        Ver todos los resultados para "{searchQuery}" →
+                      </button>
+                    </li>
+                  </ul>
+                )}
               </div>
             </form>
 
@@ -188,6 +247,13 @@ export default function Navbar() {
           </div>
         </div>
 
+        {/* Barra de progreso de scroll */}
+        <div
+          className="absolute bottom-0 left-0 h-0.5 gradient-brand transition-[width] duration-150 ease-out hidden sm:block"
+          style={{ width: `${scrollProgress}%` }}
+          aria-hidden="true"
+        />
+
         {/* Mobile menu */}
         {menuOpen && (
           <div id="mobile-menu" className="lg:hidden py-3 sm:py-4 border-t border-white/10 space-y-1 max-h-[calc(100dvh-4rem)] overflow-y-auto overscroll-contain">
@@ -209,31 +275,34 @@ export default function Navbar() {
               <Link
                 key={link.to}
                 to={link.to}
-                className={`flex items-center px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${
+                onClick={() => setMenuOpen(false)}
+                className={`flex items-center px-3.5 py-3 rounded-xl text-sm font-semibold transition-colors min-h-[44px] ${
                   isActive(link.to)
-                    ? 'text-violet-400 bg-violet-500/10'
-                    : 'text-gray-300 hover:text-white hover:bg-white/5'
+                    ? 'text-sky-400 bg-sky-500/10'
+                    : 'text-gray-200 hover:text-white hover:bg-white/5 active:bg-white/10'
                 }`}
               >
                 {link.label}
               </Link>
             ))}
 
-            <div className="pt-2 border-t border-white/10">
-              <p className="text-xs text-gray-600 px-3 py-1 uppercase tracking-wider font-semibold">Categorías</p>
+            <div className="pt-2 border-t border-slate-800">
+              <p className="text-xs text-gray-500 px-3 py-1.5 uppercase tracking-wider font-bold">Categorías</p>
               {productCategories.slice(0, 4).map(cat => (
                 <Link
                   key={cat}
                   to={`/productos?categoria=${encodeURIComponent(cat)}`}
-                  className="flex items-center gap-2 px-3 py-2 text-sm text-gray-400 hover:text-violet-400 hover:bg-white/5 rounded-xl transition-colors"
+                  onClick={() => setMenuOpen(false)}
+                  className="flex items-center gap-2 px-3.5 py-2.5 text-sm text-gray-300 hover:text-sky-400 hover:bg-white/5 rounded-xl transition-colors min-h-[40px]"
                 >
-                  <span className="w-1.5 h-1.5 rounded-full bg-violet-500/50" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-sky-400/70" />
                   {cat}
                 </Link>
               ))}
               <Link
                 to="/productos"
-                className="flex items-center gap-2 px-3 py-2 text-sm text-violet-400 hover:bg-white/5 rounded-xl transition-colors font-medium mt-1"
+                onClick={() => setMenuOpen(false)}
+                className="flex items-center gap-2 px-3.5 py-2.5 text-sm text-sky-400 hover:bg-white/5 rounded-xl transition-colors font-semibold mt-1 min-h-[44px]"
               >
                 Ver todas las categorías →
               </Link>

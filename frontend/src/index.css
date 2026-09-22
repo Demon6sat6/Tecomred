@@ -84,15 +84,11 @@
     box-shadow: 0 24px 48px rgba(134, 59, 255, 0.15);
   }
   .glass {
-    background-color: rgba(17, 24, 39, 0.75);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    background-color: #0d1527;
     border: 1px solid rgba(255, 255, 255, 0.08);
   }
   .glass-strong {
-    background-color: rgba(17, 24, 39, 0.90);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
+    background-color: #0b1120;
     border: 1px solid rgba(255, 255, 255, 0.12);
   }
 }
@@ -128,10 +124,21 @@
   100% { transform: translateX(-50%); }
 }
 .animate-marquee {
+  display: flex;
+  width: max-content;
+  will-change: transform;
   animation: marquee 22s linear infinite;
 }
-.animate-marquee:hover {
-  animation-play-state: paused;
+/* Pausa solo en dispositivos con ratón real (desktop), no en pantallas táctiles donde el hover se queda congelado */
+@media (hover: hover) and (pointer: fine) {
+  .animate-marquee:hover {
+    animation-play-state: paused;
+  }
+}
+@media (max-width: 640px) {
+  .animate-marquee {
+    animation-duration: 16s;
+  }
 }
 
 /* Toast slide-up */
@@ -202,8 +209,8 @@
   .card-hover:hover { transform: none; }
 }
 
-/* Mobile: use solid surfaces for maximum performance */
+/* Mobile and desktop: use solid surfaces for maximum contrast and performance */
 @media (max-width: 640px) {
-  .glass { background-color: #111827; }
-  .glass-strong { background-color: #1f2937; }
+  .glass { background-color: #0d1527; }
+  .glass-strong { background-color: #0b1120; }
 }

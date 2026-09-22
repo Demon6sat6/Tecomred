@@ -1,5 +1,6 @@
 import { Users, Target, Award, Cpu } from 'lucide-react';
 import { useAdmin } from '../context/AdminContext';
+import { usePageTitle } from '../hooks/usePageTitle';
 
 const equipoBase = [
   { name: 'Carlos Mendoza', role: 'Gerente General', image: 'https://i.pravatar.cc/150?img=11' },
@@ -9,6 +10,7 @@ const equipoBase = [
 ];
 
 export default function Nosotros() {
+  usePageTitle('Nosotros', 'Conoce al equipo y la misión de TecomRed, especialistas en redes y telecomunicaciones.');
   const { settings } = useAdmin();
   const valores = [
     { icon: Target, title: 'Misión', desc: settings.aboutMission || 'Brindar soluciones tecnológicas de red confiables y accesibles para empresas y hogares del Perú.' },

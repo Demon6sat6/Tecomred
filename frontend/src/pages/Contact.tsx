@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { Mail, Phone, MapPin, Clock, Send, Check, Loader2, MessageCircle } from 'lucide-react';
 import { useAdmin } from '../context/AdminContext';
+import { usePageTitle } from '../hooks/usePageTitle';
 
 const MAX_MESSAGE = 1000;
 const INITIAL_FORM = { nombre: '', email: '', asunto: '', mensaje: '', _trap: '' };
 
 export default function Contact() {
+  usePageTitle('Contacto', 'Escríbenos o llámanos: atención personalizada para proyectos de red y cómputo en todo el Perú.');
   const { settings } = useAdmin();
   const [form, setForm] = useState(INITIAL_FORM);
   const [errors, setErrors] = useState<Partial<typeof INITIAL_FORM>>({});

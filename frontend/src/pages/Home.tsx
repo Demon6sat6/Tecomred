@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { useStore } from '../context/StoreContext';
 import { useAdmin } from '../context/AdminContext';
+import { useCurrency } from '../hooks/useCurrency';
 import ProductCard from '../components/ProductCard';
 import BrandsBar from '../components/BrandsBar';
 import Testimonials from '../components/Testimonials';
@@ -60,13 +61,14 @@ function SectionReveal({ children, className = '' }: { children: React.ReactNode
 export default function Home() {
   const { products } = useStore();
   const { settings, categoryList } = useAdmin();
+  const { formatShort } = useCurrency();
   const featured = products.filter(p => p.badge === 'Popular' || p.badge === 'Oferta').slice(0, 4);
   const newProducts = products.filter(p => p.badge === 'Nuevo').slice(0, 3);
 
   return (
     <div>
-      {/* ââ HERO ââ */}
-      <section className="relative overflow-hidden py-10 sm:py-24 px-3 sm:px-4">
+      {/* ── HERO ── */}
+      <section className="relative overflow-hidden py-10 sm:py-24 px-3 sm:px-4 bg-[#070c18]">
         {/* Animated background glows */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute -top-60 -right-60 w-[600px] h-[600px] bg-sky-500/8 rounded-full blur-3xl animate-pulse-glow" />
@@ -96,7 +98,11 @@ export default function Home() {
 
               {/* Trust bullets */}
               <ul className="animate-fade-in-up animate-delay-300 space-y-2 mb-8">
-                {['Productos 100% originales con garantía', 'Envío gratis en pedidos +$100', 'Soporte técnico especializado'].map(item => (
+                {[
+                  'Productos 100% originales con garantía oficial',
+                  `Envío gratis en pedidos desde ${formatShort(Number(settings.freeShippingMin) || 300)}`,
+                  'Soporte técnico especializado para tu empresa',
+                ].map(item => (
                   <li key={item} className="flex items-center gap-2 text-sm text-gray-300">
                     <CheckCircle className="w-4 h-4 text-sky-400 shrink-0" />
                     {item}
@@ -161,8 +167,8 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ââ STATS ââ */}
-      <SectionReveal className="py-8 px-4 border-y border-white/5">
+      {/* ── STATS ── */}
+      <SectionReveal className="py-8 px-4 bg-[#0a0f1d] border-y border-slate-800">
         <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6">
           <AnimatedStat value={Number(settings.stat1Value) || 500} suffix={settings.stat1Suffix || '+'} label={settings.stat1Label || 'Productos en stock'} />
           <AnimatedStat value={Number(settings.stat2Value) || 2000} suffix={settings.stat2Suffix || '+'} label={settings.stat2Label || 'Clientes satisfechos'} />
@@ -174,8 +180,8 @@ export default function Home() {
       {/* ââ BRANDS ââ */}
       <BrandsBar />
 
-      {/* ââ CATEGORIES ââ */}
-      <SectionReveal className="py-16 px-4">
+      {/* ── CATEGORIES ── */}
+      <SectionReveal className="py-14 sm:py-16 px-4 bg-[#070c18]">
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-between mb-8">
             <div>
@@ -206,8 +212,8 @@ export default function Home() {
         </div>
       </SectionReveal>
 
-      {/* ââ FEATURED PRODUCTS ââ */}
-      <SectionReveal className="py-16 px-4 bg-gray-900/40">
+      {/* ── FEATURED PRODUCTS ── */}
+      <SectionReveal className="py-14 sm:py-16 px-4 bg-[#0a0f1d] border-y border-slate-800/80">
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-between mb-8">
             <div>
@@ -226,9 +232,9 @@ export default function Home() {
         </div>
       </SectionReveal>
 
-      {/* ââ NEW PRODUCTS ââ */}
+      {/* ── NEW PRODUCTS ── */}
       {newProducts.length > 0 && (
-        <SectionReveal className="py-16 px-4">
+        <SectionReveal className="py-14 sm:py-16 px-4 bg-[#070c18]">
           <div className="max-w-7xl mx-auto">
             <div className="flex items-center justify-between mb-8">
               <div>
@@ -248,8 +254,8 @@ export default function Home() {
         </SectionReveal>
       )}
 
-      {/* ââ FEATURES ââ */}
-      <SectionReveal className="py-16 px-4 bg-gray-900/40">
+      {/* ── FEATURES ── */}
+      <SectionReveal className="py-14 sm:py-16 px-4 bg-[#0a0f1d] border-y border-slate-800/80">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12">
             <p className="text-sky-400 text-xs font-semibold uppercase tracking-widest mb-2">Nuestras ventajas</p>
@@ -276,10 +282,10 @@ export default function Home() {
       {/* ââ TESTIMONIALS ââ */}
       <Testimonials />
 
-      {/* ââ CTA BANNER ââ */}
-      <SectionReveal className="py-16 px-4">
+      {/* ── CTA BANNER ── */}
+      <SectionReveal className="py-12 sm:py-16 px-3 sm:px-4 bg-[#070c18]">
         <div className="max-w-7xl mx-auto">
-          <div className="relative overflow-hidden rounded-3xl p-10 sm:p-14 text-center" style={{ background: 'linear-gradient(135deg, #0369a1 0%, #4f46e5 50%, #0369a1 100%)' }}>
+          <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl p-6 sm:p-12 text-center" style={{ background: 'linear-gradient(135deg, #0284c7 0%, #4338ca 50%, #0369a1 100%)' }}>
             {/* Decorative circles */}
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
               <div className="absolute -top-20 -right-20 w-64 h-64 bg-white/10 rounded-full blur-2xl" />

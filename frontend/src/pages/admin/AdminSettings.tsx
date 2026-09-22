@@ -149,6 +149,7 @@ export default function AdminSettings() {
           <Toggle label="Modo mantenimiento" desc="La tienda mostrará una página de mantenimiento" name="maintenanceMode" value={form.maintenanceMode} onChange={handleToggleChange} />
           <Toggle label="Mostrar productos agotados" desc="Los productos sin stock seguirán visibles" name="showOutOfStock" value={form.showOutOfStock} onChange={handleToggleChange} />
           <Toggle label="Permitir reseñas" desc="Los clientes pueden dejar reseñas en los productos" name="allowReviews" value={form.allowReviews} onChange={handleToggleChange} />
+          <Toggle label="Barra superior de anuncios" desc="Muestra la barra superior con ofertas y envíos arriba de la barra de navegación" name="showAnnouncementBar" value={Boolean(form.showAnnouncementBar)} onChange={handleToggleChange} />
         </div>
 
         {/* Stats del Home */}
