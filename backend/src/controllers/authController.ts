@@ -23,40 +23,36 @@ async function ensureDefaultAdmin() {
 
 export const authController = {
   login: async (req: Request, res: Response) => {
-    const { username, password } = req.body;
-    if (!username || !password) {
+    const identifier = String(req.body?.email ?? req.body?.username ?? '').trim().toLowerCase();
+    const password = req.body?.password;
+    if (!identifier || typeof password !== 'string') {
       return res.status(400).json({ error: "Invalid payload" });
     }
 
     try {
-      if (username === env.ADMIN_USER && (password === env.ADMIN_PASSWORD || password === "tecomred2026")) {
-        return res.status(200).json({
-          token: signToken("administrator", 1, "admin"),
-          user: { id: 1, username, role: "admin" },
-        });
-      }
-
       await ensureDefaultAdmin();
       const [rows] = await pool.query(
-        "SELECT id, username, password_hash, role FROM administrators WHERE username = ? AND is_active = 1 LIMIT 1",
-        [username],
+        "SELECT id, name, username, email, password_hash, role FROM administrators WHERE (LOWER(username) = ? OR LOWER(email) = ?) AND is_active = 1 LIMIT 1",
+        [identifier, identifier],
       );
-      const admin = (rows as { id: number; username: string; password_hash: string; role: string }[])[0];
-      if (!admin || !(await bcrypt.compare(password, admin.password_hash))) {
-        return res.status(401).json({ error: "Invalid credentials" });
-      }
-      return res.status(200).json({
-        token: signToken("administrator", admin.id, admin.role),
-        user: { id: admin.id, username: admin.username, role: admin.role },
-      });
-    } catch (error) {
-      if (username === env.ADMIN_USER && (password === env.ADMIN_PASSWORD || password === "tecomred2026")) {
+      const admin = (rows as { id: number; name: string; username: string; email: string | null; password_hash: string; role: string }[])[0];
+      if (admin && await bcrypt.compare(password, admin.password_hash)) {
         return res.status(200).json({
-          token: signToken("administrator", 1, "admin"),
-          user: { id: 1, username, role: "admin" },
+          token: signToken("administrator", admin.id, admin.role),
+          user: { id: admin.id, name: admin.name, username: admin.username, email: admin.email, role: admin.role },
         });
       }
-      console.error("Admin login failed", error);
+      const [userRows] = await pool.query(
+        "SELECT id, name, email, phone, password_hash FROM users WHERE email = ? AND is_active = 1 LIMIT 1",
+        [identifier],
+      );
+      const user = (userRows as { id: number; name: string; email: string; phone: string | null; password_hash: string }[])[0];
+      if (!user || !(await bcrypt.compare(password, user.password_hash))) {
+        return res.status(401).json({ error: "Correo, usuario o contraseña incorrectos" });
+      }
+      return res.json({ token: signToken("user", user.id), user: { id: user.id, name: user.name, email: user.email, phone: user.phone, role: "customer" } });
+    } catch (error) {
+      console.error("Login failed", error);
       return res.status(503).json({ error: "Authentication service unavailable" });
     }
   },
@@ -83,17 +79,4 @@ export const authController = {
     }
   },
 
-  loginUser: async (req: Request, res: Response) => {
-    const { email, password } = req.body;
-    if (!email || !password) return res.status(400).json({ error: "Correo y contraseña son obligatorios" });
-    try {
-      const [rows] = await pool.query("SELECT id, name, email, phone, password_hash FROM users WHERE email = ? AND is_active = 1 LIMIT 1", [String(email).trim().toLowerCase()]);
-      const user = (rows as { id: number; name: string; email: string; phone: string | null; password_hash: string }[])[0];
-      if (!user || !(await bcrypt.compare(password, user.password_hash))) return res.status(401).json({ error: "Correo o contraseña incorrectos" });
-      return res.json({ token: signToken("user", user.id), user: { id: user.id, name: user.name, email: user.email, phone: user.phone } });
-    } catch (error) {
-      console.error("User login failed", error);
-      return res.status(503).json({ error: "Authentication service unavailable" });
-    }
-  },
 };

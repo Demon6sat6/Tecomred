@@ -1,9 +1,10 @@
-﻿import { lazy, Suspense } from "react";
+import { lazy, Suspense } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { CartProvider } from "./context/CartContext";
 import { ToastProvider } from "./context/ToastContext";
 import { AdminProvider, useAdmin } from "./context/AdminContext";
 import { AnalyticsProvider } from "./context/AnalyticsContext";
+import { ProductListsProvider } from "./context/ProductListsContext";
 import ErrorBoundary from "./components/ErrorBoundary";
 import AnnouncementBar from "./components/AnnouncementBar";
 import Navbar from "./components/Navbar";
@@ -16,6 +17,8 @@ import Products from "./pages/Products";
 import ProductDetail from "./pages/ProductDetail";
 import Cart from "./pages/Cart";
 import Checkout from "./pages/Checkout";
+import Favorites from "./pages/Favorites";
+import Compare from "./pages/Compare";
 import NotFound from "./pages/NotFound";
 
 // Código dividido (code splitting): las páginas menos visitadas y TODO el panel
@@ -27,10 +30,8 @@ const Ubicacion = lazy(() => import("./pages/Ubicacion"));
 const Terminos = lazy(() => import("./pages/Terminos"));
 const Privacidad = lazy(() => import("./pages/Privacidad"));
 const Account = lazy(() => import("./pages/Account"));
-const AdminLogin = lazy(() => import("./pages/admin/AdminLogin"));
 const AdminLayout = lazy(() => import("./pages/admin/AdminLayout"));
 const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
-const AdminAnalytics = lazy(() => import("./pages/admin/AdminAnalytics"));
 const AdminProducts = lazy(() => import("./pages/admin/AdminProducts"));
 const AdminMedia = lazy(() => import("./pages/admin/AdminMedia"));
 const AdminOrdersPage = lazy(() => import("./pages/admin/AdminOrdersPage"));
@@ -40,20 +41,18 @@ const AdminCustomers = lazy(() => import("./pages/admin/AdminCustomers"));
 const AdminReviewsPage = lazy(() => import("./pages/admin/AdminReviewsPage"));
 const AdminCoupons = lazy(() => import("./pages/admin/AdminCoupons"));
 const AdminAdministrators = lazy(() => import("./pages/admin/AdminAdministrators"));
-const AdminTracking = lazy(() => import("./pages/admin/AdminTracking"));
-const AdminAbout = lazy(() => import("./pages/admin/AdminAbout"));
 
 function AdminGuard({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isVerifying } = useAdmin();
   if (isVerifying) {
     return <PageFallback />;
   }
-  return isAuthenticated ? <>{children}</> : <Navigate to="/admin" replace />;
+  return isAuthenticated ? <>{children}</> : <Navigate to="/cuenta" replace />;
 }
 
 const PageFallback = () => (
   <div className="min-h-[60vh] flex items-center justify-center">
-    <div className="w-8 h-8 border-2 border-violet-500/30 border-t-violet-500 rounded-full animate-spin" aria-label="Cargando" />
+    <div className="w-8 h-8 border-2 border-blue-500/30 border-t-blue-500 rounded-full animate-spin" aria-label="Cargando" />
   </div>
 );
 
@@ -70,6 +69,8 @@ function StoreLayout() {
           <Route path="/productos" element={<Products />} />
           <Route path="/producto/:id" element={<ProductDetail />} />
           <Route path="/carrito" element={<Cart />} />
+          <Route path="/favoritos" element={<Favorites />} />
+          <Route path="/comparar" element={<Compare />} />
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/contacto" element={<Contact />} />
           <Route path="/nosotros" element={<Nosotros />} />
@@ -77,7 +78,6 @@ function StoreLayout() {
           <Route path="/ubicacion" element={<Ubicacion />} />
           <Route path="/terminos" element={<Terminos />} />
           <Route path="/privacidad" element={<Privacidad />} />
-          <Route path="/cuenta" element={<Account />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
         </Suspense>
@@ -97,23 +97,27 @@ export default function App() {
         <AdminProvider>
           <ToastProvider>
             <CartProvider>
+              <ProductListsProvider>
               <AnalyticsProvider>
                 <Routes>
-                  <Route path="/admin" element={<Suspense fallback={<PageFallback />}><AdminLogin /></Suspense>} />
+                  <Route path="/cuenta" element={<Suspense fallback={<PageFallback />}><Account /></Suspense>} />
+                  <Route path="/admin/login" element={<Navigate to="/cuenta" replace />} />
                   <Route path="/admin/*" element={<Suspense fallback={<PageFallback />}><AdminGuard><AdminLayout /></AdminGuard></Suspense>}>
-                    <Route path="dashboard"  element={<AdminDashboard />} />
-                    <Route path="analytics"  element={<AdminAnalytics />} />
-                    <Route path="productos"  element={<AdminProducts />} />
-                    <Route path="medios"     element={<AdminMedia />} />
-                    <Route path="categorias" element={<AdminCategories />} />
-                    <Route path="pedidos"    element={<AdminOrdersPage />} />
-                    <Route path="clientes"   element={<AdminCustomers />} />
-                    <Route path="resenas"    element={<AdminReviewsPage />} />
-                    <Route path="cupones"    element={<AdminCoupons />} />
+                    <Route index element={<Navigate to="dashboard" replace />} />
+                    <Route path="dashboard"       element={<AdminDashboard />} />
+                    <Route path="productos"       element={<AdminProducts />} />
+                    <Route path="medios"          element={<AdminMedia />} />
+                    <Route path="categorias"      element={<AdminCategories />} />
+                    <Route path="pedidos"         element={<AdminOrdersPage />} />
+                    <Route path="clientes"        element={<AdminCustomers />} />
+                    <Route path="cupones"         element={<AdminCoupons />} />
+                    <Route path="resenas"         element={<AdminReviewsPage />} />
                     <Route path="administradores" element={<AdminAdministrators />} />
-                    <Route path="seguimiento" element={<AdminTracking />} />
-                    <Route path="nosotros" element={<AdminAbout />} />
-                    <Route path="ajustes"    element={<AdminSettings />} />
+                    <Route path="ajustes"         element={<AdminSettings />} />
+                    <Route path="analytics"       element={<Navigate to="/admin/dashboard" replace />} />
+                    <Route path="seguimiento"     element={<Navigate to="/admin/pedidos" replace />} />
+                    <Route path="nosotros"        element={<Navigate to="/admin/ajustes" replace />} />
+                    <Route path="*"               element={<Navigate to="/admin/dashboard" replace />} />
                   </Route>
                   <Route path="/*" element={
                     <Suspense fallback={<PageFallback />}>
@@ -122,6 +126,7 @@ export default function App() {
                   } />
                 </Routes>
               </AnalyticsProvider>
+              </ProductListsProvider>
             </CartProvider>
           </ToastProvider>
         </AdminProvider>

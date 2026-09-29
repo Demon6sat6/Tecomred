@@ -1,6 +1,6 @@
 import { createContext, useContext, type ReactNode, useEffect, useState, useRef } from 'react';
 import type { Product } from '../types';
-import { products as initialProducts, categories as initialCategories } from '../data/products';
+import { categories as initialCategories } from '../data/products';
 import { reviews as initialReviews } from '../data/reviews';
 import type { Review } from '../data/reviews';
 import { useLocalStorage } from '../hooks/useLocalStorage';
@@ -117,6 +117,7 @@ interface AdminContextType {
   deleteAdministrator: (id: number) => Promise<void>;
   // Products (shared with store)
   products: Product[];
+  productsError: string;
   addProduct: (p: Omit<Product, 'id'>) => Promise<void>;
   updateProduct: (p: Product) => Promise<void>;
   deleteProduct: (id: number) => Promise<void>;
@@ -150,12 +151,12 @@ interface AdminContextType {
 }
 
 const defaultSettings: StoreSettings = {
-  storeName: 'TecomRed',
-  storeEmail: 'ventas@tecomred.pe',
-  storePhone: '+51 1 234-5678',
+  storeName: 'SiscomRed',
+  storeEmail: 'siscomred2017@gmail.com',
+  storePhone: '+51 997 176 721',
   storeAddress: 'Av. Javier Prado Este 4200, San Isidro, Lima',
   supportHours: 'Lun-Vie 9am-7pm',
-  storeWebsite: 'https://tecomred.pe',
+  storeWebsite: 'https://siscomred.pe',
   freeShippingMin: '300',
   currency: 'PEN',
   taxRate: '18',
@@ -163,10 +164,10 @@ const defaultSettings: StoreSettings = {
   showOutOfStock: true,
   allowReviews: true,
   showAnnouncementBar: false,
-  apiKey: 'Tr3c0mR3d-K3y-2026-xQpZ9mNvLrWs',
+  apiKey: '',
   gaId: '',
   adminUser: 'admin',
-  adminPass: 'tecomred2026',
+  adminPass: '',
   brands: [
     { name: 'Cisco',    colorClass: 'text-blue-400' },
     { name: 'MikroTik', colorClass: 'text-red-400' },
@@ -194,15 +195,15 @@ const defaultSettings: StoreSettings = {
 
 const API_URL = (import.meta.env.VITE_API_URL as string | undefined) || '/api';
 
-function makeApiCall(apiKey: string) {
+function makeApiCall() {
   return async function apiCall<T>(endpoint: string, options?: RequestInit): Promise<T> {
-    const token = localStorage.getItem('admin_token') ?? apiKey;
+    const token = localStorage.getItem('admin_token');
     const response = await fetch(`${API_URL}${endpoint}`, {
       cache: 'no-store',
       ...options,
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
         ...(options?.headers || {}),
       },
     });
@@ -256,7 +257,7 @@ const initialAdministrators: Administrator[] = [
     id: 1,
     name: 'Administrador Principal',
     username: 'admin',
-    email: 'admin@tecomred.pe',
+    email: 'admin@siscomred.pe',
     role: 'admin',
     isActive: true,
     createdAt: '2025-01-01T00:00:00.000Z',
@@ -265,7 +266,7 @@ const initialAdministrators: Administrator[] = [
     id: 2,
     name: 'Soporte Técnico',
     username: 'soporte',
-    email: 'soporte@tecomred.pe',
+    email: 'soporte@siscomred.pe',
     role: 'editor',
     isActive: true,
     createdAt: '2025-02-15T00:00:00.000Z',
@@ -285,7 +286,8 @@ export function AdminProvider({ children }: { children: ReactNode }) {
   const [settingsError, setSettingsError] = useState('');
   const settingsRevision = useRef(0);
   const settingsSaving = useRef(false);
-  const [productList, setProductList]         = useLocalStorage<Product[]>('admin_products', initialProducts);
+  const [productList, setProductList]         = useState<Product[]>([]);
+  const [productsError, setProductsError] = useState('');
   const categoryList = settings.categories;
   const [orders, setOrders]                   = useLocalStorage<Order[]>('admin_orders', initialOrders);
   const [customers, setCustomers]             = useLocalStorage<Customer[]>('admin_customers', initialCustomers);
@@ -294,7 +296,7 @@ export function AdminProvider({ children }: { children: ReactNode }) {
   const [administrators, setAdministrators]   = useLocalStorage<Administrator[]>('admin_administrators', initialAdministrators);
   const [isBackendAvailable, setIsBackendAvailable] = useState<boolean | null>(null);
   const [isVerifying, setIsVerifying] = useState(() => isAuthenticated as boolean);
-  const apiCall = makeApiCall(settings.apiKey);
+  const apiCall = makeApiCall();
   const ordersChannel = useRef<BroadcastChannel | null>(null);
 
   // Sincronización en tiempo real multi-pestaña para pedidos
@@ -394,7 +396,7 @@ export function AdminProvider({ children }: { children: ReactNode }) {
         localStorage.removeItem('admin_token');
       }
     } catch {
-      // Backend no disponible — mantiene la sesión local
+      setIsAuthenticated(false);
     } finally {
       setIsVerifying(false);
     }
@@ -428,11 +430,21 @@ export function AdminProvider({ children }: { children: ReactNode }) {
   async function fetchProducts() {
     try {
       const data = await apiCall<{ data: Product[] }>('/products');
+      if (!Array.isArray(data.data)) throw new Error('Respuesta de catálogo inválida');
       setProductList(data.data);
-    } catch {
-      // Mantiene los productos de localStorage como fallback
+      setProductsError('');
+    } catch (error) {
+      setProductList([]);
+      setProductsError(error instanceof Error ? error.message : 'No se pudo cargar el catálogo');
     }
   }
+
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      if (document.visibilityState === 'visible') void fetchProducts();
+    }, 5000);
+    return () => window.clearInterval(timer);
+  }, []);
 
   const login = () => setIsAuthenticated(true);
   const logout = () => {
@@ -447,7 +459,7 @@ export function AdminProvider({ children }: { children: ReactNode }) {
     setSettingsError('');
     try {
       if (s.adminPass !== undefined && s.adminPass !== settings.adminPass) {
-        throw new Error('Cambia la contraseña desde Administradores; no se guarda en los ajustes públicos.');
+        throw new Error('La contraseña se gestiona desde Administradores.');
       }
       // Actualiza inmediatamente el estado y localStorage
       const updated: StoreSettings = { ...settings, ...s };
@@ -525,39 +537,22 @@ export function AdminProvider({ children }: { children: ReactNode }) {
   };
 
   const addProduct = async (p: Omit<Product, 'id'>): Promise<void> => {
-    try {
-      const result = await apiCall<{ data: Product }>('/products', {
-        method: 'POST', body: JSON.stringify({ ...p, isActive: true }),
-      });
-      setProductList(prev => [...prev, result.data]);
-    } catch {
-      const newProd: Product = {
-        ...p,
-        id: Date.now(),
-        isActive: true,
-      };
-      setProductList(prev => [...prev, newProd]);
-    }
+    const result = await apiCall<{ data: Product }>('/products', {
+      method: 'POST', body: JSON.stringify(p),
+    });
+    setProductList(prev => [result.data, ...prev]);
   };
 
   const updateProduct = async (p: Product): Promise<void> => {
-    try {
-      const result = await apiCall<{ data: Product }>(`/products/${p.id}`, {
-        method: 'PUT', body: JSON.stringify({ ...p, isActive: true }),
-      });
-      setProductList(prev => prev.map(x => x.id === p.id ? result.data : x));
-    } catch {
-      setProductList(prev => prev.map(x => x.id === p.id ? p : x));
-    }
+    const result = await apiCall<{ data: Product }>(`/products/${p.id}`, {
+      method: 'PUT', body: JSON.stringify(p),
+    });
+    setProductList(prev => prev.map(x => x.id === p.id ? result.data : x));
   };
 
   const deleteProduct = async (id: number): Promise<void> => {
-    try {
-      await apiCall(`/products/${id}`, { method: 'DELETE' });
-      setProductList(prev => prev.filter(x => x.id !== id));
-    } catch {
-      setProductList(prev => prev.filter(x => x.id !== id));
-    }
+    await apiCall(`/products/${id}`, { method: 'DELETE' });
+    setProductList(prev => prev.filter(x => x.id !== id));
   };
 
   // Categories — compartidas por el panel y todos los visitantes.
@@ -680,10 +675,10 @@ export function AdminProvider({ children }: { children: ReactNode }) {
 
   return (
     <AdminContext.Provider value={{
-      isAuthenticated, isVerifying, apiKey: settings.apiKey, login, logout, settings, saveSettings,
+      isAuthenticated, isVerifying, apiKey: localStorage.getItem('admin_token') ?? '', login, logout, settings, saveSettings,
       isSettingsLoading, isSavingSettings, settingsError,
       administrators, loadAdministrators, addAdministrator, updateAdministrator, deleteAdministrator,
-      products: productList, addProduct, updateProduct, deleteProduct,
+      products: productList, productsError, addProduct, updateProduct, deleteProduct,
       categoryList, addCategory, deleteCategory,
       orders, addOrder, updateOrder, updateOrderStatus, deleteOrder, loadOrders,
       customers, addCustomer, updateCustomer, deleteCustomer,

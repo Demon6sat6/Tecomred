@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Mail, Phone, MapPin, Clock, Send, Check, Loader2, MessageCircle } from 'lucide-react';
 import { useAdmin } from '../context/AdminContext';
 import { usePageTitle } from '../hooks/usePageTitle';
+import { useSearchParams } from 'react-router-dom';
 
 const MAX_MESSAGE = 1000;
 const INITIAL_FORM = { nombre: '', email: '', asunto: '', mensaje: '', _trap: '' };
@@ -9,7 +10,11 @@ const INITIAL_FORM = { nombre: '', email: '', asunto: '', mensaje: '', _trap: ''
 export default function Contact() {
   usePageTitle('Contacto', 'Escríbenos o llámanos: atención personalizada para proyectos de red y cómputo en todo el Perú.');
   const { settings } = useAdmin();
-  const [form, setForm] = useState(INITIAL_FORM);
+  const [searchParams] = useSearchParams();
+  const [form, setForm] = useState(() => {
+    const product = searchParams.get('producto')?.slice(0, 120);
+    return product ? { ...INITIAL_FORM, asunto: 'cotizacion', mensaje: `Quisiera consultar el precio y la disponibilidad de ${product}.` } : INITIAL_FORM;
+  });
   const [errors, setErrors] = useState<Partial<typeof INITIAL_FORM>>({});
   const [status, setStatus] = useState<'idle' | 'loading' | 'success'>('idle');
 
@@ -52,12 +57,12 @@ export default function Contact() {
   };
 
   const inputCls = (field: keyof typeof errors) =>
-    `w-full px-4 py-2.5 bg-white/5 border rounded-xl text-gray-200 placeholder-gray-500 focus:outline-none text-sm transition-colors ${
-      errors[field] ? 'border-red-500/60 focus:border-red-500' : 'border-white/10 focus:border-violet-500/60'
+    `w-full px-4 py-2.5 bg-slate-50 border rounded-xl text-slate-800 placeholder-slate-400 focus:outline-none focus:bg-white text-sm transition-colors ${
+      errors[field] ? 'border-red-400 focus:border-red-500' : 'border-slate-200 focus:border-violet-500'
     }`;
 
-  const phone   = settings.storePhone  || '+51 999 888 777';
-  const email   = settings.storeEmail  || 'ventas@tecomred.com';
+  const phone   = settings.storePhone  || '+51 997 176 721';
+  const email   = settings.storeEmail  || 'siscomred2017@gmail.com';
   const address = settings.storeAddress || 'Av. Tecnología 1234, Lima, Perú';
   const whatsappUrl = `https://wa.me/${phone.replace(/\D/g, '')}`;
 
@@ -65,11 +70,11 @@ export default function Contact() {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
       {/* Header */}
       <div className="text-center mb-14">
-        <span className="inline-block px-4 py-1.5 rounded-full text-xs font-semibold tracking-wider uppercase mb-4 border border-violet-500/30 text-violet-400 bg-violet-500/10">
+        <span className="inline-block px-4 py-1.5 rounded-full text-xs font-semibold tracking-wider uppercase mb-4 border border-violet-200 text-violet-700 bg-violet-50">
           Contáctanos
         </span>
-        <h1 className="text-4xl font-extrabold text-white mb-4">¿En qué podemos <span className="gradient-text">ayudarte?</span></h1>
-        <p className="text-gray-400 max-w-xl mx-auto">
+        <h1 className="text-4xl font-extrabold text-slate-900 mb-4">¿En qué podemos <span className="gradient-text">ayudarte?</span></h1>
+        <p className="text-slate-600 max-w-xl mx-auto">
           ¿Tienes preguntas sobre nuestros productos o necesitas asesoría técnica? Estamos aquí para ayudarte.
         </p>
       </div>
@@ -83,21 +88,21 @@ export default function Contact() {
             { icon: Mail,   label: 'Email',     value: email,   href: `mailto:${email}` },
             { icon: Clock,  label: 'Horario',   value: 'Lun-Vie 9am-7pm · Sáb 9am-2pm', href: undefined },
           ].map(({ icon: Icon, label, value, href }) => (
-            <div key={label} className="glass rounded-2xl p-5 flex items-start gap-4">
-              <div className="w-10 h-10 rounded-xl gradient-brand flex items-center justify-center shrink-0 shadow-lg shadow-violet-500/20">
+            <div key={label} className="bg-white border border-slate-200 rounded-2xl p-5 flex items-start gap-4 shadow-xs">
+              <div className="w-10 h-10 rounded-xl gradient-brand flex items-center justify-center shrink-0 shadow-md shadow-violet-500/20">
                 <Icon className="w-5 h-5 text-white" />
               </div>
               <div>
-                <p className="text-gray-500 text-xs mb-0.5 font-medium uppercase tracking-wide">{label}</p>
+                <p className="text-slate-500 text-xs mb-0.5 font-medium uppercase tracking-wide">{label}</p>
                 {href ? (
                   <a
                     href={label === 'Teléfono' ? whatsappUrl : href}
                     target={label === 'Teléfono' ? '_blank' : undefined}
                     rel={label === 'Teléfono' ? 'noopener noreferrer' : undefined}
-                    className="text-white font-medium text-sm hover:text-violet-400 transition-colors"
+                    className="text-slate-900 font-medium text-sm hover:text-violet-600 transition-colors"
                   >{value}</a>
                 ) : (
-                  <p className="text-white font-medium text-sm">{value}</p>
+                  <p className="text-slate-900 font-medium text-sm">{value}</p>
                 )}
               </div>
             </div>
@@ -108,21 +113,21 @@ export default function Contact() {
             href={whatsappUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-3 px-5 py-4 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/15 transition-colors group"
+            className="flex items-center gap-3 px-5 py-4 rounded-2xl border border-emerald-200 bg-emerald-50 hover:bg-emerald-100/70 transition-colors group shadow-xs"
           >
-            <div className="w-10 h-10 rounded-xl bg-emerald-500 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+            <div className="w-10 h-10 rounded-xl bg-emerald-600 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform shadow-xs">
               <MessageCircle className="w-5 h-5 text-white" />
             </div>
             <div>
-              <p className="text-white font-semibold text-sm">Escríbenos por WhatsApp</p>
-              <p className="text-emerald-400 text-xs">Respuesta en minutos</p>
+              <p className="text-slate-900 font-semibold text-sm">Escríbenos por WhatsApp</p>
+              <p className="text-emerald-700 text-xs font-medium">Respuesta en minutos</p>
             </div>
           </a>
 
           {/* Map */}
-          <div className="glass rounded-2xl overflow-hidden" style={{ height: '200px' }}>
+          <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-xs" style={{ height: '200px' }}>
             <iframe
-              title="Mapa TecomRed"
+              title="Mapa SiscomRed"
               src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3901.2!2d-77.0428!3d-12.0464!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMTLCsDAyJzQ3LjAiUyA3N8KwMDInMzQuMSJX!5e0!3m2!1ses!2spe!4v1620000000000!5m2!1ses!2spe"
               width="100%" height="200" style={{ border: 0 }}
               allowFullScreen loading="lazy" referrerPolicy="no-referrer-when-downgrade"
@@ -132,13 +137,13 @@ export default function Contact() {
 
         {/* Form */}
         <div className="lg:col-span-2">
-          <div className="glass rounded-2xl p-8 border border-white/8">
-            <h2 className="text-white font-bold text-xl mb-6">Envíanos un mensaje</h2>
+          <div className="bg-white border border-slate-200 rounded-2xl p-8 shadow-xs">
+            <h2 className="text-slate-900 font-bold text-xl mb-6">Envíanos un mensaje</h2>
 
             {status === 'success' && (
-              <div className="flex items-center gap-3 p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-xl mb-6">
-                <Check className="w-5 h-5 text-emerald-400 shrink-0" />
-                <p className="text-emerald-400 text-sm">¡Mensaje enviado! Te responderemos en menos de 24 horas.</p>
+              <div className="flex items-center gap-3 p-4 bg-emerald-50 border border-emerald-200 rounded-xl mb-6">
+                <Check className="w-5 h-5 text-emerald-600 shrink-0" />
+                <p className="text-emerald-700 text-sm font-medium">¡Mensaje enviado! Te responderemos en menos de 24 horas.</p>
               </div>
             )}
 
@@ -150,31 +155,31 @@ export default function Contact() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 <div>
-                  <label htmlFor="nombre" className="block text-sm text-gray-400 mb-1.5">
-                    Nombre completo <span className="text-red-400">*</span>
+                  <label htmlFor="nombre" className="block text-sm text-slate-600 font-medium mb-1.5">
+                    Nombre completo <span className="text-red-500">*</span>
                   </label>
                   <input id="nombre" type="text" name="nombre" value={form.nombre}
                     onChange={handleChange} placeholder="Juan Pérez" autoComplete="name"
                     className={inputCls('nombre')} />
-                  {errors.nombre && <p className="text-red-400 text-xs mt-1">{errors.nombre}</p>}
+                  {errors.nombre && <p className="text-red-500 text-xs mt-1 font-medium">{errors.nombre}</p>}
                 </div>
                 <div>
-                  <label htmlFor="email" className="block text-sm text-gray-400 mb-1.5">
-                    Correo electrónico <span className="text-red-400">*</span>
+                  <label htmlFor="email" className="block text-sm text-slate-600 font-medium mb-1.5">
+                    Correo electrónico <span className="text-red-500">*</span>
                   </label>
                   <input id="email" type="email" name="email" value={form.email}
                     onChange={handleChange} placeholder="juan@email.com" autoComplete="email"
                     className={inputCls('email')} />
-                  {errors.email && <p className="text-red-400 text-xs mt-1">{errors.email}</p>}
+                  {errors.email && <p className="text-red-500 text-xs mt-1 font-medium">{errors.email}</p>}
                 </div>
               </div>
 
               <div>
-                <label htmlFor="asunto" className="block text-sm text-gray-400 mb-1.5">
-                  Asunto <span className="text-red-400">*</span>
+                <label htmlFor="asunto" className="block text-sm text-slate-600 font-medium mb-1.5">
+                  Asunto <span className="text-red-500">*</span>
                 </label>
                 <select id="asunto" name="asunto" value={form.asunto}
-                  onChange={handleChange} className={`${inputCls('asunto')} bg-gray-900`}>
+                  onChange={handleChange} className={`${inputCls('asunto')} bg-white`}>
                   <option value="">Selecciona un asunto</option>
                   <option value="consulta">Consulta de producto</option>
                   <option value="cotizacion">Solicitar cotización</option>
@@ -183,15 +188,15 @@ export default function Contact() {
                   <option value="proyecto">Proyecto de red</option>
                   <option value="otro">Otro</option>
                 </select>
-                {errors.asunto && <p className="text-red-400 text-xs mt-1">{errors.asunto}</p>}
+                {errors.asunto && <p className="text-red-500 text-xs mt-1 font-medium">{errors.asunto}</p>}
               </div>
 
               <div>
                 <div className="flex justify-between mb-1.5">
-                  <label htmlFor="mensaje" className="block text-sm text-gray-400">
-                    Mensaje <span className="text-red-400">*</span>
+                  <label htmlFor="mensaje" className="block text-sm text-slate-600 font-medium">
+                    Mensaje <span className="text-red-500">*</span>
                   </label>
-                  <span className={`text-xs ${form.mensaje.length > MAX_MESSAGE ? 'text-red-400' : 'text-gray-600'}`}>
+                  <span className={`text-xs ${form.mensaje.length > MAX_MESSAGE ? 'text-red-500' : 'text-slate-400'}`}>
                     {form.mensaje.length}/{MAX_MESSAGE}
                   </span>
                 </div>
@@ -199,13 +204,13 @@ export default function Contact() {
                   onChange={handleChange} rows={5}
                   placeholder="Describe tu consulta, el proyecto que tienes en mente o la ayuda que necesitas..."
                   className={`${inputCls('mensaje')} resize-none`} />
-                {errors.mensaje && <p className="text-red-400 text-xs mt-1">{errors.mensaje}</p>}
+                {errors.mensaje && <p className="text-red-500 text-xs mt-1 font-medium">{errors.mensaje}</p>}
               </div>
 
               <button
                 type="submit"
                 disabled={status === 'loading'}
-                className="w-full flex items-center justify-center gap-2 py-3 rounded-xl gradient-brand text-white font-semibold hover:opacity-90 active:scale-[0.99] transition-all shadow-lg shadow-violet-500/20 disabled:opacity-60 disabled:cursor-not-allowed"
+                className="w-full flex items-center justify-center gap-2 py-3 rounded-xl gradient-brand text-white font-semibold hover:opacity-90 active:scale-[0.99] transition-all shadow-md shadow-violet-500/20 disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 {status === 'loading' ? (
                   <><Loader2 className="w-5 h-5 animate-spin" /> Enviando...</>
@@ -214,9 +219,9 @@ export default function Contact() {
                 )}
               </button>
 
-              <p className="text-gray-600 text-xs text-center">
+              <p className="text-slate-500 text-xs text-center">
                 Al enviar aceptas nuestra{' '}
-                <a href="/privacidad" className="text-violet-400 hover:text-violet-300 transition-colors">política de privacidad</a>.
+                <a href="/privacidad" className="text-violet-600 hover:text-violet-700 font-medium transition-colors">política de privacidad</a>.
                 Respondemos en menos de 24 horas.
               </p>
             </form>

@@ -8,15 +8,11 @@ export function requireApiKey(req: Request, res: Response, next: NextFunction) {
 
   if (!token) return res.status(401).json({ error: "Unauthorized" });
 
-  if (token === env.ADMIN_API_KEY || token === "change-this-api-key") return next();
-
   try {
     const payload = jwt.verify(token, env.ADMIN_API_KEY) as { type?: string; role?: string };
-    if (payload.type === "administrator" || payload.role === "admin") return next();
+    if (payload.type === "administrator" && (payload.role === "admin" || payload.role === "editor")) return next();
     return res.status(403).json({ error: "Administrator access required" });
   } catch {
     return res.status(401).json({ error: "Unauthorized" });
   }
-
-  return next();
 }

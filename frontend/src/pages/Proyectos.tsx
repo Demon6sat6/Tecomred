@@ -51,19 +51,19 @@ export default function Proyectos() {
       {/* Hero */}
       <section className="relative py-24 px-4 text-center overflow-hidden">
         <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute -top-32 right-1/4 w-[500px] h-[500px] rounded-full opacity-8"
+          <div className="absolute -top-32 right-1/4 w-[500px] h-[500px] rounded-full opacity-15"
             style={{ background: 'radial-gradient(circle, #47bfff, transparent 70%)' }} />
-          <div className="absolute -bottom-20 left-1/4 w-[400px] h-[400px] rounded-full opacity-8"
+          <div className="absolute -bottom-20 left-1/4 w-[400px] h-[400px] rounded-full opacity-15"
             style={{ background: 'radial-gradient(circle, #863bff, transparent 70%)' }} />
         </div>
         <div className="relative max-w-3xl mx-auto">
-          <span className="inline-block px-4 py-1.5 rounded-full text-xs font-semibold tracking-wider uppercase mb-4 border border-violet-500/30 text-violet-400 bg-violet-500/10">
+          <span className="inline-block px-4 py-1.5 rounded-full text-xs font-semibold tracking-wider uppercase mb-4 border border-violet-200 text-violet-700 bg-violet-50">
             Portafolio
           </span>
-          <h1 className="text-4xl sm:text-5xl font-extrabold text-white mb-6">
+          <h1 className="text-4xl sm:text-5xl font-extrabold text-slate-900 mb-6">
             Proyectos que hablan por <span className="gradient-text">nuestra experiencia</span>
           </h1>
-          <p className="text-gray-400 text-lg leading-relaxed">
+          <p className="text-slate-600 text-lg leading-relaxed">
             Hemos ejecutado proyectos de redes y tecnología para empresas, instituciones públicas y comunidades
             en todo el Perú. Cada proyecto es un testimonio de nuestro compromiso con la calidad.
           </p>
@@ -74,22 +74,22 @@ export default function Proyectos() {
       <section className="py-12 px-4">
         <div className="max-w-6xl mx-auto grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {proyectos.map(({ icon: Icon, titulo, descripcion, tags, año }) => (
-            <div key={titulo} className="glass rounded-2xl p-6 card-hover flex flex-col gap-4">
+            <div key={titulo} className="bg-white border border-slate-200 rounded-2xl p-6 card-hover flex flex-col gap-4 shadow-xs">
               <div className="flex items-start justify-between">
-                <div className="w-11 h-11 gradient-brand rounded-xl flex items-center justify-center shadow-lg shadow-violet-500/20 shrink-0">
+                <div className="w-11 h-11 gradient-brand rounded-xl flex items-center justify-center shadow-md shadow-violet-500/20 shrink-0">
                   <Icon className="w-5 h-5 text-white" />
                 </div>
-                <span className="text-xs text-gray-500 font-medium bg-white/5 px-2.5 py-1 rounded-full border border-white/10">
+                <span className="text-xs text-slate-600 font-semibold bg-slate-100 px-2.5 py-1 rounded-full border border-slate-200">
                   {año}
                 </span>
               </div>
               <div>
-                <h3 className="text-white font-bold text-base mb-2">{titulo}</h3>
-                <p className="text-gray-400 text-sm leading-relaxed">{descripcion}</p>
+                <h3 className="text-slate-900 font-bold text-base mb-2">{titulo}</h3>
+                <p className="text-slate-600 text-sm leading-relaxed">{descripcion}</p>
               </div>
               <div className="flex flex-wrap gap-2 mt-auto">
                 {tags.map(tag => (
-                  <span key={tag} className="text-xs px-2.5 py-1 rounded-full bg-violet-500/10 text-violet-400 border border-violet-500/20">
+                  <span key={tag} className="text-xs px-2.5 py-1 rounded-full bg-violet-50 text-violet-700 border border-violet-200 font-medium">
                     {tag}
                   </span>
                 ))}
@@ -101,12 +101,12 @@ export default function Proyectos() {
 
       {/* CTA */}
       <section className="py-20 px-4 text-center">
-        <div className="max-w-2xl mx-auto glass rounded-3xl p-10">
-          <h2 className="text-2xl font-extrabold text-white mb-3">¿Tienes un proyecto en mente?</h2>
-          <p className="text-gray-400 mb-6">Cuéntanos tu necesidad y te preparamos una solución a medida.</p>
+        <div className="max-w-2xl mx-auto bg-white border border-slate-200 rounded-3xl p-10 shadow-sm">
+          <h2 className="text-2xl font-extrabold text-slate-900 mb-3">¿Tienes un proyecto en mente?</h2>
+          <p className="text-slate-600 mb-6">Cuéntanos tu necesidad y te preparamos una solución a medida.</p>
           <a
             href="/contacto"
-            className="inline-block px-8 py-3 gradient-brand text-white font-bold rounded-xl shadow-lg shadow-violet-500/25 hover:opacity-90 transition-opacity"
+            className="inline-block px-8 py-3 gradient-brand text-white font-bold rounded-xl shadow-md shadow-violet-500/20 hover:opacity-90 transition-opacity"
           >
             Contáctanos
           </a>

@@ -17,7 +17,7 @@ const testimonials = [
     company: 'Grupo Empresarial Norte',
     avatar: 'MG',
     rating: 5,
-    text: 'Compré procesadores y memorias RAM para renovar 20 equipos de la empresa. Los precios son muy competitivos y el envío fue rapidísimo. El equipo de TecomRed siempre responde rápido.',
+    text: 'Compré procesadores y memorias RAM para renovar 20 equipos de la empresa. Los precios son muy competitivos y el envío fue rapidísimo. El equipo de SiscomRed siempre responde rápido.',
     color: 'from-purple-500 to-pink-500',
   },
   {
@@ -26,7 +26,7 @@ const testimonials = [
     company: 'Freelance',
     avatar: 'RS',
     rating: 5,
-    text: 'Como técnico independiente, necesito proveedores confiables. TecomRed tiene todo lo que necesito: cables, herramientas, access points. Los precios y la calidad son insuperables.',
+    text: 'Como técnico independiente, necesito proveedores confiables. SiscomRed tiene todo lo que necesito: cables, herramientas, access points. Los precios y la calidad son insuperables.',
     color: 'from-emerald-500 to-sky-500',
   },
 ];
@@ -37,9 +37,9 @@ export default function TestimonialsSection() {
       <div className="max-w-7xl mx-auto">
         <AnimatedSection>
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-white mb-3">Lo que dicen nuestros clientes</h2>
-            <p className="text-gray-400 max-w-xl mx-auto">
-              Más de 2,000 clientes confían en TecomRed para sus proyectos de tecnología
+            <h2 className="text-3xl font-bold text-slate-900 mb-3">Lo que dicen nuestros clientes</h2>
+            <p className="text-slate-600 max-w-xl mx-auto">
+              Más de 2,000 clientes confían en SiscomRed para sus proyectos de tecnología
             </p>
           </div>
         </AnimatedSection>
@@ -47,7 +47,7 @@ export default function TestimonialsSection() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {testimonials.map((t, i) => (
             <AnimatedSection key={t.name} delay={i * 100}>
-              <div className="glass rounded-2xl p-6 h-full flex flex-col card-hover">
+              <div className="bg-white border border-slate-200 rounded-2xl p-6 h-full flex flex-col shadow-xs card-hover">
                 {/* Stars */}
                 <div className="flex gap-1 mb-4">
                   {[...Array(t.rating)].map((_, j) => (
@@ -56,18 +56,18 @@ export default function TestimonialsSection() {
                 </div>
 
                 {/* Text */}
-                <p className="text-gray-300 text-sm leading-relaxed flex-1 mb-6">
+                <p className="text-slate-700 text-sm leading-relaxed flex-1 mb-6">
                   "{t.text}"
                 </p>
 
                 {/* Author */}
                 <div className="flex items-center gap-3">
-                  <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${t.color} flex items-center justify-center text-white font-bold text-sm shrink-0`}>
+                  <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${t.color} flex items-center justify-center text-white font-bold text-sm shrink-0 shadow-xs`}>
                     {t.avatar}
                   </div>
                   <div>
-                    <p className="text-white font-semibold text-sm">{t.name}</p>
-                    <p className="text-gray-500 text-xs">{t.role} · {t.company}</p>
+                    <p className="text-slate-900 font-semibold text-sm">{t.name}</p>
+                    <p className="text-slate-500 text-xs">{t.role} · {t.company}</p>
                   </div>
                 </div>
               </div>

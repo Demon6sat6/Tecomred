@@ -1,6 +1,8 @@
 import { createContext, useContext, type ReactNode } from 'react';
 import type { CartItem, Product } from '../types';
 import { useLocalStorage } from '../hooks/useLocalStorage';
+import { useAdmin } from './AdminContext';
+import { isReferenceProduct } from '../utils/cartOrder';
 
 interface CartContextType {
   items: CartItem[];
@@ -15,22 +17,29 @@ interface CartContextType {
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export function CartProvider({ children }: { children: ReactNode }) {
-  const [items, setItems] = useLocalStorage<CartItem[]>('cart_items', []);
+  const [storedItems, setItems] = useLocalStorage<CartItem[]>('cart_items', []);
+  const { products } = useAdmin();
+  const purchasable = new Map(products.filter(p => p.isActive && (p.stock > 0 || isReferenceProduct(p))).map(p => [p.id, p]));
+  const items = storedItems.flatMap(item => {
+    const product = purchasable.get(item.product.id);
+    return product ? [{ product, quantity: isReferenceProduct(product) ? item.quantity : Math.min(item.quantity, product.stock) }] : [];
+  });
 
   const addToCart = (product: Product) => {
     setItems(prev => {
-      const existing = prev.find(i => i.product.id === product.id);
+      const valid = prev.filter(i => purchasable.has(i.product.id));
+      const existing = valid.find(i => i.product.id === product.id);
       if (existing) {
         const newQty = existing.quantity + 1;
-        if (newQty > product.stock) return prev; // limit to stock
-        return prev.map(i =>
+        if (!isReferenceProduct(product) && newQty > product.stock) return valid; // limit to stock
+        return valid.map(i =>
           i.product.id === product.id
             ? { ...i, quantity: newQty }
             : i
         );
       }
-      if (product.stock < 1) return prev; // no stock
-      return [...prev, { product, quantity: 1 }];
+      if (!purchasable.has(product.id)) return valid;
+      return [...valid, { product, quantity: 1 }];
     });
   };
 
@@ -46,7 +55,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setItems(prev =>
       prev.map(i => {
         if (i.product.id !== productId) return i;
-        const maxQty = i.product.stock;
+        const maxQty = isReferenceProduct(i.product) ? 99 : i.product.stock;
         return { ...i, quantity: Math.min(quantity, maxQty) };
       })
     );

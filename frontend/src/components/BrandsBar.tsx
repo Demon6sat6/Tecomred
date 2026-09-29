@@ -2,6 +2,17 @@ import { useRef, useState, useEffect } from 'react';
 import { useAdmin } from '../context/AdminContext';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
+const brandLogos: Record<string, string> = {
+  cisco: '/brands/cisco.svg',
+  mikrotik: '/brands/mikrotik.svg',
+  ubiquiti: '/brands/ubiquiti.svg',
+  intel: '/brands/intel.svg',
+  samsung: '/brands/samsung.svg',
+  kingston: '/brands/kingston.png',
+  tplink: '/brands/tplink.svg',
+  seagate: '/brands/seagate.svg',
+};
+
 export default function BrandsBar() {
   const { settings } = useAdmin();
   const brands = settings.brands ?? [];
@@ -12,6 +23,10 @@ export default function BrandsBar() {
   useEffect(() => {
     const el = scrollRef.current;
     if (!el || brands.length === 0) return;
+
+    const loopWidth = el.scrollWidth / 3;
+    el.scrollLeft = loopWidth;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
     let animId: number;
     let lastTime = performance.now();
@@ -26,9 +41,10 @@ export default function BrandsBar() {
         el.scrollLeft += speed * delta;
 
         // Bucle infinito sin saltos
-        const halfScroll = el.scrollWidth / 2;
-        if (el.scrollLeft >= halfScroll) {
-          el.scrollLeft -= halfScroll;
+        if (el.scrollLeft >= loopWidth * 2) {
+          el.scrollLeft -= loopWidth;
+        } else if (el.scrollLeft < loopWidth) {
+          el.scrollLeft += loopWidth;
         }
       }
       animId = requestAnimationFrame(step);
@@ -42,7 +58,7 @@ export default function BrandsBar() {
 
   const handleManualScroll = (direction: 'left' | 'right') => {
     if (!scrollRef.current) return;
-    const offset = direction === 'left' ? -220 : 220;
+    const offset = direction === 'left' ? -208 : 208;
     scrollRef.current.scrollBy({ left: offset, behavior: 'smooth' });
   };
 
@@ -50,25 +66,26 @@ export default function BrandsBar() {
   const brandList = [...brands, ...brands, ...brands];
 
   return (
-    <section className="py-7 sm:py-9 px-3 sm:px-4 bg-[#0a0f1d] border-y border-slate-800/80">
+    <section className="py-9 sm:py-12 px-3 sm:px-4 bg-[#f8fbff] border-y border-blue-100">
       <div className="max-w-7xl mx-auto">
-        <div className="flex items-center justify-between mb-3 sm:mb-4 px-1">
-          <p className="text-[11px] sm:text-xs text-sky-400 uppercase tracking-widest font-bold">
+        <div className="flex items-center justify-between mb-5 sm:mb-6 px-1">
+          <p className="flex items-center gap-2.5 text-xs text-[#0052cc] uppercase tracking-[0.16em] font-bold">
+            <span className="w-1 h-5 rounded-full bg-[#48bb07]" aria-hidden="true" />
             Marcas que distribuimos
           </p>
 
           {/* Controles táctiles / flechas para móvil y desktop */}
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-2">
             <button
               onClick={() => handleManualScroll('left')}
-              className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-slate-800/90 hover:bg-slate-700 text-slate-300 hover:text-white flex items-center justify-center transition-colors active:scale-90 border border-slate-700"
+              className="w-9 h-9 rounded-full bg-white hover:bg-blue-50 text-[#0052cc] flex items-center justify-center transition-colors border border-blue-100 shadow-sm"
               aria-label="Desplazar marcas a la izquierda"
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
             <button
               onClick={() => handleManualScroll('right')}
-              className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-slate-800/90 hover:bg-slate-700 text-slate-300 hover:text-white flex items-center justify-center transition-colors active:scale-90 border border-slate-700"
+              className="w-9 h-9 rounded-full bg-white hover:bg-blue-50 text-[#0052cc] flex items-center justify-center transition-colors border border-blue-100 shadow-sm"
               aria-label="Desplazar marcas a la derecha"
             >
               <ChevronRight className="w-4 h-4" />
@@ -77,6 +94,8 @@ export default function BrandsBar() {
         </div>
 
         <div className="relative">
+          <div className="absolute inset-y-0 left-0 w-8 sm:w-12 bg-gradient-to-r from-[#f8fbff] to-transparent z-10 pointer-events-none" aria-hidden="true" />
+          <div className="absolute inset-y-0 right-0 w-8 sm:w-12 bg-gradient-to-l from-[#f8fbff] to-transparent z-10 pointer-events-none" aria-hidden="true" />
           {/* Contenedor deslizante interactivo con soporte táctil y momentum */}
           <div
             ref={scrollRef}
@@ -89,26 +108,38 @@ export default function BrandsBar() {
             onTouchEnd={() => {
               setTimeout(() => setIsUserInteracting(false), 1500);
             }}
-            className="flex items-center gap-3 sm:gap-5 overflow-x-auto scrollbar-none py-1.5 select-none cursor-grab active:cursor-grabbing touch-pan-x"
+            className="flex items-center gap-3 sm:gap-4 overflow-x-auto scrollbar-none py-2 select-none cursor-grab active:cursor-grabbing touch-pan-x"
             style={{
               scrollbarWidth: 'none',
               msOverflowStyle: 'none',
               WebkitOverflowScrolling: 'touch',
             }}
           >
-            {brandList.map((brand, i) => (
+            {brandList.map((brand, i) => {
+              const logo = brandLogos[brand.name.toLowerCase().replace(/[^a-z0-9]/g, '')];
+              return (
               <div
                 key={`${brand.name}-${i}`}
-                className="flex items-center gap-2.5 px-4 sm:px-5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 hover:border-sky-500/50 hover:bg-slate-850 transition-all shrink-0 shadow-md group"
+                className="flex items-center justify-center w-44 sm:w-48 h-20 rounded-2xl bg-white border border-blue-100 hover:border-[#0052cc]/30 hover:shadow-md hover:shadow-blue-100/70 transition-all shrink-0 shadow-sm"
+                aria-hidden={i >= brands.length}
               >
-                <span className="w-2 h-2 rounded-full bg-sky-400 group-hover:scale-125 transition-transform shrink-0" />
-                <span
-                  className={`text-sm sm:text-base font-bold tracking-wide whitespace-nowrap ${brand.colorClass} group-hover:brightness-125`}
-                >
-                  {brand.name}
-                </span>
+                {logo ? (
+                  <div className="flex items-center justify-center gap-2 px-4 w-full">
+                    <img
+                      src={logo}
+                      alt={brand.name}
+                      className={`max-h-11 w-full object-contain ${brand.name.toLowerCase() === 'ubiquiti' ? 'max-w-11' : 'max-w-36'}`}
+                      loading="lazy"
+                      draggable={false}
+                    />
+                    {brand.name.toLowerCase() === 'ubiquiti' && <span className="font-bold text-slate-800">Ubiquiti</span>}
+                  </div>
+                ) : (
+                  <span className="text-base font-bold text-slate-700 whitespace-nowrap">{brand.name}</span>
+                )}
               </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </div>

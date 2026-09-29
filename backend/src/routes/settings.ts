@@ -20,12 +20,12 @@ async function ensureSettingsTable() {
 }
 
 const fallbackSettings: Record<string, any> = {
-  storeName: "TecomRed",
-  storeEmail: "ventas@tecomred.pe",
-  storePhone: "+51 1 234-5678",
+  storeName: "SiscomRed",
+  storeEmail: "siscomred2017@gmail.com",
+  storePhone: "+51 997 176 721",
   storeAddress: "Av. Javier Prado Este 4200, San Isidro, Lima",
   supportHours: "Lun-Vie 9am-7pm",
-  storeWebsite: "https://tecomred.pe",
+  storeWebsite: "https://siscomred.pe",
   freeShippingMin: "300",
   currency: "PEN",
   taxRate: "18",

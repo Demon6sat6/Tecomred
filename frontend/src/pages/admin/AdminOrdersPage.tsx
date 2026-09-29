@@ -1,21 +1,21 @@
 import { useState } from 'react';
-import { Search, X, ChevronDown, Plus, Trash2, Check, Pencil } from 'lucide-react';
+import { Search, X, ChevronDown, Plus, Trash2, Pencil, Eye, ShoppingBag } from 'lucide-react';
 import { useAdmin, type Order } from '../../context/AdminContext';
 import { useCurrency } from '../../hooks/useCurrency';
 
 const statusColors: Record<string, string> = {
-  Pendiente:  'bg-yellow-500/15 text-yellow-400 border-yellow-500/20',
-  Procesando: 'bg-sky-500/15 text-sky-400 border-sky-500/20',
-  Enviado:    'bg-indigo-500/15 text-indigo-400 border-indigo-500/20',
-  Entregado:  'bg-emerald-500/15 text-emerald-400 border-emerald-500/20',
-  Cancelado:  'bg-red-500/15 text-red-400 border-red-500/20',
+  Pendiente:  'bg-amber-50 text-amber-700 border-amber-200',
+  Procesando: 'bg-blue-50 text-blue-700 border-blue-200',
+  Enviado:    'bg-indigo-50 text-indigo-700 border-indigo-200',
+  Entregado:  'bg-emerald-50 text-emerald-700 border-emerald-200',
+  Cancelado:  'bg-rose-50 text-rose-700 border-rose-200',
 };
 
 const allStatuses: Order['status'][] = ['Pendiente', 'Procesando', 'Enviado', 'Entregado', 'Cancelado'];
 
 const emptyOrder: Omit<Order, 'id'> = {
   customer: '', email: '', phone: '',
-  date: new Date().toLocaleDateString('es', { day: 'numeric', month: 'short', year: 'numeric' }),
+  date: new Date().toLocaleDateString('es-PE', { day: 'numeric', month: 'short', year: 'numeric' }),
   total: 0, discount: 0, couponCode: '', status: 'Pendiente', city: '', address: '', notes: '', items: [],
 };
 
@@ -34,7 +34,7 @@ export default function AdminOrders() {
   const [itemQty, setItemQty] = useState(1);
 
   const filtered = orders.filter(o => {
-    const matchSearch = o.customer.toLowerCase().includes(search.toLowerCase()) || o.id.toLowerCase().includes(search.toLowerCase());
+    const matchSearch = (o.customer || '').toLowerCase().includes(search.toLowerCase()) || (o.id || '').toLowerCase().includes(search.toLowerCase());
     const matchStatus = filterStatus === 'Todos' || o.status === filterStatus;
     return matchSearch && matchStatus;
   });
@@ -91,16 +91,18 @@ export default function AdminOrders() {
   };
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h2 className="text-xl sm:text-2xl font-extrabold text-white">Pedidos</h2>
-          <p className="text-gray-500 text-sm">{orders.length} pedidos en total</p>
+          <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">Pedidos y Ventas</h2>
+          <p className="text-slate-500 text-sm mt-0.5">{orders.length} pedidos registrados en tiempo real</p>
         </div>
-        <button onClick={() => { setForm(emptyOrder); setModal('add'); }}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl gradient-brand text-white text-sm font-bold hover:opacity-90 active:scale-95 transition-all shadow-lg shadow-sky-500/20 self-start sm:self-auto">
-          <Plus className="w-4 h-4" /> Nuevo pedido
+        <button
+          onClick={() => { setForm(emptyOrder); setModal('add'); }}
+          className="flex items-center gap-2 px-4 py-2.5 rounded-xl gradient-brand text-white text-sm font-bold hover:opacity-90 active:scale-95 transition-all shadow-md shadow-blue-600/20 self-start sm:self-auto"
+        >
+          <Plus className="w-4 h-4" /> Registrar Pedido Manual
         </button>
       </div>
 
@@ -108,69 +110,103 @@ export default function AdminOrders() {
       <div className="flex flex-wrap gap-2">
         {['Todos', ...allStatuses].map(s => {
           const count = s === 'Todos' ? orders.length : orders.filter(o => o.status === s).length;
+          const isActive = filterStatus === s;
           return (
-            <button key={s} onClick={() => setFilterStatus(s)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${filterStatus === s ? 'gradient-brand text-white border-transparent shadow-lg shadow-sky-500/20' : 'bg-white/5 text-gray-400 border-white/10 hover:bg-white/10'}`}>
-              {s} <span className="opacity-70">({count})</span>
+            <button
+              key={s}
+              onClick={() => setFilterStatus(s)}
+              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold border transition-all ${
+                isActive
+                  ? 'gradient-brand text-white border-transparent shadow-xs'
+                  : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
+              }`}
+            >
+              {s} <span className={isActive ? 'text-white/80' : 'text-slate-400 font-semibold'}>({count})</span>
             </button>
           );
         })}
       </div>
 
-      {/* Search + revenue */}
+      {/* Search & Revenue Summary */}
       <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
-        <div className="relative w-full sm:w-72">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
-          <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Buscar por cliente o ID..."
-            className="w-full pl-9 pr-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-sm text-gray-200 placeholder-gray-600 focus:outline-none focus:border-sky-500/60" />
-          {search && <button onClick={() => setSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2"><X className="w-4 h-4 text-gray-500" /></button>}
+        <div className="relative w-full sm:w-80">
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+          <input
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            placeholder="Buscar por cliente o código de pedido..."
+            className="w-full pl-10 pr-10 py-2.5 bg-white border border-slate-200 rounded-xl text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 shadow-xs transition-all"
+          />
+          {search && (
+            <button onClick={() => setSearch('')} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+              <X className="w-4 h-4" />
+            </button>
+          )}
         </div>
-        <div className="glass rounded-xl px-4 py-2 text-sm">
-          <span className="text-gray-400">Ingresos filtrados: </span>
-          <span className="text-white font-bold">{formatShort(totalRevenue)}</span>
+        <div className="bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm shadow-xs flex items-center gap-2">
+          <span className="text-slate-500 text-xs font-semibold">Total filtrado:</span>
+          <span className="text-slate-900 font-black text-base">{formatShort(totalRevenue)}</span>
         </div>
       </div>
 
-      {/* Table */}
-      <div className="glass rounded-2xl overflow-hidden">
+      {/* Orders Table */}
+      <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-xs">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
-            <thead className="border-b border-white/8">
+            <thead className="border-b border-slate-200 bg-slate-50">
               <tr>
-                <th className="text-left text-gray-500 text-xs font-semibold px-4 py-3">Pedido</th>
-                <th className="text-left text-gray-500 text-xs font-semibold px-4 py-3">Cliente</th>
-                <th className="text-left text-gray-500 text-xs font-semibold px-4 py-3 hidden md:table-cell">Ciudad</th>
-                <th className="text-left text-gray-500 text-xs font-semibold px-4 py-3 hidden sm:table-cell">Fecha</th>
-                <th className="text-right text-gray-500 text-xs font-semibold px-4 py-3">Total</th>
-                <th className="text-center text-gray-500 text-xs font-semibold px-4 py-3">Estado</th>
-                <th className="text-right text-gray-500 text-xs font-semibold px-4 py-3">Acc.</th>
+                <th className="text-left text-slate-500 text-xs font-bold uppercase tracking-wider px-4 py-3.5">ID Pedido</th>
+                <th className="text-left text-slate-500 text-xs font-bold uppercase tracking-wider px-4 py-3.5">Cliente</th>
+                <th className="text-left text-slate-500 text-xs font-bold uppercase tracking-wider px-4 py-3.5 hidden md:table-cell">Ciudad</th>
+                <th className="text-left text-slate-500 text-xs font-bold uppercase tracking-wider px-4 py-3.5 hidden sm:table-cell">Fecha</th>
+                <th className="text-right text-slate-500 text-xs font-bold uppercase tracking-wider px-4 py-3.5">Total</th>
+                <th className="text-center text-slate-500 text-xs font-bold uppercase tracking-wider px-4 py-3.5">Estado</th>
+                <th className="text-right text-slate-500 text-xs font-bold uppercase tracking-wider px-4 py-3.5">Acciones</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/5">
+            <tbody className="divide-y divide-slate-100">
               {filtered.map(order => (
-                <tr key={order.id} className="hover:bg-white/3 transition-colors">
-                  <td className="px-4 py-3">
-                    <button onClick={() => { setSelected(order); setModal('detail'); }}
-                      className="text-sky-400 hover:text-sky-300 text-xs font-mono font-semibold transition-colors">{order.id}</button>
-                    <p className="text-gray-600 text-[10px]">{order.items.length} item{order.items.length !== 1 ? 's' : ''}</p>
-                  </td>                  <td className="px-4 py-3">
-                    <p className="text-white text-xs font-semibold">{order.customer}</p>
-                    <p className="text-gray-500 text-[10px]">{order.email}</p>
+                <tr key={order.id} className="hover:bg-slate-50/70 transition-colors">
+                  <td className="px-4 py-3.5">
+                    <button
+                      onClick={() => { setSelected(order); setModal('detail'); }}
+                      className="text-blue-600 hover:text-blue-700 text-xs font-mono font-bold transition-colors text-left"
+                    >
+                      {order.id}
+                    </button>
+                    <p className="text-slate-400 text-[11px] mt-0.5">{order.items?.length || 0} producto{(order.items?.length || 0) !== 1 ? 's' : ''}</p>
                   </td>
-                  <td className="px-4 py-3 hidden md:table-cell"><span className="text-gray-400 text-xs">{order.city}</span></td>
-                  <td className="px-4 py-3 hidden sm:table-cell"><span className="text-gray-400 text-xs">{order.date}</span></td>
-                  <td className="px-4 py-3 text-right"><span className="text-white text-xs font-bold">{formatShort(order.total)}</span></td>
-                  <td className="px-4 py-3">
+                  <td className="px-4 py-3.5">
+                    <p className="text-slate-900 text-xs font-bold">{order.customer}</p>
+                    <p className="text-slate-400 text-[11px]">{order.email}</p>
+                  </td>
+                  <td className="px-4 py-3.5 hidden md:table-cell">
+                    <span className="text-slate-600 text-xs">{order.city || '-'}</span>
+                  </td>
+                  <td className="px-4 py-3.5 hidden sm:table-cell">
+                    <span className="text-slate-500 text-xs">{order.date}</span>
+                  </td>
+                  <td className="px-4 py-3.5 text-right">
+                    <span className="text-slate-900 text-xs font-black">{formatShort(order.total)}</span>
+                  </td>
+                  <td className="px-4 py-3.5">
                     <div className="relative flex justify-center">
-                      <button onClick={() => setOpenDropdown(openDropdown === order.id ? null : order.id)}
-                        className={`flex items-center gap-1 text-[10px] font-bold px-2.5 py-1 rounded-full border transition-all ${statusColors[order.status]}`}>
-                        {order.status} <ChevronDown className="w-3 h-3" />
+                      <button
+                        onClick={() => setOpenDropdown(openDropdown === order.id ? null : order.id)}
+                        className={`flex items-center gap-1.5 text-[11px] font-bold px-3 py-1 rounded-full border shadow-2xs transition-all ${statusColors[order.status] ?? 'bg-slate-100 text-slate-700'}`}
+                      >
+                        {order.status} <ChevronDown className="w-3 h-3 opacity-70" />
                       </button>
                       {openDropdown === order.id && (
-                        <div className="absolute top-full mt-1 right-0 z-20 glass-strong rounded-xl shadow-xl border border-white/10 py-1 min-w-[130px]">
+                        <div className="absolute top-full mt-1.5 right-0 z-20 bg-white rounded-xl shadow-xl border border-slate-200 py-1.5 min-w-[140px] animate-fade-in">
                           {allStatuses.map(s => (
-<button key={s} onClick={() => { handleStatusChange(order.id, s); }}
-                               className={`w-full text-left px-3 py-1.5 text-xs font-semibold hover:bg-white/5 transition-colors ${order.status === s ? 'text-sky-400' : 'text-gray-300'}`}>
+                            <button
+                              key={s}
+                              onClick={() => handleStatusChange(order.id, s)}
+                              className={`w-full text-left px-3.5 py-1.5 text-xs font-bold transition-colors ${
+                                order.status === s ? 'text-blue-600 bg-blue-50' : 'text-slate-700 hover:bg-slate-50'
+                              }`}
+                            >
                               {s}
                             </button>
                           ))}
@@ -178,15 +214,28 @@ export default function AdminOrders() {
                       )}
                     </div>
                   </td>
-                  <td className="px-4 py-3 text-right">
+                  <td className="px-4 py-3.5 text-right">
                     <div className="flex items-center justify-end gap-1">
-                      <button onClick={() => openEdit(order)}
-                        className="p-1.5 rounded-lg hover:bg-sky-500/15 text-gray-500 hover:text-sky-400 transition-colors">
-                        <Pencil className="w-3.5 h-3.5" />
+                      <button
+                        onClick={() => { setSelected(order); setModal('detail'); }}
+                        className="p-1.5 rounded-lg text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+                        title="Ver detalle"
+                      >
+                        <Eye className="w-4 h-4" />
                       </button>
-                      <button onClick={() => { setSelected(order); setModal('delete'); }}
-                        className="p-1.5 rounded-lg hover:bg-red-500/15 text-gray-500 hover:text-red-400 transition-colors">
-                        <Trash2 className="w-3.5 h-3.5" />
+                      <button
+                        onClick={() => openEdit(order)}
+                        className="p-1.5 rounded-lg text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+                        title="Editar pedido"
+                      >
+                        <Pencil className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => { setSelected(order); setModal('delete'); }}
+                        className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
+                        title="Eliminar pedido"
+                      >
+                        <Trash2 className="w-4 h-4" />
                       </button>
                     </div>
                   </td>
@@ -194,143 +243,142 @@ export default function AdminOrders() {
               ))}
             </tbody>
           </table>
-          {filtered.length === 0 && <div className="text-center py-12 text-gray-500 text-sm">No se encontraron pedidos.</div>}
+          {filtered.length === 0 && (
+            <div className="text-center py-16 text-slate-400 text-sm">
+              <ShoppingBag className="w-10 h-10 mx-auto mb-2 text-slate-300" />
+              No se encontraron pedidos coincidentes.
+            </div>
+          )}
         </div>
       </div>
 
       {/* ADD ORDER MODAL */}
       {modal === 'add' && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="glass-strong rounded-2xl w-full max-w-xl max-h-[90vh] overflow-y-auto shadow-2xl border border-white/10">
-            <div className="flex items-center justify-between p-5 border-b border-white/10">
-              <h3 className="text-white font-bold">Nuevo pedido</h3>
-              <button onClick={() => setModal(null)} className="p-1.5 rounded-lg hover:bg-white/10 text-gray-400"><X className="w-5 h-5" /></button>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+          <div className="bg-white rounded-2xl w-full max-w-xl max-h-[90vh] overflow-y-auto shadow-2xl border border-slate-200 animate-fade-in">
+            <div className="flex items-center justify-between p-5 border-b border-slate-100">
+              <h3 className="text-slate-900 font-extrabold text-base">Nuevo Pedido</h3>
+              <button onClick={() => setModal(null)} className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100">
+                <X className="w-5 h-5" />
+              </button>
             </div>
             <div className="p-5 space-y-4">
-              <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold">Datos del cliente</p>
+              <p className="text-xs text-slate-400 uppercase tracking-wider font-bold">Datos del cliente</p>
               <div className="grid grid-cols-2 gap-3">
                 {([
-                  { label: 'Nombre *', key: 'customer', placeholder: 'Juan Pérez' },
-                  { label: 'Email *',  key: 'email',    placeholder: 'juan@email.com' },
-                  { label: 'Teléfono', key: 'phone',    placeholder: '+1 234 567' },
+                  { label: 'Nombre *', key: 'customer', placeholder: 'Carlos Mendoza' },
+                  { label: 'Email *',  key: 'email',    placeholder: 'cliente@email.com' },
+                  { label: 'Teléfono', key: 'phone',    placeholder: '+51 987 654 321' },
                   { label: 'Ciudad',   key: 'city',     placeholder: 'Lima' },
                 ] as const).map(f => (
                   <div key={f.key}>
-                    <label className="block text-xs text-gray-400 mb-1.5 font-medium">{f.label}</label>
-                    <input value={(form as any)[f.key]} placeholder={f.placeholder}
+                    <label className="block text-xs text-slate-600 mb-1 font-semibold">{f.label}</label>
+                    <input
+                      value={(form as any)[f.key]}
+                      placeholder={f.placeholder}
                       onChange={e => setForm(prev => ({ ...prev, [f.key]: e.target.value }))}
-                      className="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-gray-200 text-sm focus:outline-none focus:border-sky-500/60" />
+                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 text-sm focus:bg-white focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                    />
                   </div>
                 ))}
                 <div className="col-span-2">
-                  <label className="block text-xs text-gray-400 mb-1.5 font-medium">Dirección</label>
-                  <input value={form.address} placeholder="Av. Principal 123"
+                  <label className="block text-xs text-slate-600 mb-1 font-semibold">Dirección</label>
+                  <input
+                    value={form.address}
+                    placeholder="Av. Javier Prado 1234, San Isidro"
                     onChange={e => setForm(f => ({ ...f, address: e.target.value }))}
-                    className="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-gray-200 text-sm focus:outline-none focus:border-sky-500/60" />
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 text-sm focus:bg-white focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                  />
                 </div>
               </div>
+
               <div>
-                <label className="block text-xs text-gray-400 mb-1.5 font-medium">Estado inicial</label>
-                <select value={form.status} onChange={e => setForm(f => ({ ...f, status: e.target.value as Order['status'] }))}
-                  className="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-gray-200 text-sm focus:outline-none focus:border-sky-500/60">
-                  {allStatuses.map(s => <option key={s} value={s} className="bg-gray-900">{s}</option>)}
+                <label className="block text-xs text-slate-600 mb-1 font-semibold">Estado Inicial</label>
+                <select
+                  value={form.status}
+                  onChange={e => setForm(f => ({ ...f, status: e.target.value as Order['status'] }))}
+                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 text-sm focus:bg-white focus:outline-none focus:border-blue-500"
+                >
+                  {allStatuses.map(s => <option key={s} value={s}>{s}</option>)}
                 </select>
               </div>
-              <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold pt-2">Productos del pedido</p>
+
+              <p className="text-xs text-slate-400 uppercase tracking-wider font-bold pt-2">Productos del pedido</p>
               <div className="flex gap-2">
-                <select value={itemProductId} onChange={e => setItemProductId(e.target.value)}
-                  className="flex-1 px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-gray-200 text-sm focus:outline-none focus:border-sky-500/60">
-                  <option value="" className="bg-gray-900">Seleccionar producto...</option>
-                  {products.map(p => <option key={p.id} value={p.id} className="bg-gray-900">{p.name} - ${p.price}</option>)}
+                <select
+                  value={itemProductId}
+                  onChange={e => setItemProductId(e.target.value)}
+                  className="flex-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 text-sm focus:bg-white focus:outline-none focus:border-blue-500"
+                >
+                  <option value="">Seleccionar producto de catálogo...</option>
+                  {products.map(p => <option key={p.id} value={p.id}>{p.name} - ${p.price}</option>)}
                 </select>
-                <input type="number" min={1} value={itemQty} onChange={e => setItemQty(+e.target.value)}
-                  className="w-16 px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-gray-200 text-sm focus:outline-none focus:border-sky-500/60 text-center" />
-                <button onClick={addItem} disabled={!itemProductId}
-                  className="px-4 py-2.5 rounded-xl gradient-brand text-white text-sm font-bold hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed transition-all">
+                <input
+                  type="number"
+                  min={1}
+                  value={itemQty}
+                  onChange={e => setItemQty(+e.target.value)}
+                  className="w-16 px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 text-sm focus:bg-white focus:outline-none text-center font-bold"
+                />
+                <button
+                  type="button"
+                  onClick={addItem}
+                  disabled={!itemProductId}
+                  className="px-4 py-2 rounded-xl gradient-brand text-white text-sm font-bold hover:opacity-90 disabled:opacity-40 transition-all"
+                >
                   <Plus className="w-4 h-4" />
                 </button>
               </div>
+
               {form.items.length > 0 && (
-                <div className="space-y-2">
+                <div className="space-y-2 bg-slate-50 p-3 rounded-xl border border-slate-200/80">
                   {form.items.map((item, idx) => (
-                    <div key={idx} className="flex items-center justify-between p-3 bg-white/3 rounded-xl">
+                    <div key={idx} className="flex items-center justify-between p-2.5 bg-white rounded-lg border border-slate-200/60 shadow-2xs">
                       <div className="flex-1 min-w-0">
-                        <p className="text-white text-xs font-medium truncate">{item.name}</p>
-                        <p className="text-gray-500 text-[10px]">x{item.qty} · {formatShort(item.price)} c/u</p>
+                        <p className="text-slate-800 text-xs font-bold truncate">{item.name}</p>
+                        <p className="text-slate-400 text-[10px]">x{item.qty} · {formatShort(item.price)} c/u</p>
                       </div>
                       <div className="flex items-center gap-3">
-                        <span className="text-white text-xs font-bold">{formatShort(item.price * item.qty)}</span>
-                        <button onClick={() => removeItem(idx)} className="p-1 rounded hover:bg-red-500/15 text-gray-500 hover:text-red-400 transition-colors">
+                        <span className="text-slate-900 text-xs font-extrabold">{formatShort(item.price * item.qty)}</span>
+                        <button onClick={() => removeItem(idx)} className="p-1 rounded text-slate-400 hover:text-rose-600">
                           <X className="w-3.5 h-3.5" />
                         </button>
                       </div>
                     </div>
                   ))}
-                  <div className="flex justify-between pt-2 border-t border-white/10 font-bold">
-                    <span className="text-gray-400 text-sm">Total</span>
-                    <span className="gradient-text text-lg">{formatShort(form.total)}</span>
+                  <div className="flex justify-between pt-2 border-t border-slate-200 font-bold px-1">
+                    <span className="text-slate-600 text-sm">Total a cobrar:</span>
+                    <span className="text-slate-900 text-lg font-black">{formatShort(form.total)}</span>
                   </div>
                 </div>
               )}
-              <div>
-                <label className="block text-xs text-gray-400 mb-1.5 font-medium">Notas</label>
-                <textarea value={form.notes} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))}
-                  rows={2} placeholder="Instrucciones especiales..."
-                  className="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-gray-200 text-sm focus:outline-none focus:border-sky-500/60 resize-none" />
-              </div>
-            </div>
-            <div className="flex gap-3 p-5 border-t border-white/10">
-              <button onClick={() => setModal(null)} className="flex-1 py-2.5 rounded-xl bg-white/5 border border-white/10 text-gray-300 text-sm font-semibold hover:bg-white/10 transition-colors">Cancelar</button>
-              <button onClick={handleSave} disabled={saving || !form.customer || form.items.length === 0}
-                className={`flex-1 py-2.5 rounded-xl text-white text-sm font-bold transition-all active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed ${saved ? 'bg-emerald-500' : 'gradient-brand hover:opacity-90'}`}>
-                {saved ? <span className="flex items-center justify-center gap-2"><Check className="w-4 h-4" /> Creado</span> : 'Crear pedido'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
-      {/* EDIT ORDER MODAL */}
-      {modal === 'edit' && selected && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="glass-strong rounded-2xl w-full max-w-md shadow-2xl border border-white/10">
-            <div className="flex items-center justify-between p-5 border-b border-white/10">
-              <h3 className="text-white font-bold">Editar pedido <span className="font-mono text-sky-400">{selected.id}</span></h3>
-              <button onClick={() => setModal(null)} className="p-1.5 rounded-lg hover:bg-white/10 text-gray-400"><X className="w-5 h-5" /></button>
-            </div>
-            <div className="p-5 space-y-4">
-              {([
-                { label: 'Cliente',   key: 'customer', placeholder: 'Juan Pérez' },
-                { label: 'Email',     key: 'email',    placeholder: 'juan@email.com' },
-                { label: 'Teléfono', key: 'phone',    placeholder: '+1 234 567' },
-                { label: 'Ciudad',   key: 'city',     placeholder: 'Lima' },
-                { label: 'Dirección', key: 'address',  placeholder: 'Av. Principal 123' },
-              ] as const).map(f => (
-                <div key={f.key}>
-                  <label className="block text-xs text-gray-400 mb-1.5 font-medium">{f.label}</label>
-                  <input value={(selected as any)[f.key]} placeholder={f.placeholder}
-                    onChange={e => setSelected(s => s ? { ...s, [f.key]: e.target.value } : s)}
-                    className="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-gray-200 text-sm focus:outline-none focus:border-sky-500/60" />
-                </div>
-              ))}
               <div>
-                <label className="block text-xs text-gray-400 mb-1.5 font-medium">Estado</label>
-                <select value={selected.status} onChange={e => setSelected(s => s ? { ...s, status: e.target.value as Order['status'] } : s)}
-                  className="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-gray-200 text-sm focus:outline-none focus:border-sky-500/60">
-                  {allStatuses.map(s => <option key={s} value={s} className="bg-gray-900">{s}</option>)}
-                </select>
-              </div>
-              <div>
-                <label className="block text-xs text-gray-400 mb-1.5 font-medium">Notas</label>
-                <textarea value={selected.notes} onChange={e => setSelected(s => s ? { ...s, notes: e.target.value } : s)}
-                  rows={2} className="w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-gray-200 text-sm focus:outline-none focus:border-sky-500/60 resize-none" />
+                <label className="block text-xs text-slate-600 mb-1 font-semibold">Notas / Observaciones</label>
+                <textarea
+                  value={form.notes}
+                  onChange={e => setForm(f => ({ ...f, notes: e.target.value }))}
+                  rows={2}
+                  placeholder="Instrucciones de entrega, factura, etc."
+                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 text-sm focus:bg-white focus:outline-none focus:border-blue-500 resize-none"
+                />
               </div>
             </div>
-            <div className="flex gap-3 p-5 border-t border-white/10">
-              <button onClick={() => setModal(null)} className="flex-1 py-2.5 rounded-xl bg-white/5 border border-white/10 text-gray-300 text-sm font-semibold hover:bg-white/10 transition-colors">Cancelar</button>
-              <button onClick={handleEditSave}
-                className="flex-1 py-2.5 rounded-xl gradient-brand text-white text-sm font-bold hover:opacity-90 active:scale-95 transition-all">
-                Guardar cambios
+            <div className="flex gap-3 p-5 border-t border-slate-100">
+              <button
+                onClick={() => setModal(null)}
+                className="flex-1 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-semibold transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleSave}
+                disabled={saving || !form.customer || form.items.length === 0}
+                className={`flex-1 py-2.5 rounded-xl text-white text-sm font-bold transition-all active:scale-95 disabled:opacity-40 ${
+                  saved ? 'bg-emerald-600' : 'gradient-brand hover:opacity-95 shadow-md shadow-blue-600/20'
+                }`}
+              >
+                {saved ? '¡Pedido Creado!' : 'Crear Pedido'}
               </button>
             </div>
           </div>
@@ -339,49 +387,130 @@ export default function AdminOrders() {
 
       {/* DETAIL MODAL */}
       {modal === 'detail' && selected && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="glass-strong rounded-2xl w-full max-w-md max-h-[90vh] overflow-y-auto shadow-2xl border border-white/10">
-            <div className="flex items-center justify-between p-5 border-b border-white/10">
-              <h3 className="text-white font-bold font-mono">{selected.id}</h3>
-              <button onClick={() => setModal(null)} className="p-1.5 rounded-lg hover:bg-white/10 text-gray-400"><X className="w-5 h-5" /></button>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+          <div className="bg-white rounded-2xl w-full max-w-md max-h-[90vh] overflow-y-auto shadow-2xl border border-slate-200 animate-fade-in">
+            <div className="flex items-center justify-between p-5 border-b border-slate-100">
+              <div>
+                <h3 className="text-slate-900 font-extrabold text-base">Detalle de Pedido</h3>
+                <p className="text-xs text-blue-600 font-mono font-bold mt-0.5">{selected.id}</p>
+              </div>
+              <button onClick={() => setModal(null)} className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100">
+                <X className="w-5 h-5" />
+              </button>
             </div>
             <div className="p-5 space-y-4">
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-3 bg-slate-50 p-4 rounded-xl border border-slate-200/80">
                 {[
                   { label: 'Cliente',   value: selected.customer },
                   { label: 'Email',     value: selected.email },
-                  { label: 'Telefono',  value: selected.phone || '-' },
-                  { label: 'Ciudad',    value: selected.city },
-                  { label: 'Direccion', value: selected.address || '-' },
+                  { label: 'Teléfono',  value: selected.phone || '-' },
+                  { label: 'Ciudad',    value: selected.city || '-' },
+                  { label: 'Dirección', value: selected.address || '-' },
                   { label: 'Fecha',     value: selected.date },
                 ].map(({ label, value }) => (
                   <div key={label}>
-                    <p className="text-gray-500 text-xs">{label}</p>
-                    <p className="text-white text-sm font-medium">{value}</p>
+                    <p className="text-slate-400 text-[11px] font-semibold">{label}</p>
+                    <p className="text-slate-800 text-xs font-bold mt-0.5">{value}</p>
                   </div>
                 ))}
               </div>
+
               {selected.notes && (
-                <div className="p-3 bg-yellow-500/5 border border-yellow-500/20 rounded-xl">
-                  <p className="text-yellow-400 text-xs font-semibold mb-1">Notas</p>
-                  <p className="text-gray-300 text-xs">{selected.notes}</p>
+                <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs">
+                  <p className="text-amber-900 font-bold mb-0.5">Notas de entrega:</p>
+                  <p className="text-amber-800">{selected.notes}</p>
                 </div>
               )}
+
               <div>
-                <p className="text-gray-500 text-xs uppercase tracking-wider font-semibold mb-2">Productos</p>
+                <p className="text-xs text-slate-500 uppercase tracking-wider font-bold mb-2">Artículos comprados</p>
                 <div className="space-y-2">
                   {selected.items.map((item, i) => (
-                    <div key={i} className="flex justify-between text-sm">
-                      <span className="text-gray-300 truncate flex-1">{item.name} x{item.qty}</span>
-                      <span className="text-white font-semibold ml-3">{formatShort(item.price * item.qty)}</span>
+                    <div key={i} className="flex justify-between items-center text-xs p-2.5 rounded-lg border border-slate-100 bg-slate-50/50">
+                      <span className="text-slate-800 font-medium truncate flex-1">{item.name} x{item.qty}</span>
+                      <span className="text-slate-900 font-extrabold ml-3">{formatShort(item.price * item.qty)}</span>
                     </div>
                   ))}
-                  <div className="flex justify-between font-bold pt-2 border-t border-white/10">
-                    <span className="text-white">Total</span>
-                    <span className="gradient-text text-lg">{formatShort(selected.total)}</span>
+                  <div className="flex justify-between items-center font-bold pt-3 border-t border-slate-200">
+                    <span className="text-slate-700 text-sm">Total del pedido:</span>
+                    <span className="text-slate-900 text-lg font-black">{formatShort(selected.total)}</span>
                   </div>
                 </div>
               </div>
+            </div>
+            <div className="p-4 border-t border-slate-100">
+              <button
+                onClick={() => setModal(null)}
+                className="w-full py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-semibold transition-colors"
+              >
+                Cerrar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* EDIT ORDER MODAL */}
+      {modal === 'edit' && selected && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+          <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl border border-slate-200 animate-fade-in">
+            <div className="flex items-center justify-between p-5 border-b border-slate-100">
+              <h3 className="text-slate-900 font-extrabold">Editar Pedido <span className="font-mono text-blue-600">{selected.id}</span></h3>
+              <button onClick={() => setModal(null)} className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="p-5 space-y-3.5">
+              {([
+                { label: 'Cliente',   key: 'customer', placeholder: 'Juan Pérez' },
+                { label: 'Email',     key: 'email',    placeholder: 'juan@email.com' },
+                { label: 'Teléfono',  key: 'phone',    placeholder: '+51 987 654 321' },
+                { label: 'Ciudad',    key: 'city',     placeholder: 'Lima' },
+                { label: 'Dirección', key: 'address',  placeholder: 'Av. Principal 123' },
+              ] as const).map(f => (
+                <div key={f.key}>
+                  <label className="block text-xs text-slate-600 mb-1 font-semibold">{f.label}</label>
+                  <input
+                    value={(selected as any)[f.key]}
+                    placeholder={f.placeholder}
+                    onChange={e => setSelected(s => s ? { ...s, [f.key]: e.target.value } : s)}
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 text-sm focus:bg-white focus:outline-none focus:border-blue-500"
+                  />
+                </div>
+              ))}
+              <div>
+                <label className="block text-xs text-slate-600 mb-1 font-semibold">Estado</label>
+                <select
+                  value={selected.status}
+                  onChange={e => setSelected(s => s ? { ...s, status: e.target.value as Order['status'] } : s)}
+                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 text-sm focus:bg-white focus:outline-none focus:border-blue-500"
+                >
+                  {allStatuses.map(s => <option key={s} value={s}>{s}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs text-slate-600 mb-1 font-semibold">Notas</label>
+                <textarea
+                  value={selected.notes}
+                  onChange={e => setSelected(s => s ? { ...s, notes: e.target.value } : s)}
+                  rows={2}
+                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 text-sm focus:bg-white focus:outline-none focus:border-blue-500 resize-none"
+                />
+              </div>
+            </div>
+            <div className="flex gap-3 p-5 border-t border-slate-100">
+              <button
+                onClick={() => setModal(null)}
+                className="flex-1 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-semibold transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleEditSave}
+                className="flex-1 py-2.5 rounded-xl gradient-brand text-white text-sm font-bold hover:opacity-95 active:scale-95 transition-all shadow-md shadow-blue-600/20"
+              >
+                Guardar Cambios
+              </button>
             </div>
           </div>
         </div>
@@ -389,16 +518,28 @@ export default function AdminOrders() {
 
       {/* DELETE MODAL */}
       {modal === 'delete' && selected && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="glass-strong rounded-2xl w-full max-w-sm p-6 shadow-2xl border border-white/10 text-center">
-            <div className="w-14 h-14 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center mx-auto mb-4">
-              <Trash2 className="w-7 h-7 text-red-400" />
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+          <div className="bg-white rounded-2xl w-full max-w-sm p-6 shadow-2xl border border-slate-200 text-center animate-fade-in">
+            <div className="w-14 h-14 rounded-full bg-rose-50 border border-rose-100 flex items-center justify-center mx-auto mb-4">
+              <Trash2 className="w-7 h-7 text-rose-600" />
             </div>
-            <h3 className="text-white font-bold text-lg mb-2">Eliminar pedido?</h3>
-            <p className="text-gray-400 text-sm mb-6">Se eliminara el pedido <span className="text-white font-mono font-bold">{selected.id}</span>.</p>
+            <h3 className="text-slate-900 font-extrabold text-lg mb-2">¿Eliminar pedido?</h3>
+            <p className="text-slate-500 text-sm mb-6">
+              Se eliminará el pedido <span className="font-mono font-bold text-slate-900">{selected.id}</span> del historial de ventas.
+            </p>
             <div className="flex gap-3">
-              <button onClick={() => setModal(null)} className="flex-1 py-2.5 rounded-xl bg-white/5 border border-white/10 text-gray-300 text-sm font-semibold hover:bg-white/10 transition-colors">Cancelar</button>
-              <button onClick={handleDelete} className="flex-1 py-2.5 rounded-xl bg-red-500 text-white text-sm font-bold hover:bg-red-600 active:scale-95 transition-all">Eliminar</button>
+              <button
+                onClick={() => setModal(null)}
+                className="flex-1 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-semibold transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleDelete}
+                className="flex-1 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-sm font-bold shadow-md shadow-rose-600/20 active:scale-95 transition-all"
+              >
+                Eliminar
+              </button>
             </div>
           </div>
         </div>
@@ -406,6 +547,3 @@ export default function AdminOrders() {
     </div>
   );
 }
-
-
-

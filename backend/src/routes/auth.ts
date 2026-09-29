@@ -6,5 +6,4 @@ export const authRouter = Router();
 
 authRouter.post("/login",  authController.login);
 authRouter.post("/register", authController.registerUser);
-authRouter.post("/customer-login", authController.loginUser);
 authRouter.get("/verify",  requireApiKey, (_req, res) => res.json({ valid: true }));

@@ -5,14 +5,14 @@ import { useEffect } from 'react';
  * por página (SEO on-page). Restaura el título base al desmontar.
  */
 export function usePageTitle(title?: string, description?: string) {
-  const BASE_TITLE = 'TecomRed — Redes, Switches, Routers y Componentes';
+  const BASE_TITLE = 'SiscomRed — Sistemas, Cómputo y Redes';
 
   useEffect(() => {
     const prevTitle = document.title;
-    document.title = title ? `${title} | TecomRed` : BASE_TITLE;
+    document.title = title ? `${title} | SiscomRed` : BASE_TITLE;
 
     const fallbackDesc =
-      'Tu tienda especializada en redes y componentes de cómputo: switches, routers, cables, procesadores, memorias RAM y más. Envío a todo el Perú.';
+      'Tu tienda especializada en sistemas, redes y componentes de cómputo: switches, routers, cables, procesadores, memorias RAM y más. Envío a todo el Perú.';
     let prevDesc: string | null = null;
     let meta = document.querySelector<HTMLMetaElement>('meta[name="description"]');
     if (meta) {

@@ -3,26 +3,23 @@ import { Link, useLocation, useNavigate, Outlet } from 'react-router-dom';
 import {
   LayoutDashboard, Package, ShoppingBag,
   LogOut, Menu, X, ChevronRight, Bell, Settings,
-  Users, Tag, Star, FolderOpen, BarChart2, ImageIcon,
-  UserCog, MapPinned, BookOpen,
+  Users, Tag, Star, FolderOpen, ImageIcon,
+  UserCog,
   Sun, Moon, Store,
 } from 'lucide-react';
 import { useAdmin } from '../../context/AdminContext';
 
 const navItems = [
-  { to: '/admin/dashboard',  icon: LayoutDashboard, label: 'Panel' },
-  { to: '/admin/analytics',  icon: BarChart2,        label: 'Analíticas' },
-  { to: '/admin/productos',  icon: Package,          label: 'Productos' },
-  { to: '/admin/medios',     icon: ImageIcon,        label: 'Medios' },
-  { to: '/admin/categorias', icon: FolderOpen,       label: 'Categorías' },
-  { to: '/admin/pedidos',    icon: ShoppingBag,      label: 'Pedidos' },
-  { to: '/admin/clientes',   icon: Users,            label: 'Clientes' },
-  { to: '/admin/administradores', icon: UserCog,     label: 'Administradores' },
-  { to: '/admin/resenas',    icon: Star,             label: 'Reseñas' },
-  { to: '/admin/cupones',    icon: Tag,              label: 'Cupones' },
-  { to: '/admin/seguimiento', icon: MapPinned,       label: 'Seguimiento' },
-  { to: '/admin/nosotros',    icon: BookOpen,        label: 'Nosotros' },
-  { to: '/admin/ajustes',    icon: Settings,         label: 'Ajustes' },
+  { to: '/admin/dashboard',       icon: LayoutDashboard, label: 'Panel' },
+  { to: '/admin/productos',       icon: Package,          label: 'Productos' },
+  { to: '/admin/categorias',      icon: FolderOpen,       label: 'Categorías' },
+  { to: '/admin/pedidos',         icon: ShoppingBag,      label: 'Pedidos' },
+  { to: '/admin/clientes',        icon: Users,            label: 'Clientes' },
+  { to: '/admin/medios',          icon: ImageIcon,        label: 'Medios' },
+  { to: '/admin/cupones',         icon: Tag,              label: 'Cupones' },
+  { to: '/admin/resenas',         icon: Star,             label: 'Reseñas' },
+  { to: '/admin/administradores', icon: UserCog,          label: 'Administradores' },
+  { to: '/admin/ajustes',         icon: Settings,         label: 'Ajustes' },
 ];
 
 function Sidebar({ light, onLogout, pendingOrders }: {
@@ -39,11 +36,9 @@ function Sidebar({ light, onLogout, pendingOrders }: {
     <div className={`flex flex-col h-full border-r ${bg}`}>
       {/* Logo */}
       <div className={`flex items-center gap-3 px-5 py-5 border-b ${light ? 'border-slate-100' : 'border-white/8'}`}>
-        <div className="w-9 h-9 rounded-xl gradient-brand flex items-center justify-center shadow-lg shadow-violet-500/25">
-          <img src="/favicon.svg" alt="TecomRed" className="w-5 h-5" />
-        </div>
+        <img src="/faviivon-nuevo.png" alt="SiscomRed" className="w-9 h-9 rounded-xl object-contain shadow-xs" />
         <div>
-          <p className={`font-extrabold text-base leading-none ${light ? 'text-slate-900' : 'text-white'}`}>TecomRed</p>
+          <p className={`font-extrabold text-base leading-none ${light ? 'text-slate-900' : 'text-white'}`}>SiscomRed</p>
           <p className={`text-xs ${textMuted}`}>Admin Panel</p>
         </div>
       </div>
@@ -107,7 +102,7 @@ export default function AdminLayout() {
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [lightMode, setLightMode] = useState(() =>
-    localStorage.getItem('admin_theme') === 'light'
+    localStorage.getItem('admin_theme') !== 'dark'
   );
 
   const toggleTheme = () => {
@@ -117,7 +112,7 @@ export default function AdminLayout() {
   };
 
   const pendingOrders = orders.filter(o => o.status === 'Pendiente').length;
-  const handleLogout = () => { logout(); navigate('/admin'); };
+  const handleLogout = () => { logout(); navigate('/cuenta'); };
 
   const mainBg   = lightMode ? 'bg-slate-100' : 'bg-gray-950';
   const headerBg = lightMode ? 'bg-white border-slate-200' : 'bg-gray-950 border-white/8';

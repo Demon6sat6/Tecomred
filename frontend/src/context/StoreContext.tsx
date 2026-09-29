@@ -6,5 +6,5 @@ import { useAdmin } from './AdminContext';
 
 export function useStore() {
   const { products } = useAdmin();
-  return { products };
+  return { products: products.filter(product => product.isActive) };
 }

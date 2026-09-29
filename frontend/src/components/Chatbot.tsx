@@ -61,7 +61,7 @@ export default function Chatbot() {
 
   const welcomeMessage: Message = {
     id: 1,
-    text: `¡Hola! 👋 Soy el asistente virtual de ${settings.storeName || 'TecomRed'}. ¿En qué te puedo colaborar hoy? Puedo ayudarte a cotizar equipos, ver stock en tiempo real, métodos de pago o comunicarte directamente con un asesor técnico.`,
+    text: `¡Hola! 👋 Soy el asistente virtual de ${settings.storeName || 'SiscomRed'}. ¿En qué te puedo colaborar hoy? Puedo ayudarte a cotizar equipos, ver stock en tiempo real, métodos de pago o comunicarte directamente con un asesor técnico.`,
     sender: 'bot',
     timestamp: new Date(),
     type: 'text',
@@ -120,8 +120,8 @@ export default function Chatbot() {
         q.includes('persona') || q.includes('llamar') || q.includes('telefono') ||
         q.includes('celular') || q.includes('contacto') || q.includes('cotizar')
       ) {
-        const phoneClean = (settings.storePhone || '51987654321').replace(/\D/g, '');
-        const waUrl = `https://wa.me/${phoneClean}?text=${encodeURIComponent(`Hola TecomRed, vengo desde la tienda web y deseo asesoría técnica especializada.`)}`;
+        const phoneClean = (settings.storePhone || '+51 997 176 721').replace(/\D/g, '');
+        const waUrl = `https://wa.me/${phoneClean}?text=${encodeURIComponent(`Hola SiscomRed, vengo desde la tienda web y deseo asesoría técnica especializada.`)}`;
         addBotMessage({
           text: `¡Por supuesto! Puedes chatear directamente con nuestro equipo de ingenieros y asesores comerciales:\n\n📱 **Teléfono / WhatsApp:** ${settings.storePhone}\n✉️ **Correo:** ${settings.storeEmail}\n⏰ **Horario:** ${settings.supportHours}`,
           type: 'buttons',
@@ -386,30 +386,30 @@ export default function Chatbot() {
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
-          className="fixed bottom-[calc(0.75rem+env(safe-area-inset-bottom))] right-3 sm:bottom-6 sm:right-6 z-[90] w-14 h-14 sm:w-16 sm:h-16 rounded-full gradient-brand shadow-2xl shadow-violet-500/40 flex items-center justify-center hover:scale-110 active:scale-95 transition-transform group touch-manipulation"
+          className="fixed bottom-[calc(0.75rem+env(safe-area-inset-bottom))] right-3 sm:bottom-6 sm:right-6 z-[90] w-14 h-14 sm:w-16 sm:h-16 rounded-full gradient-brand shadow-xl shadow-violet-500/30 flex items-center justify-center hover:scale-110 active:scale-95 transition-transform group touch-manipulation"
           aria-label="Abrir chat"
         >
           <MessageCircle className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
-          <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full border-2 border-gray-950 animate-pulse" />
-          <div className="absolute bottom-full right-0 mb-2 px-3 py-1.5 bg-gray-800 border border-white/10 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none shadow-xl">
+          <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full border-2 border-white animate-pulse" />
+          <div className="absolute bottom-full right-0 mb-2 px-3 py-1.5 bg-white border border-slate-200 text-slate-800 text-xs font-medium rounded-xl opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none shadow-lg">
             ¿Necesitas ayuda?
           </div>
         </button>
       )}
 
-      {/* Chat window — superficie opaca para conservar el contraste en cualquier fondo */}
+      {/* Chat window */}
       {isOpen && (
-        <div className="fixed inset-x-2 bottom-[env(safe-area-inset-bottom)] sm:inset-x-auto sm:bottom-6 sm:right-6 z-[90] w-auto sm:w-[420px] h-[min(720px,calc(100dvh-0.5rem))] sm:h-[600px] max-h-[calc(100dvh-0.5rem)] bg-[#08111f] border border-sky-200/15 rounded-t-2xl sm:rounded-2xl shadow-2xl shadow-black/70 flex flex-col overflow-hidden animate-slide-up">
+        <div className="fixed inset-x-2 bottom-[env(safe-area-inset-bottom)] sm:inset-x-auto sm:bottom-6 sm:right-6 z-[90] w-auto sm:w-[420px] h-[min(720px,calc(100dvh-0.5rem))] sm:h-[600px] max-h-[calc(100dvh-0.5rem)] bg-white border border-slate-200 rounded-t-2xl sm:rounded-2xl shadow-2xl shadow-slate-900/20 flex flex-col overflow-hidden animate-slide-up">
 
           {/* Header */}
-          <div className="gradient-brand px-4 sm:px-5 py-3 sm:py-3.5 flex items-center justify-between shrink-0 shadow-md">
+          <div className="gradient-brand px-4 sm:px-5 py-3 sm:py-3.5 flex items-center justify-between shrink-0 shadow-xs">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white/20 flex items-center justify-center shrink-0">
-                <Bot className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white p-1 flex items-center justify-center shrink-0 shadow-xs">
+                <img src="/faviivon-nuevo.png" alt="SiscomRed" className="w-full h-full object-contain" />
               </div>
               <div>
-                <h3 className="text-white font-bold text-sm sm:text-base leading-tight">Asistente {settings.storeName || 'TecomRed'}</h3>
-                <p className="text-white/80 text-xs flex items-center gap-1.5 mt-0.5">
+                <h3 className="text-white font-bold text-sm sm:text-base leading-tight">Asistente {settings.storeName || 'SiscomRed'}</h3>
+                <p className="text-white/80 text-xs flex items-center gap-1.5 mt-0.5 font-medium">
                   <span className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
                   Especialista en hardware & redes
                 </p>
@@ -435,25 +435,25 @@ export default function Chatbot() {
           </div>
 
           {/* Messages */}
-          <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain p-3 sm:p-4 space-y-3 sm:space-y-4 bg-[#050b16]" aria-live="polite">
+          <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain p-3 sm:p-4 space-y-3 sm:space-y-4 bg-slate-50" aria-live="polite">
             {messages.map(msg => (
               <div key={msg.id}>
                 {msg.type === 'text' && (
                   <div className={`flex gap-2 sm:gap-3 ${msg.sender === 'user' ? 'flex-row-reverse' : 'flex-row'}`}>
                     <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center shrink-0 ${
-                      msg.sender === 'bot' ? 'bg-sky-500/20 text-sky-400' : 'bg-indigo-600/30 text-indigo-300'
+                      msg.sender === 'bot' ? 'bg-violet-100 text-violet-700' : 'bg-slate-200 text-slate-700'
                     }`}>
                       {msg.sender === 'bot' ? <Bot className="w-4 h-4" /> : <User className="w-4 h-4" />}
                     </div>
                     <div className={`max-w-[82%] sm:max-w-[78%] flex flex-col gap-1 ${msg.sender === 'user' ? 'items-end' : 'items-start'}`}>
-                      <div className={`px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-2xl text-xs sm:text-sm whitespace-pre-line break-words leading-relaxed shadow-sm ${
+                      <div className={`px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-2xl text-xs sm:text-sm whitespace-pre-line break-words leading-relaxed shadow-xs ${
                         msg.sender === 'bot'
-                          ? 'bg-[#0f172a] text-slate-100 rounded-tl-sm border border-slate-800'
-                          : 'gradient-brand text-white rounded-tr-sm font-medium'
+                          ? 'bg-white text-slate-800 rounded-tl-xs border border-slate-200'
+                          : 'gradient-brand text-white rounded-tr-xs font-medium'
                       }`}>
                         {msg.text}
                       </div>
-                      <span className="text-[10px] text-slate-500 px-1">
+                      <span className="text-[10px] text-slate-400 px-1 font-medium">
                         {msg.timestamp.toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' })}
                       </span>
                     </div>
@@ -463,26 +463,26 @@ export default function Chatbot() {
                 {msg.type === 'products' && isProductList(msg.data) && (
                   <div className="space-y-2.5 ml-9 sm:ml-10">
                     {msg.data.map(product => (
-                      <div key={product.id} className="bg-[#0f172a] border border-slate-800 rounded-xl p-3 flex gap-3 shadow-md hover:border-sky-500/40 transition-colors">
-                        <img src={product.image} alt={product.name} className="w-16 h-16 rounded-lg object-cover bg-slate-900 shrink-0 border border-slate-800" />
+                      <div key={product.id} className="bg-white border border-slate-200 rounded-xl p-3 flex gap-3 shadow-xs hover:border-violet-300 transition-colors">
+                        <img src={product.image} alt={product.name} className="w-16 h-16 rounded-lg object-cover bg-slate-50 shrink-0 border border-slate-100" />
                         <div className="flex-1 min-w-0">
-                          <p className="text-[11px] text-sky-400 font-bold uppercase tracking-wider mb-0.5">{product.category}</p>
-                          <h4 className="text-white text-xs font-semibold line-clamp-2 mb-1 leading-snug">{product.name}</h4>
+                          <p className="text-[11px] text-violet-600 font-bold uppercase tracking-wider mb-0.5">{product.category}</p>
+                          <h4 className="text-slate-900 text-xs font-semibold line-clamp-2 mb-1 leading-snug">{product.name}</h4>
                           <div className="flex items-center gap-1.5 mb-2">
                             <Star className="w-3.5 h-3.5 text-yellow-400 fill-yellow-400" />
-                            <span className="text-xs text-slate-300 font-medium">{product.rating}</span>
-                            <span className="text-[10px] text-emerald-400 font-medium ml-1">● En Stock</span>
+                            <span className="text-xs text-slate-600 font-medium">{product.rating}</span>
+                            <span className="text-[10px] text-emerald-700 bg-emerald-50 px-1.5 py-0.2 rounded font-semibold ml-1">En Stock</span>
                           </div>
                           <div className="flex items-center justify-between gap-2">
-                            <span className="text-sm sm:text-base font-extrabold text-white">{formatShort(product.price)}</span>
+                            <span className="text-sm sm:text-base font-extrabold text-slate-900">{formatShort(product.price)}</span>
                             <div className="flex gap-1.5">
                               <Link to={`/producto/${product.id}`} onClick={() => setIsOpen(false)}
-                                className="px-2 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors flex items-center gap-1 text-xs font-semibold" title="Ver detalles">
+                                className="px-2 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 hover:text-slate-900 transition-colors flex items-center gap-1 text-xs font-semibold" title="Ver detalles">
                                 <ExternalLink className="w-3.5 h-3.5" />
                                 <span className="hidden sm:inline">Ver</span>
                               </Link>
                               <button onClick={() => handleAddToCart(product)}
-                                className="px-2.5 py-1.5 rounded-lg gradient-brand text-white hover:opacity-90 active:scale-95 transition-all flex items-center gap-1 text-xs font-bold shadow-sm" title="Agregar al carrito">
+                                className="px-2.5 py-1.5 rounded-lg gradient-brand text-white hover:opacity-90 active:scale-95 transition-all flex items-center gap-1 text-xs font-bold shadow-xs" title="Agregar al carrito">
                                 <ShoppingCart className="w-3.5 h-3.5" />
                                 <span>Agregar</span>
                               </button>
@@ -492,28 +492,28 @@ export default function Chatbot() {
                       </div>
                     ))}
                     <Link to="/productos" onClick={() => setIsOpen(false)}
-                      className="block text-center py-2 px-3 rounded-xl bg-slate-900/80 border border-slate-800 text-xs font-bold text-sky-400 hover:text-sky-300 transition-colors">
+                      className="block text-center py-2 px-3 rounded-xl bg-white border border-slate-200 text-xs font-bold text-violet-600 hover:text-violet-700 shadow-xs hover:bg-slate-50 transition-colors">
                       Ver todo el catálogo completo →
                     </Link>
                   </div>
                 )}
 
                 {msg.type === 'card' && isCardData(msg.data) && (
-                  <div className="ml-9 sm:ml-10 bg-[#0f172a] border border-slate-800 rounded-xl p-4 space-y-3 shadow-md">
-                    <h4 className="text-white font-bold text-sm flex items-center gap-2">
-                      <Sparkles className="w-4 h-4 text-sky-400" />
+                  <div className="ml-9 sm:ml-10 bg-white border border-slate-200 rounded-xl p-4 space-y-3 shadow-xs">
+                    <h4 className="text-slate-900 font-bold text-sm flex items-center gap-2">
+                      <Sparkles className="w-4 h-4 text-violet-600" />
                       {msg.data.title}
                     </h4>
-                    <div className="space-y-2 divide-y divide-slate-800/60">
+                    <div className="space-y-2 divide-y divide-slate-100">
                       {msg.data.items.map((item, i) => (
                         <div key={i} className="flex flex-col sm:flex-row sm:justify-between text-xs pt-2 first:pt-0 gap-0.5 sm:gap-2">
-                          <span className="text-slate-400 font-medium">{item.label}:</span>
-                          <span className="text-slate-200 font-semibold sm:text-right">{item.value}</span>
+                          <span className="text-slate-500 font-medium">{item.label}:</span>
+                          <span className="text-slate-800 font-semibold sm:text-right">{item.value}</span>
                         </div>
                       ))}
                     </div>
                     {msg.data.footer && (
-                      <p className="text-xs text-sky-300 pt-2.5 border-t border-slate-800 font-medium">
+                      <p className="text-xs text-violet-700 pt-2.5 border-t border-slate-200 font-medium">
                         ✓ {msg.data.footer}
                       </p>
                     )}
@@ -529,11 +529,11 @@ export default function Chatbot() {
                         <button
                           key={i}
                           onClick={() => handleButtonClick(btn.action)}
-                          className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all active:scale-95 flex items-center gap-1.5 shadow-sm ${
+                          className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all active:scale-95 flex items-center gap-1.5 shadow-xs ${
                             isWa
-                              ? 'bg-emerald-600 hover:bg-emerald-500 text-white border border-emerald-500'
+                              ? 'bg-emerald-600 hover:bg-emerald-700 text-white'
                               : isSec
-                                ? 'bg-slate-800 hover:bg-slate-750 text-slate-200 border border-slate-700'
+                                ? 'bg-white hover:bg-slate-100 text-slate-700 border border-slate-200'
                                 : 'gradient-brand text-white hover:opacity-90'
                           }`}
                         >
@@ -548,21 +548,21 @@ export default function Chatbot() {
 
             {isTyping && (
               <div className="flex gap-2 sm:gap-3">
-                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-sky-500/20 text-sky-400 flex items-center justify-center shrink-0">
+                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-violet-100 text-violet-700 flex items-center justify-center shrink-0">
                   <Bot className="w-4 h-4" />
                 </div>
-                <div className="px-4 py-3 bg-[#0f172a] border border-slate-800 rounded-2xl rounded-tl-sm flex items-center gap-1.5">
-                  <span className="w-2 h-2 bg-sky-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                  <span className="w-2 h-2 bg-sky-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                  <span className="w-2 h-2 bg-sky-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                <div className="px-4 py-3 bg-white border border-slate-200 rounded-2xl rounded-tl-xs flex items-center gap-1.5 shadow-xs">
+                  <span className="w-2 h-2 bg-violet-600 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                  <span className="w-2 h-2 bg-violet-600 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                  <span className="w-2 h-2 bg-violet-600 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
                 </div>
               </div>
             )}
             <div ref={messagesEndRef} />
           </div>
 
-          {/* Chips rápidos PERMANENTES — siempre visibles para facilitar la interacción táctil */}
-          <div className="px-3 py-2 bg-[#090e1a] border-t border-slate-800/90 shrink-0">
+          {/* Chips rápidos PERMANENTES */}
+          <div className="px-3 py-2 bg-white border-t border-slate-200 shrink-0">
             <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none py-0.5 select-none touch-pan-x"
               style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
               {quickChips.map((chip, idx) => (
@@ -570,7 +570,7 @@ export default function Chatbot() {
                   key={idx}
                   onClick={() => handleSend(chip.query)}
                   disabled={isTyping}
-                  className="px-2.5 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 active:bg-sky-500/20 text-slate-300 hover:text-white border border-slate-800 hover:border-sky-500/40 text-[11px] font-semibold whitespace-nowrap transition-all shrink-0 active:scale-95 disabled:opacity-50"
+                  className="px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 active:bg-violet-100 text-slate-700 hover:text-slate-900 border border-slate-200 text-[11px] font-semibold whitespace-nowrap transition-all shrink-0 active:scale-95 disabled:opacity-50"
                 >
                   {chip.label}
                 </button>
@@ -580,17 +580,17 @@ export default function Chatbot() {
 
           {/* Input */}
           <form onSubmit={e => { e.preventDefault(); handleSend(); }}
-            className="p-3 sm:p-4 pb-[calc(0.75rem+env(safe-area-inset-bottom))] sm:pb-4 border-t border-slate-800 bg-[#070c18] shrink-0">
+            className="p-3 sm:p-4 pb-[calc(0.75rem+env(safe-area-inset-bottom))] sm:pb-4 border-t border-slate-200 bg-slate-50 shrink-0">
             <div className="flex gap-2">
               <input
                 type="text" value={inputValue} onChange={e => setInputValue(e.target.value)}
                 placeholder="Escribe tu consulta (ej: switches Cisco, envíos, boleta...)"
                 maxLength={500}
                 enterKeyHint="send"
-                className="flex-1 min-w-0 min-h-[44px] px-3 sm:px-4 py-2 sm:py-2.5 bg-slate-900 border border-slate-800 rounded-xl text-xs sm:text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-sky-500 transition-colors"
+                className="flex-1 min-w-0 min-h-[44px] px-3 sm:px-4 py-2 sm:py-2.5 bg-white border border-slate-300 rounded-xl text-xs sm:text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-violet-500 transition-colors"
               />
               <button type="submit" disabled={!inputValue.trim()}
-                className="w-11 h-11 sm:w-11 sm:h-11 shrink-0 rounded-xl gradient-brand flex items-center justify-center hover:opacity-90 active:scale-95 transition-all disabled:opacity-35 disabled:cursor-not-allowed touch-manipulation shadow-md"
+                className="w-11 h-11 sm:w-11 sm:h-11 shrink-0 rounded-xl gradient-brand flex items-center justify-center hover:opacity-90 active:scale-95 transition-all disabled:opacity-35 disabled:cursor-not-allowed touch-manipulation shadow-md shadow-violet-500/20"
                 aria-label="Enviar">
                 <Send className="w-4 h-4 text-white" />
               </button>
