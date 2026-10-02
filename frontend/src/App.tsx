@@ -41,6 +41,9 @@ const AdminCustomers = lazy(() => import("./pages/admin/AdminCustomers"));
 const AdminReviewsPage = lazy(() => import("./pages/admin/AdminReviewsPage"));
 const AdminCoupons = lazy(() => import("./pages/admin/AdminCoupons"));
 const AdminAdministrators = lazy(() => import("./pages/admin/AdminAdministrators"));
+const AdminInventory = lazy(() => import("./pages/admin/AdminInventory"));
+const AdminMarketing = lazy(() => import("./pages/admin/AdminMarketing"));
+const AdminAnalytics = lazy(() => import("./pages/admin/AdminAnalytics"));
 
 function AdminGuard({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isVerifying } = useAdmin();
@@ -57,7 +60,20 @@ const PageFallback = () => (
 );
 
 function StoreLayout() {
-  const { settings } = useAdmin();
+  const { settings, isSettingsLoading } = useAdmin();
+  if (!isSettingsLoading && settings.maintenanceMode) {
+    return (
+      <main className="min-h-screen bg-[#f5f8fc] flex items-center justify-center px-5 py-12">
+        <div className="w-full max-w-xl rounded-3xl border border-blue-100 bg-white p-8 sm:p-12 text-center shadow-xl shadow-blue-900/5">
+          <img src="/logo.png" alt="SiscomRed" className="mx-auto mb-8 h-24 w-auto object-contain" />
+          <span className="inline-flex items-center gap-2 rounded-full bg-green-50 px-4 py-2 text-xs font-bold uppercase tracking-widest text-green-700">Estamos mejorando la tienda</span>
+          <h1 className="mt-5 text-3xl font-black tracking-tight text-slate-900 sm:text-4xl">Volvemos muy pronto</h1>
+          <p className="mt-4 text-slate-600">Estamos realizando mejoras. Si necesitas un producto o asesoría, contáctanos y te atenderemos directamente.</p>
+          <a href={`https://wa.me/${settings.storePhone.replace(/\D/g, '')}`} target="_blank" rel="noopener noreferrer" className="mt-7 inline-flex min-h-12 items-center justify-center rounded-xl bg-[#0052b8] px-7 font-bold text-white hover:bg-[#003d91]">Hablar con SiscomRed</a>
+        </div>
+      </main>
+    );
+  }
   return (
     <div className="min-h-screen flex flex-col">
       {settings.showAnnouncementBar && <AnnouncementBar />}
@@ -106,18 +122,23 @@ export default function App() {
                     <Route index element={<Navigate to="dashboard" replace />} />
                     <Route path="dashboard"       element={<AdminDashboard />} />
                     <Route path="productos"       element={<AdminProducts />} />
+                    <Route path="inventario"      element={<AdminInventory />} />
                     <Route path="medios"          element={<AdminMedia />} />
                     <Route path="categorias"      element={<AdminCategories />} />
                     <Route path="pedidos"         element={<AdminOrdersPage />} />
                     <Route path="clientes"        element={<AdminCustomers />} />
                     <Route path="cupones"         element={<AdminCoupons />} />
+                    <Route path="promociones"     element={<AdminCoupons />} />
                     <Route path="resenas"         element={<AdminReviewsPage />} />
+                    <Route path="marketing"       element={<AdminMarketing />} />
+                    <Route path="reportes"        element={<AdminAnalytics />} />
                     <Route path="administradores" element={<AdminAdministrators />} />
                     <Route path="ajustes"         element={<AdminSettings />} />
-                    <Route path="analytics"       element={<Navigate to="/admin/dashboard" replace />} />
+                    <Route path="configuracion"   element={<AdminSettings />} />
+                    <Route path="analytics"       element={<Navigate to="/admin/reportes" replace />} />
                     <Route path="seguimiento"     element={<Navigate to="/admin/pedidos" replace />} />
                     <Route path="nosotros"        element={<Navigate to="/admin/ajustes" replace />} />
-                    <Route path="*"               element={<Navigate to="/admin/dashboard" replace />} />
+                    <Route path="*"               element={<NotFound />} />
                   </Route>
                   <Route path="/*" element={
                     <Suspense fallback={<PageFallback />}>

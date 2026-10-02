@@ -352,10 +352,10 @@ export default function Products() {
                 </span>
               )}
             </button>
-            <div className="flex items-center gap-2 ml-auto">
+            <div className="flex min-w-0 items-center gap-2 ml-auto">
               <label className="text-sm text-slate-600 font-medium hidden sm:block">Ordenar:</label>
-              <select value={sortBy} onChange={e => setSortBy(e.target.value)}
-                className="bg-white border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-800 shadow-xs focus:outline-none focus:border-violet-500 transition-colors">
+              <select aria-label="Ordenar productos" value={sortBy} onChange={e => setSortBy(e.target.value)}
+                className="min-w-0 max-w-[min(54vw,14rem)] bg-white border border-slate-200 rounded-xl px-2 sm:px-3 py-2 text-xs sm:text-sm text-slate-800 shadow-xs focus:outline-none focus:border-violet-500 transition-colors">
                 <option value="relevancia" className="bg-white text-slate-800">Relevancia</option>
                 <option value="precio-asc" className="bg-white text-slate-800">Precio: menor a mayor</option>
                 <option value="precio-desc" className="bg-white text-slate-800">Precio: mayor a menor</option>

@@ -1,311 +1,139 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import {
-  DollarSign, Package, ShoppingBag, Users,
-  ArrowRight, ArrowUpRight, AlertTriangle, Download,
-  TrendingUp, Eye, Star,
-} from 'lucide-react';
-import { useAdmin } from '../../context/AdminContext';
-import { useAnalytics } from '../../context/AnalyticsContext';
+import { AlertTriangle, ArrowRight, CalendarDays, Clock, Package, ShoppingCart, Star, UserPlus, Wallet } from 'lucide-react';
+import { useAdmin, type Order } from '../../context/AdminContext';
+import { Badge, LiveStatus, StatCard } from '../../components/admin/AdminUI';
+import { orderStatusTone } from '../../utils/adminFormat';
 import { useCurrency } from '../../hooks/useCurrency';
-import { parseFlexibleDate, isSameDay } from '../../utils/dateUtils';
+import { parseFlexibleDate } from '../../utils/dateUtils';
 
-const statusColors: Record<string, string> = {
-  Pendiente:  'bg-amber-50 text-amber-700 border-amber-200',
-  Procesando: 'bg-blue-50 text-blue-700 border-blue-200',
-  Enviado:    'bg-indigo-50 text-indigo-700 border-indigo-200',
-  Entregado:  'bg-emerald-50 text-emerald-700 border-emerald-200',
-  Cancelado:  'bg-rose-50 text-rose-700 border-rose-200',
-};
+type Period = 'month' | 'previous' | 'seven' | 'thirty';
+type Grouping = 'daily' | 'weekly';
+type ChartMode = 'both' | 'sales' | 'orders';
+
+const validOrder = (order: Order) => order.status !== 'Cancelado';
+const completedOrder = (order: Order) => order.status === 'Entregado';
+const asDate = (date: string) => parseFlexibleDate(date);
+const dateKey = (date: Date) => `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
+const isInRange = (date: Date, start: Date, end: Date) => !Number.isNaN(date.getTime()) && date >= start && date < end;
+
+function getRange(period: Period, now: Date) {
+  const start = new Date(now.getFullYear(), now.getMonth(), 1);
+  const end = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+  if (period === 'previous') { start.setMonth(start.getMonth() - 1); end.setMonth(end.getMonth() - 1); }
+  if (period === 'seven' || period === 'thirty') { start.setTime(now.getTime()); start.setDate(start.getDate() - (period === 'seven' ? 6 : 29)); start.setHours(0, 0, 0, 0); end.setTime(now.getTime()); end.setDate(end.getDate() + 1); end.setHours(0, 0, 0, 0); }
+  const previousEnd = new Date(start);
+  const previousStart = new Date(start.getTime() - (end.getTime() - start.getTime()));
+  return { start, end, previousStart, previousEnd };
+}
+
+function StatusPill({ status }: { status: Order['status'] }) {
+  return <Badge tone={orderStatusTone[status]}>{status}</Badge>;
+}
 
 export default function AdminDashboard() {
-  const { products, orders, customers } = useAdmin();
-  const { activeNow, visitsToday, visitsThisWeek } = useAnalytics();
+  const { products, orders, reviews } = useAdmin();
   const { formatShort } = useCurrency();
-
-  const totalRevenue  = orders.filter(o => o.status !== 'Cancelado').reduce((s, o) => s + o.total, 0);
-  const totalOrders   = orders.length;
-  const totalProducts = products.length;
-  const lowStock      = products.filter(p => p.stock <= 5 && p.stock > 0);
-  const recentOrders  = [...orders].slice(0, 5);
-
-  // Sales by category
-  const byCategory = products.reduce<Record<string, number>>((acc, p) => {
-    acc[p.category] = (acc[p.category] || 0) + 1;
-    return acc;
-  }, {});
-  const topCategories = Object.entries(byCategory).sort((a, b) => b[1] - a[1]).slice(0, 5);
-  const maxCat = Math.max(...topCategories.map(c => c[1]), 1);
-
-  // Real sales chart data (last 7 days from actual orders)
-  const today = new Date();
-  const last7DaysList = Array.from({ length: 7 }, (_, i) => {
-    const d = new Date(today);
-    d.setDate(d.getDate() - (6 - i));
-    d.setHours(0, 0, 0, 0);
-    return d;
-  });
-
-  const days = last7DaysList.map((d) =>
-    d.toLocaleDateString('es', { weekday: 'short', day: 'numeric' })
-  );
-
-  const salesData = last7DaysList.map((dayDate) => {
-    const dayOrders = orders.filter((o) => {
-      if (o.status === 'Cancelado') return false;
-      const orderDate = parseFlexibleDate(o.date);
-      return isSameDay(orderDate, dayDate);
-    });
-    return Math.round(dayOrders.reduce((sum, o) => sum + o.total, 0));
-  });
-  const maxSales = Math.max(...salesData, 100);
-
-  // Export orders to CSV
-  const exportOrdersCSV = () => {
-    const headers = ['ID', 'Cliente', 'Email', 'Ciudad', 'Fecha', 'Total', 'Estado'];
-    const rows = orders.map(o => [o.id, o.customer, o.email, o.city, o.date, o.total.toFixed(2), o.status]);
-    const csv = [headers, ...rows].map(r => r.join(',')).join('\n');
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url; a.download = 'pedidos_siscomred.csv'; a.click();
-    URL.revokeObjectURL(url);
+  const [period, setPeriod] = useState<Period>('month');
+  const [grouping, setGrouping] = useState<Grouping>('daily');
+  const [chartMode, setChartMode] = useState<ChartMode>('both');
+  const now = new Date();
+  const { start, end, previousStart, previousEnd } = getRange(period, now);
+  const currentOrders = orders.filter(order => isInRange(asDate(order.date), start, end) && validOrder(order));
+  const priorOrders = orders.filter(order => isInRange(asDate(order.date), previousStart, previousEnd) && validOrder(order));
+  const completed = currentOrders.filter(completedOrder);
+  const priorCompleted = priorOrders.filter(completedOrder);
+  const revenue = completed.reduce((total, order) => total + order.total, 0);
+  const priorRevenue = priorCompleted.reduce((total, order) => total + order.total, 0);
+  const sold = completed.flatMap(order => order.items).reduce((total, item) => total + item.qty, 0);
+  const priorSold = priorCompleted.flatMap(order => order.items).reduce((total, item) => total + item.qty, 0);
+  const newCustomers = new Set(currentOrders.map(order => order.email.toLowerCase()).filter(Boolean)).size;
+  const priorCustomers = new Set(priorOrders.map(order => order.email.toLowerCase()).filter(Boolean)).size;
+  const change = (current: number, previous: number) => {
+    if (previous <= 0) return <span className="text-slate-400">Sin datos del período anterior</span>;
+    const pct = ((current - previous) / previous) * 100;
+    const up = pct >= 0;
+    return <span><span className={`mr-1 rounded-md px-1.5 py-0.5 font-bold ${up ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700'}`}>{up ? '↑' : '↓'} {Math.abs(pct).toFixed(1)}%</span>vs. período anterior</span>;
   };
-
-  const exportProductsCSV = () => {
-    const headers = ['ID', 'Nombre', 'Categoría', 'Precio', 'Stock', 'Rating'];
-    const rows = products.map(p => [p.id, `"${p.name}"`, p.category, p.price.toFixed(2), p.stock, p.rating]);
-    const csv = [headers, ...rows].map(r => r.join(',')).join('\n');
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url; a.download = 'productos_siscomred.csv'; a.click();
-    URL.revokeObjectURL(url);
-  };
-
-  const exportCustomersCSV = () => {
-    const headers = ['ID', 'Nombre', 'Email', 'Ciudad', 'Pedidos', 'Total Gastado', 'Estado'];
-    const rows = customers.map(c => [c.id, `"${c.name}"`, c.email, c.city, c.orders, c.totalSpent.toFixed(2), c.status]);
-    const csv = [headers, ...rows].map(r => r.join(',')).join('\n');
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url; a.download = 'clientes_siscomred.csv'; a.click();
-    URL.revokeObjectURL(url);
-  };
-
   const stats = [
-    { label: 'Ingresos totales', value: formatShort(totalRevenue), icon: DollarSign, color: 'text-emerald-600', bg: 'bg-emerald-50', change: '+12.5%' },
-    { label: 'Pedidos',          value: totalOrders,      icon: ShoppingBag, color: 'text-blue-600',    bg: 'bg-blue-50',    change: '+8.2%' },
-    { label: 'Productos',        value: totalProducts,    icon: Package,     color: 'text-indigo-600',  bg: 'bg-indigo-50',  change: `${totalProducts} activos` },
-    { label: 'Clientes',         value: customers.length, icon: Users,       color: 'text-purple-600',  bg: 'bg-purple-50',  change: `${customers.filter(c => c.status === 'Activo').length} activos` },
-    { label: 'Activos ahora',    value: activeNow,        icon: Eye,         color: 'text-emerald-600', bg: 'bg-emerald-50', change: `${visitsToday} hoy`, live: true },
-    { label: 'Visitas semana',   value: visitsThisWeek,   icon: TrendingUp,  color: 'text-blue-600',    bg: 'bg-blue-50',    change: 'últimos 7 días' },
+    { label: 'Ventas entregadas', value: formatShort(revenue), icon: Wallet, tone: 'blue' as const, change: change(revenue, priorRevenue) },
+    { label: 'Órdenes', value: currentOrders.length.toLocaleString('es-PE'), icon: ShoppingCart, tone: 'green' as const, change: change(currentOrders.length, priorOrders.length) },
+    { label: 'Clientes únicos', value: newCustomers.toLocaleString('es-PE'), icon: UserPlus, tone: 'violet' as const, change: change(newCustomers, priorCustomers) },
+    { label: 'Productos vendidos', value: sold.toLocaleString('es-PE'), icon: Package, tone: 'sky' as const, change: change(sold, priorSold) },
+  ];
+  const attention = [
+    { label: 'Órdenes pendientes', value: orders.filter(order => order.status === 'Pendiente').length, to: '/admin/pedidos?status=Pendiente', icon: Clock, tone: 'amber' as const },
+    { label: 'Productos con stock bajo', value: products.filter(product => product.stock <= 5).length, to: '/admin/inventario', icon: AlertTriangle, tone: 'rose' as const },
+    { label: 'Reseñas por moderar', value: reviews.filter(review => review.approved === false).length, to: '/admin/resenas', icon: Star, tone: 'violet' as const },
   ];
 
-  return (
-    <div className="space-y-6">
-      {/* Top Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div>
-          <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">Dashboard</h2>
-          <p className="text-slate-500 text-sm mt-0.5">Resumen de ventas y actividad de la tienda</p>
-        </div>
-        {/* Export buttons */}
-        <div className="flex gap-2">
-          <div className="relative group">
-            <button className="flex items-center gap-2 px-3.5 py-2 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-50 shadow-xs transition-colors">
-              <Download className="w-3.5 h-3.5 text-slate-500" /> Exportar reporte
-            </button>
-            <div className="absolute right-0 top-full mt-1.5 bg-white rounded-xl shadow-lg border border-slate-200 py-1.5 min-w-[160px] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-20">
-              <button onClick={exportOrdersCSV}   className="w-full text-left px-3.5 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 transition-colors">Pedidos CSV</button>
-              <button onClick={exportProductsCSV} className="w-full text-left px-3.5 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 transition-colors">Productos CSV</button>
-              <button onClick={exportCustomersCSV} className="w-full text-left px-3.5 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 transition-colors">Clientes CSV</button>
-            </div>
-          </div>
-        </div>
-      </div>
+  const chart = (() => {
+    const points: { date: Date; sales: number; count: number }[] = [];
+    for (let day = new Date(start); day < end; day.setDate(day.getDate() + 1)) {
+      const date = new Date(day);
+      const dayOrders = currentOrders.filter(order => dateKey(asDate(order.date)) === dateKey(date));
+      points.push({ date, sales: dayOrders.filter(completedOrder).reduce((sum, order) => sum + order.total, 0), count: dayOrders.length });
+    }
+    if (grouping === 'daily') return points;
+    const weeks: typeof points = [];
+    points.forEach((point, index) => { if (index % 7 === 0) weeks.push({ date: point.date, sales: 0, count: 0 }); weeks[weeks.length - 1].sales += point.sales; weeks[weeks.length - 1].count += point.count; });
+    return weeks;
+  })();
+  const maxSales = Math.max(1, ...chart.map(point => point.sales));
+  const maxCount = Math.max(1, ...chart.map(point => point.count));
+  const linePoints = chart.map((point, index) => `${((index + .5) / chart.length) * 1000},${200 - (point.count / maxCount) * 170}`).join(' ');
+  const showSales = chartMode !== 'orders';
+  const showOrders = chartMode !== 'sales';
 
-      {/* KPI Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-4">
-        {stats.map(({ label, value, icon: Icon, color, bg, change, live }) => (
-          <div key={label} className="bg-white border border-slate-200 rounded-2xl p-4 sm:p-5 shadow-xs hover:border-slate-300 transition-colors">
-            <div className="flex items-start justify-between mb-3">
-              <div className={`w-10 h-10 rounded-xl ${bg} flex items-center justify-center shrink-0`}>
-                <Icon className={`w-5 h-5 ${color}`} />
-              </div>
-              <div className="flex items-center gap-1.5">
-                {live && (
-                  <span className="relative flex h-2 w-2">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
-                  </span>
-                )}
-                <span className="text-[11px] font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md flex items-center gap-0.5">
-                  <ArrowUpRight className="w-3 h-3" />
-                  {change}
-                </span>
-              </div>
-            </div>
-            <p className="text-2xl font-black text-slate-900 tracking-tight">{value}</p>
-            <p className="text-slate-500 text-xs font-medium mt-0.5">{label}</p>
-          </div>
-        ))}
-      </div>
+  const productById = new Map(products.map(product => [product.id, product]));
+  const categoryData = new Map<string, { units: number; image: string }>();
+  const productData = new Map<number, { units: number; revenue: number }>();
+  completed.forEach(order => order.items.forEach(item => {
+    const product = productById.get(item.productId);
+    if (!product) return;
+    const category = categoryData.get(product.category) ?? { units: 0, image: product.image };
+    category.units += item.qty;
+    categoryData.set(product.category, category);
+    const entry = productData.get(product.id) ?? { units: 0, revenue: 0 };
+    entry.units += item.qty;
+    entry.revenue += item.price * item.qty;
+    productData.set(product.id, entry);
+  }));
+  const categories = [...categoryData].sort((a, b) => b[1].units - a[1].units).slice(0, 5);
+  const topProducts = [...productData].sort((a, b) => b[1].units - a[1].units).slice(0, 5);
+  const recentOrders = [...currentOrders].sort((a, b) => asDate(b.date).getTime() - asDate(a.date).getTime()).slice(0, 5);
+  const dateLabel = (date: Date) => date.toLocaleDateString('es-PE', { day: '2-digit', month: 'short' });
+  const rangeLabel = `${dateLabel(start)} - ${dateLabel(new Date(end.getTime() - 1))} ${end.getFullYear()}`;
 
-      {/* Sales chart */}
-      <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs">
-        <div className="flex items-center justify-between mb-5">
-          <h3 className="text-slate-900 font-bold text-base flex items-center gap-2">
-            <TrendingUp className="w-4 h-4 text-blue-600" /> Ventas últimos 7 días
-          </h3>
-          <span className="text-xs font-semibold text-slate-500 bg-slate-50 border border-slate-200 px-2.5 py-1 rounded-lg">
-            Total semana: <strong className="text-slate-800">{formatShort(salesData.reduce((a, b) => a + b, 0))}</strong>
-          </span>
-        </div>
-        <div className="flex items-end gap-2 sm:gap-4 h-36 pt-4">
-          {salesData.map((val, i) => (
-            <div key={i} className="flex-1 flex flex-col items-center gap-1.5">
-              <span className="text-[10px] font-bold text-slate-500">${val >= 1000 ? `${(val/1000).toFixed(1)}k` : val}</span>
-              <div className="w-full bg-slate-100 rounded-t-lg h-24 flex items-end overflow-hidden">
-                <div
-                  className="w-full rounded-t-lg gradient-brand transition-all duration-700 hover:opacity-90"
-                  style={{ height: `${Math.max(6, (val / maxSales) * 100)}%` }}
-                />
-              </div>
-              <span className="text-[10px] font-semibold text-slate-500 truncate w-full text-center">{days[i]}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Two columns: Recent Orders & Categories */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
-        {/* Recent orders */}
-        <div className="lg:col-span-2 bg-white border border-slate-200 rounded-2xl p-5 shadow-xs">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-slate-900 font-bold text-base">Pedidos recientes</h3>
-            <Link to="/admin/pedidos" className="text-blue-600 hover:text-blue-700 text-xs font-bold flex items-center gap-1 transition-colors">
-              Ver todos <ArrowRight className="w-3.5 h-3.5" />
-            </Link>
-          </div>
-          <div className="space-y-2.5">
-            {recentOrders.length === 0 ? (
-              <p className="text-slate-400 text-sm py-4 text-center">No hay pedidos registrados aún</p>
-            ) : (
-              recentOrders.map(order => (
-                <div key={order.id} className="flex items-center gap-3 p-3 rounded-xl border border-slate-100 hover:border-slate-200 hover:bg-slate-50/50 transition-colors">
-                  <div className="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
-                    <ShoppingBag className="w-4 h-4" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-slate-900 text-sm font-semibold truncate">{order.customer}</p>
-                    <p className="text-slate-400 text-xs font-mono">{order.id} · {order.date}</p>
-                  </div>
-                  <div className="text-right shrink-0">
-                    <p className="text-slate-900 text-sm font-extrabold">{formatShort(order.total)}</p>
-                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${statusColors[order.status] ?? 'bg-slate-100 text-slate-700'}`}>
-                      {order.status}
-                    </span>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-        </div>
-
-        {/* Right column: Categories & Low Stock */}
-        <div className="space-y-4">
-          {/* Categories chart */}
-          <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs">
-            <h3 className="text-slate-900 font-bold text-base mb-4">Productos por categoría</h3>
-            <div className="space-y-3">
-              {topCategories.map(([cat, count]) => (
-                <div key={cat}>
-                  <div className="flex justify-between text-xs font-medium mb-1">
-                    <span className="text-slate-600 truncate">{cat}</span>
-                    <span className="text-slate-900 font-bold shrink-0 ml-2">{count}</span>
-                  </div>
-                  <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
-                    <div
-                      className="h-full gradient-brand rounded-full transition-all duration-700"
-                      style={{ width: `${(count / maxCat) * 100}%` }}
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Low stock alert */}
-          {lowStock.length > 0 && (
-            <div className="bg-amber-50/70 border border-amber-200 rounded-2xl p-5">
-              <div className="flex items-center gap-2 mb-3">
-                <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
-                <h3 className="text-amber-900 font-bold text-sm">Alerta de stock bajo ({lowStock.length})</h3>
-              </div>
-              <div className="space-y-2">
-                {lowStock.slice(0, 4).map(p => (
-                  <div key={p.id} className="flex items-center justify-between text-xs">
-                    <p className="text-amber-950 font-medium truncate flex-1">{p.name}</p>
-                    <span className="bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded ml-2 shrink-0">{p.stock} uds</span>
-                  </div>
-                ))}
-              </div>
-              <Link to="/admin/productos" className="block mt-3 text-xs font-bold text-blue-600 hover:text-blue-700 transition-colors">
-                Gestionar inventario &rarr;
-              </Link>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Top products table */}
-      <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-slate-900 font-bold text-base">Productos más valorados</h3>
-          <Link to="/admin/productos" className="text-blue-600 hover:text-blue-700 text-xs font-bold flex items-center gap-1 transition-colors">
-            Ver catálogo completo <ArrowRight className="w-3.5 h-3.5" />
-          </Link>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-slate-100">
-                <th className="text-left text-slate-400 text-xs font-semibold pb-3 pr-4">Producto</th>
-                <th className="text-left text-slate-400 text-xs font-semibold pb-3 pr-4 hidden sm:table-cell">Categoría</th>
-                <th className="text-right text-slate-400 text-xs font-semibold pb-3 pr-4">Precio</th>
-                <th className="text-right text-slate-400 text-xs font-semibold pb-3 pr-4">Stock</th>
-                <th className="text-right text-slate-400 text-xs font-semibold pb-3">Rating</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {[...products].sort((a, b) => b.rating - a.rating).slice(0, 5).map(p => (
-                <tr key={p.id} className="hover:bg-slate-50/60 transition-colors">
-                  <td className="py-3 pr-4">
-                    <div className="flex items-center gap-3">
-                      <img src={p.image} alt={p.name} className="w-9 h-9 rounded-lg object-contain bg-slate-50 border border-slate-100 p-0.5 shrink-0" />
-                      <span className="text-slate-900 text-xs font-semibold truncate max-w-[200px]">{p.name}</span>
-                    </div>
-                  </td>
-                  <td className="py-3 pr-4 hidden sm:table-cell"><span className="text-slate-500 text-xs">{p.category}</span></td>
-                  <td className="py-3 pr-4 text-right"><span className="text-slate-900 text-xs font-black">{formatShort(p.price)}</span></td>
-                  <td className="py-3 pr-4 text-right">
-                    <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${p.stock <= 5 ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'}`}>
-                      {p.stock}
-                    </span>
-                  </td>
-                  <td className="py-3 text-right">
-                    <span className="inline-flex items-center gap-1 text-amber-600 text-xs font-bold">
-                      <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
-                      {p.rating}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
+  return <div className="space-y-3.5">
+    <div className="flex flex-wrap items-start justify-between gap-3 pb-1">
+      <div><h2>Dashboard</h2><p className="mt-1 flex flex-wrap items-center gap-2 text-sm text-slate-500">Resumen general de tu tienda en línea <LiveStatus /></p></div>
+      <label className="relative flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 shadow-sm"><CalendarDays className="h-4 w-4 text-slate-600" /><span className="sr-only">Período del dashboard</span><select value={period} onChange={event => setPeriod(event.target.value as Period)} aria-label="Período del dashboard" className="h-10 min-w-[185px] border-0 bg-transparent text-xs font-medium text-slate-800 outline-none"><option value="month">{rangeLabel}</option><option value="previous">Mes anterior</option><option value="seven">Últimos 7 días</option><option value="thirty">Últimos 30 días</option></select></label>
     </div>
-  );
+
+    <section className="grid grid-cols-2 gap-3 xl:grid-cols-4" aria-label="Indicadores del período">
+      {stats.map(stat => <StatCard key={stat.label} label={stat.label} value={stat.value} icon={stat.icon} tone={stat.tone} detail={stat.change} />)}
+    </section>
+
+    {attention.some(item => item.value > 0) && <section className="grid gap-3 sm:grid-cols-3" aria-label="Requiere atención">
+      {attention.map(item => <Link key={item.label} to={item.to} className={`admin-card group flex items-center gap-3 p-3.5 transition hover:border-blue-200 ${item.value ? '' : 'opacity-60'}`}>
+        <span className={`admin-kpi-icon admin-tone-${item.value ? item.tone : 'slate'} !h-10 !w-10`}><item.icon className="h-5 w-5" /></span>
+        <span className="min-w-0 flex-1"><span className="tabular block text-lg font-extrabold leading-tight text-slate-900">{item.value}</span><span className="block truncate text-xs font-medium text-slate-500">{item.label}</span></span>
+        <ArrowRight className="h-4 w-4 text-slate-300 transition group-hover:translate-x-0.5 group-hover:text-[#0052cc]" />
+      </Link>)}
+    </section>}
+
+    <div className="grid gap-3.5 xl:grid-cols-[minmax(0,1.75fr)_minmax(330px,1fr)]">
+      <section className="admin-ref-card min-w-0 p-4" aria-label="Ventas y órdenes"><div className="flex flex-wrap items-center justify-between gap-2"><h3 className="text-[16px] font-bold">Ventas y órdenes</h3><div className="flex gap-2"><select value={grouping} onChange={event => setGrouping(event.target.value as Grouping)} aria-label="Agrupar gráfico" className="admin-chart-select"><option value="daily">Diario</option><option value="weekly">Semanal</option></select><select value={chartMode} onChange={event => setChartMode(event.target.value as ChartMode)} aria-label="Serie del gráfico" className="admin-chart-select"><option value="both">Ventas y órdenes</option><option value="sales">Ventas</option><option value="orders">Órdenes</option></select></div></div>
+        <div className="relative mt-4 h-[245px] min-w-0 pl-9 pr-7"><div className="absolute inset-y-0 left-0 flex flex-col justify-between pb-6 text-[10px] text-slate-500"><span>{formatShort(maxSales)}</span><span>{formatShort(maxSales / 2)}</span><span>0</span></div><div className="relative h-[205px] border-b border-l border-slate-200"><div className="absolute inset-0 flex flex-col justify-between"><span className="border-t border-slate-100" /><span className="border-t border-slate-100" /><span className="border-t border-slate-100" /></div><div className="relative flex h-full items-end gap-[2px]">{chart.map((point, index) => <div key={index} className="flex h-full min-w-0 flex-1 items-end justify-center" title={`${dateLabel(point.date)}: ${formatShort(point.sales)}, ${point.count} órdenes`}>{showSales && <div className="w-[72%] max-w-5 rounded-t-sm bg-[#1972e8]" style={{ height: `${point.sales ? Math.max(2, (point.sales / maxSales) * 88) : 0}%` }} />}</div>)}</div>{showOrders && chart.length > 1 && <svg viewBox="0 0 1000 200" preserveAspectRatio="none" className="pointer-events-none absolute inset-0 h-full w-full overflow-visible" aria-hidden="true"><polyline fill="none" stroke="#33a329" strokeWidth="3" vectorEffect="non-scaling-stroke" points={linePoints} /></svg>}{currentOrders.length === 0 && <div className="absolute inset-0 flex items-center justify-center bg-white/75 text-center"><p className="max-w-[250px] text-xs font-medium text-slate-500">El gráfico mostrará las ventas y órdenes cuando se registren pedidos.</p></div>}</div><div className="mt-2 flex justify-between pl-1 text-[10px] text-slate-500">{chart.filter((_, index) => index % Math.max(1, Math.ceil(chart.length / 6)) === 0).map(point => <span key={dateKey(point.date)}>{dateLabel(point.date)}</span>)}</div><div className="absolute inset-y-0 right-0 flex flex-col justify-between pb-6 text-[10px] text-slate-500"><span>{maxCount}</span><span>{Math.round(maxCount / 2)}</span><span>0</span></div></div>
+        <div className="mt-2 flex items-center justify-center gap-5 text-[11px] text-slate-700"><span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-full bg-[#1972e8]" />Ventas (S/)</span><span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-full bg-[#33a329]" />Órdenes</span></div>
+      </section>
+      <section className="admin-ref-card min-w-0 p-4"><div className="flex items-center justify-between"><h3 className="text-[16px] font-bold">Categorías más vendidas</h3><Link to="/admin/categorias" className="text-xs font-medium text-blue-600 hover:underline">Ver todas</Link></div>{categories.length ? <div className="mt-3 divide-y divide-slate-100">{categories.map(([name, data]) => <div key={name} className="flex items-center gap-3 py-2"><img src={data.image} alt="" className="h-10 w-10 shrink-0 rounded-md bg-slate-50 object-contain" /><div className="min-w-0 flex-1"><div className="flex items-center justify-between gap-2"><p className="truncate text-xs font-semibold text-slate-800">{name}</p><span className="text-[11px] font-medium text-slate-700">{sold ? ((data.units / sold) * 100).toFixed(1) : 0}%</span></div><p className="text-[11px] text-slate-500">{data.units} vendidos</p><div className="mt-1 h-1.5 overflow-hidden rounded-full bg-slate-200"><div className="h-full rounded-full bg-[#36a229]" style={{ width: `${sold ? (data.units / sold) * 100 : 0}%` }} /></div></div></div>)}</div> : <div className="flex h-[270px] flex-col items-center justify-center text-center"><Package className="mb-2 h-7 w-7 text-slate-300" /><p className="text-sm font-semibold text-slate-700">Sin categorías vendidas aún</p><p className="mt-1 text-xs text-slate-500">Aparecerán al completar pedidos.</p></div>}</section>
+    </div>
+
+    <div className="grid gap-3.5 xl:grid-cols-[minmax(0,1.75fr)_minmax(330px,1fr)]">
+      <section className="admin-ref-card min-w-0 p-4"><div className="mb-3 flex items-center justify-between"><h3 className="text-[16px] font-bold">Órdenes recientes</h3><Link to="/admin/pedidos" className="text-xs font-medium text-blue-600 hover:underline">Ver todas</Link></div><div className="overflow-x-auto"><table className="w-full text-left text-xs"><thead><tr><th className="px-2 py-2"># Orden</th><th className="px-2 py-2">Cliente</th><th className="px-2 py-2">Fecha</th><th className="px-2 py-2">Estado</th><th className="px-2 py-2 text-right">Total</th><th className="px-2 py-2 text-center">Acciones</th></tr></thead><tbody>{recentOrders.map(order => <tr key={order.id} className="border-b border-slate-100 last:border-0"><td className="px-2 py-2"><Link to={`/admin/pedidos?search=${encodeURIComponent(order.id)}`} className="font-semibold text-blue-600 hover:underline">{order.id}</Link></td><td className="max-w-36 truncate px-2 py-2 text-slate-700">{order.customer}</td><td className="whitespace-nowrap px-2 py-2 text-slate-500">{order.date}</td><td className="px-2 py-2"><StatusPill status={order.status} /></td><td className="px-2 py-2 text-right font-semibold text-slate-800">{formatShort(order.total)}</td><td className="px-2 py-2 text-center"><Link to={`/admin/pedidos?search=${encodeURIComponent(order.id)}`} aria-label={`Ver orden ${order.id}`} className="inline-flex rounded-md border border-slate-200 px-2 py-1 text-slate-600 hover:bg-slate-50">···</Link></td></tr>)}</tbody></table>{!recentOrders.length && <p className="py-10 text-center text-sm text-slate-500">No hay órdenes en este período.</p>}</div></section>
+      <section className="admin-ref-card min-w-0 p-4"><div className="mb-3 flex items-center justify-between"><h3 className="text-[16px] font-bold">Productos con mayor rendimiento</h3><Link to="/admin/productos" className="text-xs font-medium text-blue-600 hover:underline">Ver todos</Link></div><div className="overflow-x-auto"><table className="w-full text-left text-xs"><thead><tr><th className="px-2 py-2">Producto</th><th className="px-2 py-2 text-right">Ventas</th><th className="px-2 py-2 text-right">Ingresos</th></tr></thead><tbody>{topProducts.map(([id, data]) => { const product = productById.get(id); return product && <tr key={id} className="border-b border-slate-100 last:border-0"><td className="px-2 py-2"><div className="flex min-w-0 items-center gap-2"><img src={product.image} alt="" className="h-8 w-8 shrink-0 rounded bg-slate-50 object-contain" /><span className="max-w-40 truncate text-slate-700">{product.name}</span></div></td><td className="px-2 py-2 text-right font-medium text-slate-700">{data.units}</td><td className="px-2 py-2 text-right font-medium text-slate-800">{formatShort(data.revenue)}</td></tr>; })}</tbody></table>{!topProducts.length && <p className="py-10 text-center text-sm text-slate-500">Aún no hay productos vendidos.</p>}</div></section>
+    </div>
+  </div>;
 }

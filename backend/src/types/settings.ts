@@ -18,6 +18,7 @@ export const settingsSchema = z
     maintenanceMode: z.boolean(),
     showOutOfStock: z.boolean(),
     allowReviews: z.boolean(),
+    showAnnouncementBar: z.boolean(),
     gaId: shortText,
     brands: z
       .array(z.object({ name: shortText, colorClass: shortText }))

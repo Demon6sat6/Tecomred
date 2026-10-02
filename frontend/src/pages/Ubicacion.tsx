@@ -35,7 +35,7 @@ export default function Ubicacion() {
         <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-8">
 
           {/* Mapa embed */}
-          <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-xs" style={{ minHeight: '420px' }}>
+          <div className="min-w-0 bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-xs" style={{ minHeight: '420px' }}>
             <iframe
               title="Ubicación SiscomRed"
               src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3901.2!2d-77.0428!3d-12.0464!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMTLCsDAyJzQ3LjAiUyA3N8KwMDInMzQuMSJX!5e0!3m2!1ses!2spe!4v1620000000000!5m2!1ses!2spe"
@@ -49,14 +49,14 @@ export default function Ubicacion() {
           </div>
 
           {/* Info de contacto */}
-          <div className="flex flex-col gap-5">
+          <div className="min-w-0 flex flex-col gap-5">
             {/* Dirección */}
             <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs">
               <div className="flex items-start gap-4">
                 <div className="w-11 h-11 gradient-brand rounded-xl flex items-center justify-center shrink-0 shadow-md shadow-violet-500/20">
                   <MapPin className="w-5 h-5 text-white" />
                 </div>
-                <div>
+                <div className="min-w-0">
                   <h3 className="text-slate-900 font-bold mb-1">Dirección</h3>
                   <p className="text-slate-600 text-sm">{address}</p>
                   <a
@@ -118,7 +118,7 @@ export default function Ubicacion() {
                 </div>
                 <div>
                   <h3 className="text-slate-900 font-bold mb-1">Correo Electrónico</h3>
-                  <a href={`mailto:${email}`} className="text-violet-600 hover:text-violet-700 font-medium transition-colors text-sm">
+                  <a href={`mailto:${email}`} className="break-all text-violet-600 hover:text-violet-700 font-medium transition-colors text-sm">
                     {email}
                   </a>
                   <p className="text-slate-500 text-xs mt-0.5">Respondemos en menos de 24 h</p>

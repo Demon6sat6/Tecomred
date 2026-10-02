@@ -4,7 +4,7 @@ import {
   Package, AlertTriangle, ThumbsUp, BadgeCheck, ChevronLeft, ChevronRight, Heart, ArrowLeftRight,
 } from 'lucide-react';
 import { useStore } from '../context/StoreContext';
-import { reviews } from '../data/reviews';
+import type { Review } from '../data/reviews';
 import { useCart } from '../context/CartContext';
 import { usePageTitle } from '../hooks/usePageTitle';
 import { useToast } from '../context/ToastContext';
@@ -12,29 +12,28 @@ import { useAdmin } from '../context/AdminContext';
 import { useCurrency } from '../hooks/useCurrency';
 import { useProductLists } from '../context/useProductLists';
 import ProductCard from '../components/ProductCard';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 type Tab = 'specs' | 'reviews' | 'bundle';
 
-interface LocalReview {
-  id: number; author: string; rating: number; title: string; body: string; date: string;
-}
-
-function ReviewForm({ onSubmit }: { productId: number; onSubmit: (r: LocalReview) => void }) {
+function ReviewForm({ onSubmit }: { onSubmit: (r: { author: string; rating: number; title: string; body: string }) => Promise<void> }) {
   const [form, setForm] = useState({ author: '', rating: 5, title: '', body: '' });
   const [sent, setSent] = useState(false);
+  const [error, setError] = useState('');
+  const [sending, setSending] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.author.trim() || !form.title.trim() || form.body.trim().length < 10) return;
-    onSubmit({
-      id: Date.now(), author: form.author.trim(), rating: form.rating,
-      title: form.title.trim(), body: form.body.trim(),
-      date: new Date().toLocaleDateString('es', { day: 'numeric', month: 'short', year: 'numeric' }),
-    });
-    setSent(true);
-    setForm({ author: '', rating: 5, title: '', body: '' });
-    setTimeout(() => setSent(false), 3000);
+    setSending(true);
+    setError('');
+    try {
+      await onSubmit({ author: form.author.trim(), rating: form.rating, title: form.title.trim(), body: form.body.trim() });
+      setSent(true);
+      setForm({ author: '', rating: 5, title: '', body: '' });
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'No se pudo enviar la reseña');
+    } finally { setSending(false); }
   };
 
   const inputCls = "w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 text-sm placeholder-slate-400 focus:outline-none focus:bg-white focus:border-violet-500 transition-colors";
@@ -48,6 +47,7 @@ function ReviewForm({ onSubmit }: { productId: number; onSubmit: (r: LocalReview
           <p className="text-emerald-700 text-sm font-medium">¡Gracias por tu reseña! Será visible próximamente.</p>
         </div>
       )}
+      {error && <p role="alert" className="mb-4 rounded-xl bg-rose-50 p-3 text-sm text-rose-700">{error}</p>}
       <form onSubmit={handleSubmit} className="space-y-3">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
@@ -77,9 +77,9 @@ function ReviewForm({ onSubmit }: { productId: number; onSubmit: (r: LocalReview
             rows={3} placeholder="Describe tu experiencia con el producto (mínimo 10 caracteres)..."
             className={`${inputCls} resize-none`} required minLength={10} />
         </div>
-        <button type="submit"
+        <button type="submit" disabled={sending}
           className="px-6 py-2.5 gradient-brand text-white text-sm font-bold rounded-xl hover:opacity-90 active:scale-95 transition-all shadow-md shadow-violet-500/20">
-          Publicar reseña
+          {sending ? 'Enviando…' : 'Enviar reseña para aprobación'}
         </button>
       </form>
     </div>
@@ -115,9 +115,32 @@ export default function ProductDetail() {
   const [activeTab, setActiveTab] = useState<Tab>('specs');
   const [activeImg, setActiveImg] = useState(0);
   const [touchStartX, setTouchStartX] = useState<number | null>(null);
-  const [localReviews, setLocalReviews] = useState<LocalReview[]>([]);
+  const [productReviews, setProductReviews] = useState<Review[]>([]);
+  const [reviewsError, setReviewsError] = useState('');
 
   const product = products.find(p => p.id === Number(id));
+
+  useEffect(() => {
+    if (!id || !Number.isSafeInteger(Number(id))) return;
+    let cancelled = false;
+    void fetch(`/api/reviews/${id}`)
+      .then(async response => {
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error || 'No se pudieron cargar las reseñas');
+        return result as { data: Review[] };
+      })
+      .then(result => { if (!cancelled) { setProductReviews(result.data); setReviewsError(''); } })
+      .catch(cause => { if (!cancelled) setReviewsError(cause instanceof Error ? cause.message : 'No se pudieron cargar las reseñas'); });
+    return () => { cancelled = true; };
+  }, [id]);
+
+  const submitReview = async (review: { author: string; rating: number; title: string; body: string }) => {
+    const response = await fetch(`/api/reviews/${id}`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(review),
+    });
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.error || 'No se pudo enviar la reseña');
+  };
 
   usePageTitle(
     product ? product.name : 'Producto no encontrado',
@@ -136,10 +159,9 @@ export default function ProductDetail() {
 
   const images = [product.image];
 
-  const productReviews = reviews.filter(r => r.productId === product.id);
   const avgRating = productReviews.length
     ? productReviews.reduce((s, r) => s + r.rating, 0) / productReviews.length
-    : product.rating;
+    : 0;
 
   // Rating distribution
   const ratingDist = [5, 4, 3, 2, 1].map(star => ({
@@ -296,7 +318,7 @@ export default function ProductDetail() {
             <StarRating rating={avgRating} size="md" />
             <span className="text-slate-900 font-bold">{avgRating.toFixed(1)}</span>
             <span className="text-slate-500 text-sm">
-              ({productReviews.length > 0 ? productReviews.length : product.reviews} reseñas)
+              ({productReviews.length} reseñas)
             </span>
             {productReviews.filter(r => r.verified).length > 0 && (
               <span className="flex items-center gap-1 text-xs font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
@@ -403,12 +425,12 @@ export default function ProductDetail() {
       {/* TABS */}
       <div className="mb-12">
         {/* Tab headers */}
-        <div className="flex gap-1 border-b border-slate-200 mb-6 overflow-x-auto">
+        <div className="grid grid-cols-3 gap-1 border-b border-slate-200 mb-6 sm:flex">
           {tabs.map(tab => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 px-4 sm:px-6 py-3 text-sm font-semibold whitespace-nowrap border-b-2 transition-all ${
+              className={`min-w-0 flex items-center justify-center gap-1 px-1.5 sm:px-6 py-3 text-[11px] sm:text-sm leading-tight text-center font-semibold border-b-2 transition-all ${
                 activeTab === tab.id
                   ? 'border-violet-600 text-violet-600'
                   : 'border-transparent text-slate-500 hover:text-slate-800'
@@ -518,29 +540,8 @@ export default function ProductDetail() {
                 <p className="text-slate-500 text-sm mt-1">¡Sé el primero en opinar!</p>
               </div>
             )}
-            {/* Local reviews (submitted this session) */}
-            {localReviews.filter(r => r.id > 0).map(r => (
-              <div key={r.id} className="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs">
-                <div className="flex items-start justify-between gap-4 mb-3">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full gradient-brand flex items-center justify-center text-white text-sm font-bold shrink-0">
-                      {r.author.slice(0,2).toUpperCase()}
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-slate-900 font-semibold text-sm">{r.author}</span>
-                        <span className="text-[10px] text-violet-700 bg-violet-50 border border-violet-200 font-medium px-2 py-0.5 rounded-full">Nueva</span>
-                      </div>
-                      <span className="text-slate-400 text-xs">{r.date}</span>
-                    </div>
-                  </div>
-                  <StarRating rating={r.rating} size="sm" />
-                </div>
-                <h4 className="text-slate-900 font-semibold text-sm mb-1">{r.title}</h4>
-                <p className="text-slate-600 text-sm leading-relaxed">{r.body}</p>
-              </div>
-            ))}
-            <ReviewForm productId={product.id} onSubmit={r => setLocalReviews(prev => [r, ...prev])} />
+            {reviewsError && <p role="alert" className="rounded-xl bg-rose-50 p-3 text-sm text-rose-700">{reviewsError}</p>}
+            {settings.allowReviews && <ReviewForm onSubmit={submitReview} />}
           </div>
         )}
 

@@ -1,4 +1,5 @@
 export default async function run(page, ui) {
+  if (!process.env.ADMIN_PASSWORD) throw new Error('Set ADMIN_PASSWORD to run this legacy browser check');
   const routes = [
     { path: "/admin/dashboard", expected: "Panel" },
     { path: "/admin/analytics", expected: "Analytics" },
@@ -20,8 +21,8 @@ export default async function run(page, ui) {
   await page.waitForTimeout(400);
 
   // Login
-  await page.locator('input[type="text"]').first().fill("admin");
-  await page.locator('input[type="password"]').first().fill("tecomred2026");
+  await page.locator('input[type="text"]').first().fill(process.env.ADMIN_USER || 'admin');
+  await page.locator('input[type="password"]').first().fill(process.env.ADMIN_PASSWORD);
   await page.locator('button[type="submit"]').first().click();
   await page.waitForTimeout(600);
 

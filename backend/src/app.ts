@@ -15,6 +15,9 @@ import { newsletterRouter } from "./routes/newsletter.js";
 import { administratorsRouter } from "./routes/administrators.js";
 import { settingsRouter } from "./routes/settings.js";
 import { analyticsRouter } from "./routes/analytics.js";
+import { adminRecordsRouter } from "./routes/adminRecords.js";
+import { reviewsRouter } from "./routes/reviews.js";
+import { couponsRouter } from "./routes/coupons.js";
 
 export const app = express();
 
@@ -62,6 +65,9 @@ app.use("/api/newsletter",  newsletterRouter);
 app.use("/api/administrators", administratorsRouter);
 app.use("/api/settings", settingsRouter);
 app.use("/api/analytics", analyticsRouter);
+app.use("/api/admin-records", adminRecordsRouter);
+app.use("/api/reviews", reviewsRouter);
+app.use("/api/coupons", couponsRouter);
 
 // 404
 app.use((_req, res, next) => {

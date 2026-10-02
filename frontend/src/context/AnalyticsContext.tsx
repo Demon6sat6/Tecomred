@@ -172,6 +172,19 @@ export function AnalyticsProvider({ children }: { children: ReactNode }) {
 
   // 1. Send Heartbeat every 10s to keep session alive in backend & local
   useEffect(() => {
+    if (location.pathname.startsWith('/admin')) {
+      setData(prev => {
+        const activeSessions = { ...prev.activeSessions };
+        delete activeSessions[sessionId.current];
+        return { ...prev, activeSessions };
+      });
+      fetch(`${API_BASE}/analytics/leave`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sessionId: sessionId.current }),
+      }).catch(() => {});
+      return;
+    }
     const beat = () => {
       const now = Date.now();
       setData(prev => ({
@@ -328,44 +341,24 @@ export function AnalyticsProvider({ children }: { children: ReactNode }) {
   });
 
   // Decide source of truth: Server live data if available, else local
-  const activeNow = serverLive?.activeNow !== undefined && serverLive.activeNow > 0
-    ? serverLive.activeNow
-    : Math.max(localActiveNow, 1);
+  const activeNow = serverLive?.activeNow ?? localActiveNow;
 
-  const activeVisitors = serverLive?.activeVisitors ?? [
-    {
-      sessionId: sessionId.current,
-      path: location.pathname,
-      label: getLabel(location.pathname),
-      device: deviceType.current,
-      secondsAgo: 0,
-    },
-  ];
+  const activeVisitors = serverLive?.activeVisitors ?? [];
 
-  const visitsToday = (serverLive?.visitsToday && serverLive.visitsToday > 0)
-    ? serverLive.visitsToday
-    : localVisitsToday;
+  const visitsToday = serverLive?.visitsToday ?? localVisitsToday;
 
   const visitsYesterday = serverLive?.visitsYesterday ?? localVisitsYesterday;
 
-  const visitsThisWeek = (serverLive?.visitsThisWeek && serverLive.visitsThisWeek > 0)
-    ? serverLive.visitsThisWeek
-    : localVisitsThisWeek;
+  const visitsThisWeek = serverLive?.visitsThisWeek ?? localVisitsThisWeek;
 
   const visitsPrevWeek = serverLive?.visitsPrevWeek ?? localVisitsPrevWeek;
 
-  const visitsTotal = (serverLive?.visitsTotal && serverLive.visitsTotal > 0)
-    ? serverLive.visitsTotal
-    : localVisitsTotal;
+  const visitsTotal = serverLive?.visitsTotal ?? localVisitsTotal;
 
-  const topPages = (serverLive?.topPages && serverLive.topPages.length > 0)
-    ? serverLive.topPages
-    : localTopPages;
+  const topPages = serverLive?.topPages ?? localTopPages;
 
   const visitsByHour = serverLive?.visitsByHour ?? localVisitsByHour;
-  const recentVisits = (serverLive?.recentVisits && serverLive.recentVisits.length > 0)
-    ? serverLive.recentVisits
-    : data.visits.slice(0, 25);
+  const recentVisits = serverLive?.recentVisits ?? data.visits.slice(0, 25);
 
   const devices = serverLive?.devices ?? localDevices;
 

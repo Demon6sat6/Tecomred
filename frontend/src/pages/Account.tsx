@@ -1,12 +1,33 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, Check, Eye, EyeOff, LockKeyhole, Mail, UserRound, Phone } from 'lucide-react';
+import Swal from 'sweetalert2';
+import 'sweetalert2/dist/sweetalert2.min.css';
 import { useAdmin } from '../context/AdminContext';
 
 const API_URL = (import.meta.env.VITE_API_URL as string | undefined)
   ?? (import.meta.env.DEV ? '/api' : 'https://tecomred-production-910c.up.railway.app/api');
 
 type Mode = 'login' | 'register';
+
+const successIcon = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m5 12 4.5 4.5L19 7" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const errorIcon = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6.5 6.5 17.5 17.5M17.5 6.5 6.5 17.5" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"/></svg>';
+
+function showLoginNotice(kind: 'success' | 'error', title: string, message: string) {
+  void Swal.fire({
+    toast: true,
+    position: window.matchMedia('(max-width: 640px)').matches ? 'bottom' : 'top-end',
+    icon: kind,
+    iconHtml: kind === 'success' ? successIcon : errorIcon,
+    title,
+    text: message,
+    timer: kind === 'success' ? 3000 : 6000,
+    timerProgressBar: true,
+    showConfirmButton: false,
+    showCloseButton: true,
+    customClass: { popup: `account-toast account-toast--${kind}` },
+  });
+}
 
 export default function Account() {
   const navigate = useNavigate();
@@ -38,14 +59,21 @@ export default function Account() {
         localStorage.removeItem('customer_user');
         localStorage.setItem('admin_token', data.token);
         login();
+        if (mode === 'login') showLoginNotice('success', 'Bienvenido al panel', `Hola, ${data.user.name || data.user.username}. Tu sesión está lista.`);
         navigate('/admin/dashboard', { replace: true });
       } else {
         localStorage.setItem('customer_token', data.token);
         localStorage.setItem('customer_user', JSON.stringify(data.user));
+        if (mode === 'login') showLoginNotice('success', 'Qué bueno verte de nuevo', `Hola, ${data.user.name || 'bienvenido'}. Ya puedes continuar en la tienda.`);
         navigate('/', { replace: true });
       }
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : 'Ocurrió un error');
+      const message = error instanceof Error ? error.message : 'Ocurrió un error';
+      if (mode === 'login') {
+        showLoginNotice('error', 'No pudimos iniciar sesión', message);
+      } else {
+        setMessage(message);
+      }
     } finally {
       setLoading(false);
     }

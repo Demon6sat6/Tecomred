@@ -1,82 +1,34 @@
-import { Link, useNavigate } from 'react-router-dom';
-import { Home, ArrowLeft, Search, Wifi } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { ArrowRight, House, SearchX } from 'lucide-react';
 
 export default function NotFound() {
-  const navigate = useNavigate();
-
   return (
-    <div className="min-h-[80vh] flex items-center justify-center px-4 py-16 relative">
-      {/* Background soft glows */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-violet-500/5 rounded-full blur-3xl" />
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-indigo-500/5 rounded-full blur-3xl" />
-      </div>
-
-      <div className="relative text-center max-w-lg mx-auto">
-        {/* Logo */}
-        <div className="flex justify-center mb-6">
-          <div className="w-20 h-20 rounded-2xl bg-gradient-to-tr from-violet-600 to-indigo-600 flex items-center justify-center shadow-xl shadow-violet-500/20">
-            <Wifi className="w-10 h-10 text-white" />
+    <main className="relative flex min-h-[75vh] items-center justify-center overflow-hidden bg-[#f5f8fc] px-4 py-12 text-[#11264b]">
+      <div className="pointer-events-none absolute -left-24 top-10 h-72 w-72 rounded-full bg-[#0052cc]/[0.06] blur-3xl" />
+      <div className="pointer-events-none absolute -right-20 bottom-0 h-72 w-72 rounded-full bg-[#48bb07]/[0.08] blur-3xl" />
+      <section className="relative w-full max-w-[620px] overflow-hidden rounded-[28px] border border-[#dce5f1] bg-white shadow-[0_22px_70px_-35px_rgba(17,38,75,0.35)]" aria-labelledby="not-found-title">
+        <div className="h-1.5 bg-gradient-to-r from-[#0052cc] via-[#0052cc] to-[#48bb07]" />
+        <div className="px-6 pb-9 pt-8 sm:px-11 sm:pb-11 sm:pt-10">
+          <div className="flex items-center justify-between gap-4">
+            <img src="/logo.png" alt="SiscomRed" className="h-11 w-auto max-w-[150px] object-contain object-left" />
+            <span className="rounded-full border border-[#cfe2ff] bg-[#edf5ff] px-3 py-1 text-xs font-bold tracking-wider text-[#0052cc]">ERROR 404</span>
+          </div>
+          <div className="mt-9 flex h-14 w-14 items-center justify-center rounded-2xl border border-[#cfe2ff] bg-[#edf5ff] text-[#0052cc]">
+            <SearchX size={27} strokeWidth={1.8} aria-hidden="true" />
+          </div>
+          <p className="mt-7 text-xs font-bold uppercase tracking-[0.2em] text-[#308700]">Parece que tomamos otro camino</p>
+          <h1 id="not-found-title" className="mt-2 text-[clamp(1.8rem,5vw,2.4rem)] font-extrabold leading-tight tracking-tight">Esta página no existe</h1>
+          <p className="mt-4 max-w-[460px] text-[15px] leading-7 text-[#50627c]">Revisa la dirección o continúa explorando SiscomRed. Podemos ayudarte a encontrar lo que buscas.</p>
+          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+            <Link to="/" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-[#0052cc] px-5 font-semibold text-white transition-colors hover:bg-[#003f9e] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0052cc]">
+              <House size={17} aria-hidden="true" /> Ir al inicio
+            </Link>
+            <Link to="/productos" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-[#dce5f1] bg-white px-5 font-semibold text-[#11264b] transition-colors hover:bg-[#f5f8fc] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0052cc]">
+              Ver productos <ArrowRight size={17} aria-hidden="true" />
+            </Link>
           </div>
         </div>
-
-        {/* 404 */}
-        <div className="mb-6">
-          <h1 className="text-[7rem] sm:text-[9rem] font-black leading-none bg-gradient-to-r from-violet-600 via-indigo-600 to-sky-600 bg-clip-text text-transparent select-none">
-            404
-          </h1>
-          <div className="w-24 h-1.5 bg-gradient-to-r from-violet-600 to-indigo-600 rounded-full mx-auto -mt-2" />
-        </div>
-
-        <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 mb-3">
-          Página no encontrada
-        </h2>
-        <p className="text-slate-600 mb-10 leading-relaxed text-sm sm:text-base">
-          La página que buscas no existe o fue movida.<br />
-          Pero tenemos cientos de productos esperándote en nuestro catálogo.
-        </p>
-
-        {/* Actions */}
-        <div className="flex flex-col sm:flex-row gap-3 justify-center">
-          <Link
-            to="/"
-            className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 text-white font-semibold hover:from-violet-700 hover:to-indigo-700 active:scale-95 transition-all shadow-md shadow-violet-500/20"
-          >
-            <Home className="w-4 h-4" />
-            Ir al inicio
-          </Link>
-          <Link
-            to="/productos"
-            className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-white border border-slate-200 text-slate-800 font-semibold hover:bg-slate-50 active:scale-95 transition-all shadow-xs"
-          >
-            <Search className="w-4 h-4" />
-            Ver catálogo
-          </Link>
-          <button
-            onClick={() => navigate(-1)}
-            className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-white border border-slate-200 text-slate-600 font-semibold hover:bg-slate-50 hover:text-slate-900 active:scale-95 transition-all shadow-xs"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Volver
-          </button>
-        </div>
-
-        {/* Quick links */}
-        <div className="mt-12 pt-8 border-t border-slate-200">
-          <p className="text-slate-500 text-xs font-medium uppercase tracking-wider mb-4">Quizás buscabas</p>
-          <div className="flex flex-wrap gap-2 justify-center">
-            {['Switches', 'Routers', 'Procesadores', 'Memorias RAM', 'Almacenamiento'].map(cat => (
-              <Link
-                key={cat}
-                to={`/productos?categoria=${encodeURIComponent(cat)}`}
-                className="px-3.5 py-1.5 rounded-lg bg-white hover:bg-violet-50 border border-slate-200 hover:border-violet-300 text-slate-600 hover:text-violet-700 text-xs font-medium transition-all shadow-2xs"
-              >
-                {cat}
-              </Link>
-            ))}
-          </div>
-        </div>
-      </div>
-    </div>
+      </section>
+    </main>
   );
 }

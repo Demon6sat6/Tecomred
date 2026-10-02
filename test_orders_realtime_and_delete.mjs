@@ -1,10 +1,11 @@
 export default async function run(page, ui) {
+  if (!process.env.ADMIN_PASSWORD) throw new Error('Set ADMIN_PASSWORD to run this legacy browser check');
   // 1. Iniciar sesión en el admin
   await page.goto("http://localhost:4173/admin");
   await page.waitForTimeout(500);
 
-  await page.locator('input[type="text"]').first().fill("admin");
-  await page.locator('input[type="password"]').first().fill("tecomred2026");
+  await page.locator('input[type="text"]').first().fill(process.env.ADMIN_USER || 'admin');
+  await page.locator('input[type="password"]').first().fill(process.env.ADMIN_PASSWORD);
   await page.locator('button[type="submit"]').first().click();
   await page.waitForTimeout(600);
 
@@ -55,8 +56,8 @@ export default async function run(page, ui) {
   // 4. Ahora eliminar ese pedido desde el admin (abrir modal delete y confirmar)
   // Evaluamos deleteOrder o eliminamos vía API/UI
   await page.evaluate(async (id) => {
-    const token =
-      localStorage.getItem("admin_token") || "Tr3c0mR3d-K3y-2026-xQpZ9mNvLrWs";
+    const token = localStorage.getItem("admin_token");
+    if (!token) throw new Error('Missing administrator session');
     await fetch(`/api/orders/${id}`, {
       method: "DELETE",
       headers: { Authorization: `Bearer ${token}` },

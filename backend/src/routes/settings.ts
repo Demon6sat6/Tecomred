@@ -32,6 +32,7 @@ const fallbackSettings: Record<string, any> = {
   maintenanceMode: false,
   showOutOfStock: true,
   allowReviews: true,
+  showAnnouncementBar: false,
   brands: [
     { name: "Cisco", colorClass: "text-blue-400" },
     { name: "MikroTik", colorClass: "text-red-400" },
@@ -100,7 +101,6 @@ settingsRouter.patch("/", requireApiKey, async (req, res) => {
     );
     return res.json({ data: await readSettings() });
   } catch (error) {
-    Object.assign(fallbackSettings, parsed.data);
-    return res.json({ data: fallbackSettings });
+    return res.status(503).json({ error: "No se pudo guardar la configuración en la base de datos" });
   }
 });

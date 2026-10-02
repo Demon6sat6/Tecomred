@@ -1,278 +1,155 @@
 import { useState } from 'react';
-import { Plus, Trash2, FolderOpen, Check, AlertCircle, Tag } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { FolderOpen, Loader2, Package, Plus, Tag, Trash2 } from 'lucide-react';
 import { useAdmin } from '../../context/AdminContext';
+import { adminAlert } from '../../utils/adminAlerts';
+import { labelSchema, validate } from '../../utils/adminValidation';
+import { EmptyState, Field, PageHeader, SearchInput, StatCard } from '../../components/admin/AdminUI';
 
 const COLOR_OPTIONS = [
-  { label: 'Azul',      value: 'text-blue-600',    preview: 'bg-blue-600' },
-  { label: 'Celeste',   value: 'text-sky-600',     preview: 'bg-sky-600' },
-  { label: 'Índigo',    value: 'text-indigo-600',  preview: 'bg-indigo-600' },
-  { label: 'Rojo',      value: 'text-rose-600',    preview: 'bg-rose-600' },
-  { label: 'Naranja',   value: 'text-orange-600',  preview: 'bg-orange-600' },
-  { label: 'Verde',     value: 'text-emerald-600', preview: 'bg-emerald-600' },
-  { label: 'Morado',    value: 'text-purple-600',  preview: 'bg-purple-600' },
-  { label: 'Gris Oscuro', value: 'text-slate-800', preview: 'bg-slate-800' },
+  { label: 'Azul', value: 'text-blue-600', preview: 'bg-blue-600' },
+  { label: 'Celeste', value: 'text-sky-600', preview: 'bg-sky-600' },
+  { label: 'Índigo', value: 'text-indigo-600', preview: 'bg-indigo-600' },
+  { label: 'Rojo', value: 'text-rose-600', preview: 'bg-rose-600' },
+  { label: 'Naranja', value: 'text-orange-600', preview: 'bg-orange-600' },
+  { label: 'Verde', value: 'text-emerald-600', preview: 'bg-emerald-600' },
+  { label: 'Morado', value: 'text-purple-600', preview: 'bg-purple-600' },
+  { label: 'Gris oscuro', value: 'text-slate-800', preview: 'bg-slate-800' },
 ];
 
 export default function AdminCategories() {
-  const { categoryList, addCategory, deleteCategory, products, settings, saveSettings } = useAdmin();
-
-  // Categorías
-  const [newCat, setNewCat]         = useState('');
-  const [catError, setCatError]     = useState('');
-  const [catSaved, setCatSaved]     = useState(false);
-  const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
-
-  // Marcas
+  const { categoryList, addCategory, deleteCategory, products, settings, saveSettings, isSavingSettings } = useAdmin();
   const brands = settings.brands ?? [];
-  const [newBrand, setNewBrand]     = useState('');
-  const [newColor, setNewColor]     = useState(COLOR_OPTIONS[0].value);
+  const [newCat, setNewCat] = useState('');
+  const [catError, setCatError] = useState('');
+  const [categorySearch, setCategorySearch] = useState('');
+  const [newBrand, setNewBrand] = useState('');
+  const [newColor, setNewColor] = useState(COLOR_OPTIONS[0].value);
   const [brandError, setBrandError] = useState('');
-  const [brandSaved, setBrandSaved] = useState(false);
-  const [confirmBrandDelete, setConfirmBrandDelete] = useState<number | null>(null);
 
-  const handleAddCat = (e: React.FormEvent) => {
-    e.preventDefault();
-    const name = newCat.trim();
-    if (!name) { setCatError('Escribe un nombre de categoría'); return; }
-    if (categoryList.includes(name)) { setCatError('Ya existe esa categoría'); return; }
-    addCategory(name);
+  const handleAddCat = async (event: React.SyntheticEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const result = validate(labelSchema('La categoría', categoryList), newCat);
+    if (!result.ok || !result.data) { setCatError(result.messages[0]); return; }
+    if (!await addCategory(result.data)) { void adminAlert.error('No se pudo guardar la categoría en el servidor.'); return; }
     setNewCat('');
     setCatError('');
-    setCatSaved(true);
-    setTimeout(() => setCatSaved(false), 1500);
+    void adminAlert.success('Categoría creada', `"${result.data}" ya está disponible en el catálogo.`);
   };
 
-  const handleAddBrand = (e: React.FormEvent) => {
-    e.preventDefault();
-    const name = newBrand.trim();
-    if (!name) { setBrandError('Escribe el nombre de la marca'); return; }
-    if (brands.some(b => b.name.toLowerCase() === name.toLowerCase())) {
-      setBrandError('Esa marca ya existe');
-      return;
-    }
-    saveSettings({ ...settings, brands: [...brands, { name, colorClass: newColor }] });
+  const handleAddBrand = async (event: React.SyntheticEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const result = validate(labelSchema('La marca', brands.map(brand => brand.name)), newBrand);
+    if (!result.ok || !result.data) { setBrandError(result.messages[0]); return; }
+    if (!await saveSettings({ brands: [...brands, { name: result.data, colorClass: newColor }] })) { void adminAlert.error('No se pudo guardar la marca en el servidor.'); return; }
     setNewBrand('');
     setNewColor(COLOR_OPTIONS[0].value);
     setBrandError('');
-    setBrandSaved(true);
-    setTimeout(() => setBrandSaved(false), 1500);
+    void adminAlert.success('Marca agregada');
   };
 
-  const handleDeleteBrand = (index: number) => {
-    saveSettings({ ...settings, brands: brands.filter((_, i) => i !== index) });
-    setConfirmBrandDelete(null);
+  const handleDeleteBrand = async (index: number) => {
+    if (!await adminAlert.confirmDelete('¿Eliminar marca?', `${brands[index].name} dejará de mostrarse en la tienda.`)) return;
+    if (await saveSettings({ brands: brands.filter((_, i) => i !== index) })) void adminAlert.success('Marca eliminada');
+    else void adminAlert.error('No se pudo eliminar la marca en el servidor.');
   };
+
+  const handleDeleteCategory = async (name: string, count: number) => {
+    if (count > 0) {
+      void adminAlert.info('Categoría en uso', `"${name}" tiene ${count} producto${count === 1 ? '' : 's'}. Muévelos a otra categoría o elimínalos antes de borrarla.`);
+      return;
+    }
+    if (!await adminAlert.confirmDelete('¿Eliminar categoría?', `"${name}" dejará de estar disponible en la tienda.`)) return;
+    if (await deleteCategory(name)) void adminAlert.success('Categoría eliminada');
+    else void adminAlert.error('No se pudo eliminar la categoría en el servidor.');
+  };
+
+  const term = categorySearch.trim().toLocaleLowerCase('es');
+  const filteredCategories = categoryList.filter(category => category.toLocaleLowerCase('es').includes(term));
+  const assignedProducts = products.filter(product => categoryList.includes(product.category)).length;
+  const countByCategory = new Map<string, number>();
+  products.forEach(product => countByCategory.set(product.category, (countByCategory.get(product.category) ?? 0) + 1));
+  const maxCount = Math.max(1, ...countByCategory.values());
 
   return (
-    <div className="space-y-8 max-w-3xl">
+    <div className="space-y-5">
+      <PageHeader title="Categorías y marcas" description="Organiza el catálogo y las marcas que aparecen en la tienda." />
 
-      {/* ── CATEGORÍAS ── */}
-      <div>
-        <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">Categorías de la Tienda</h2>
-        <p className="text-slate-500 text-sm mt-0.5">
-          {categoryList.length} categorías activas · estructuran el menú, catálogo y filtros de búsqueda
-        </p>
-      </div>
+      <section className="grid gap-3 sm:grid-cols-3">
+        <StatCard label="Categorías" value={categoryList.length} icon={FolderOpen} tone="blue" />
+        <StatCard label="Productos clasificados" value={assignedProducts} icon={Package} tone="green" detail={`${products.length - assignedProducts} sin categoría válida`} />
+        <StatCard label="Marcas visibles" value={brands.length} icon={Tag} tone="violet" />
+      </section>
 
-      {/* Formulario Agregar Categoría */}
-      <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs">
-        <h3 className="text-slate-900 font-bold text-base mb-4 flex items-center gap-2">
-          <Plus className="w-4 h-4 text-blue-600" /> Nueva categoría
-        </h3>
-        <form onSubmit={handleAddCat} className="flex flex-col sm:flex-row gap-3">
-          <div className="flex-1">
-            <input
-              value={newCat}
-              onChange={e => { setNewCat(e.target.value); setCatError(''); }}
-              placeholder="Ej: Fibra Óptica, Servidores, etc."
-              className={`w-full px-4 py-2.5 bg-slate-50 border rounded-xl text-slate-800 text-sm placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-100 transition-all ${
-                catError ? 'border-rose-400 focus:border-rose-500' : 'border-slate-200 focus:border-blue-500'
-              }`}
-            />
-            {catError && (
-              <p className="flex items-center gap-1 mt-1.5 text-xs text-rose-600 font-medium">
-                <AlertCircle className="w-3.5 h-3.5" /> {catError}
-              </p>
-            )}
+      <div className="grid gap-5 xl:grid-cols-[minmax(0,1.6fr)_minmax(320px,.9fr)]">
+        <section className="admin-card min-w-0 overflow-hidden">
+          <div className="admin-card-header">
+            <div><h3 className="text-[15px]">Categorías de la tienda</h3><p className="text-xs text-slate-500">{categoryList.length} categorías activas</p></div>
+            <SearchInput value={categorySearch} onChange={setCategorySearch} placeholder="Buscar categoría" className="w-full sm:w-60" />
           </div>
-          <button
-            type="submit"
-            className={`px-5 py-2.5 rounded-xl text-white text-sm font-bold transition-all active:scale-95 shrink-0 flex items-center justify-center gap-2 ${
-              catSaved ? 'bg-emerald-600' : 'gradient-brand hover:opacity-95 shadow-md shadow-blue-600/20'
-            }`}
-          >
-            {catSaved ? <Check className="w-4 h-4" /> : null}
-            {catSaved ? '¡Guardada!' : 'Agregar Categoría'}
-          </button>
-        </form>
-      </div>
-
-      {/* Lista de Categorías */}
-      <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-xs">
-        <div className="px-5 py-3.5 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
-          <span className="text-slate-500 text-xs font-bold uppercase tracking-wider">Nombre de Categoría</span>
-          <span className="text-slate-500 text-xs font-bold uppercase tracking-wider">Productos Asignados</span>
-        </div>
-        <div className="divide-y divide-slate-100">
-          {categoryList.map(cat => {
-            const count = products.filter(p => p.category === cat).length;
-            return (
-              <div key={cat} className="flex items-center justify-between px-5 py-3.5 hover:bg-slate-50/60 transition-colors group">
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
-                    <FolderOpen className="w-4 h-4" />
-                  </div>
-                  <span className="text-slate-900 text-sm font-semibold">{cat}</span>
-                </div>
-                <div className="flex items-center gap-4">
-                  <span className="text-slate-500 text-xs font-medium bg-slate-100 px-2.5 py-1 rounded-full">
-                    {count} producto{count !== 1 ? 's' : ''}
-                  </span>
-                  {confirmDelete === cat ? (
-                    <div className="flex items-center gap-2 bg-rose-50 px-2 py-1 rounded-lg border border-rose-200">
-                      <span className="text-xs text-rose-700 font-semibold">¿Eliminar?</span>
-                      <button
-                        onClick={() => { deleteCategory(cat); setConfirmDelete(null); }}
-                        className="text-xs bg-rose-600 text-white px-2 py-0.5 rounded font-bold hover:bg-rose-700"
-                      >
-                        Sí
-                      </button>
-                      <button
-                        onClick={() => setConfirmDelete(null)}
-                        className="text-xs text-slate-500 hover:text-slate-700 font-medium"
-                      >
-                        No
-                      </button>
+          {filteredCategories.length ? <ul className="divide-y divide-slate-100">
+            {filteredCategories.map(category => {
+              const count = countByCategory.get(category) ?? 0;
+              return (
+                <li key={category} className="flex items-center gap-4 px-5 py-3 transition-colors hover:bg-slate-50/70">
+                  <span className="admin-kpi-icon admin-tone-blue !h-9 !w-9"><FolderOpen className="h-4 w-4" /></span>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center justify-between gap-3">
+                      <Link to={`/admin/productos?search=${encodeURIComponent(category)}`} className="truncate text-sm font-semibold text-slate-900 hover:text-[#0052cc]">{category}</Link>
+                      <span className="tabular shrink-0 text-xs font-semibold text-slate-500">{count} producto{count === 1 ? '' : 's'}</span>
                     </div>
-                  ) : (
-                    <button
-                      onClick={() => setConfirmDelete(cat)}
-                      className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
-                      title="Eliminar categoría"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  )}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* ── MARCAS ── */}
-      <div className="pt-4 border-t border-slate-200">
-        <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">Marcas y Proveedores</h2>
-        <p className="text-slate-500 text-sm mt-0.5">{brands.length} marcas mostradas en la tienda virtual</p>
-      </div>
-
-      {/* Formulario Agregar Marca */}
-      <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs">
-        <h3 className="text-slate-900 font-bold text-base mb-4 flex items-center gap-2">
-          <Plus className="w-4 h-4 text-blue-600" /> Nueva marca
-        </h3>
-        <form onSubmit={handleAddBrand} className="space-y-4">
-          <div className="flex flex-col sm:flex-row gap-3">
-            <div className="flex-1">
-              <input
-                value={newBrand}
-                onChange={e => { setNewBrand(e.target.value); setBrandError(''); }}
-                placeholder="Ej: Ubiquiti, Mikrotik, Cisco, TP-Link..."
-                className={`w-full px-4 py-2.5 bg-slate-50 border rounded-xl text-slate-800 text-sm placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-100 transition-all ${
-                  brandError ? 'border-rose-400 focus:border-rose-500' : 'border-slate-200 focus:border-blue-500'
-                }`}
-              />
-              {brandError && (
-                <p className="flex items-center gap-1 mt-1.5 text-xs text-rose-600 font-medium">
-                  <AlertCircle className="w-3.5 h-3.5" /> {brandError}
-                </p>
-              )}
-            </div>
-            <button
-              type="submit"
-              className={`px-5 py-2.5 rounded-xl text-white text-sm font-bold transition-all active:scale-95 shrink-0 flex items-center justify-center gap-2 ${
-                brandSaved ? 'bg-emerald-600' : 'gradient-brand hover:opacity-95 shadow-md shadow-blue-600/20'
-              }`}
-            >
-              {brandSaved ? <Check className="w-4 h-4" /> : null}
-              {brandSaved ? '¡Guardada!' : 'Agregar Marca'}
-            </button>
-          </div>
-
-          {/* Selector de color */}
-          <div className="bg-slate-50 p-3 rounded-xl border border-slate-200/80">
-            <p className="text-xs text-slate-600 mb-2 font-semibold">Color distintivo de la marca:</p>
-            <div className="flex flex-wrap gap-2.5">
-              {COLOR_OPTIONS.map(opt => (
-                <button
-                  key={opt.value}
-                  type="button"
-                  onClick={() => setNewColor(opt.value)}
-                  title={opt.label}
-                  className={`w-6 h-6 rounded-full ${opt.preview} transition-all ${
-                    newColor === opt.value ? 'ring-2 ring-blue-600 ring-offset-2 scale-110' : 'opacity-70 hover:opacity-100'
-                  }`}
-                />
-              ))}
-            </div>
-            <p className="text-xs text-slate-500 mt-2">
-              Vista previa: <span className={`font-bold text-sm ${newColor}`}>{newBrand || 'MarcaEjemplo'}</span>
-            </p>
-          </div>
-        </form>
-      </div>
-
-      {/* Lista de Marcas */}
-      <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-xs">
-        <div className="px-5 py-3.5 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
-          <span className="text-slate-500 text-xs font-bold uppercase tracking-wider">Marca</span>
-          <span className="text-slate-500 text-xs font-bold uppercase tracking-wider">Acción</span>
-        </div>
-        {brands.length === 0 ? (
-          <div className="px-5 py-8 text-center text-slate-400 text-sm">No hay marcas configuradas</div>
-        ) : (
-          <div className="divide-y divide-slate-100">
-            {brands.map((brand, i) => (
-              <div key={i} className="flex items-center justify-between px-5 py-3.5 hover:bg-slate-50/60 transition-colors group">
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-slate-100 text-slate-600 flex items-center justify-center shrink-0">
-                    <Tag className="w-4 h-4" />
+                    <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-slate-100"><div className="h-full rounded-full bg-[#0052cc]/70" style={{ width: `${(count / maxCount) * 100}%` }} /></div>
                   </div>
-                  <span className={`text-sm font-extrabold ${brand.colorClass}`}>{brand.name}</span>
-                </div>
-                <div className="flex items-center gap-4">
-                  {confirmBrandDelete === i ? (
-                    <div className="flex items-center gap-2 bg-rose-50 px-2 py-1 rounded-lg border border-rose-200">
-                      <span className="text-xs text-rose-700 font-semibold">¿Eliminar?</span>
-                      <button
-                        onClick={() => handleDeleteBrand(i)}
-                        className="text-xs bg-rose-600 text-white px-2 py-0.5 rounded font-bold hover:bg-rose-700"
-                      >
-                        Sí
-                      </button>
-                      <button
-                        onClick={() => setConfirmBrandDelete(null)}
-                        className="text-xs text-slate-500 hover:text-slate-700 font-medium"
-                      >
-                        No
-                      </button>
-                    </div>
-                  ) : (
-                    <button
-                      onClick={() => setConfirmBrandDelete(i)}
-                      className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
-                      title="Eliminar marca"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  )}
-                </div>
-              </div>
+                  <button onClick={() => void handleDeleteCategory(category, count)} className="admin-action admin-action-danger" title={count ? 'Categoría en uso' : 'Eliminar categoría'} aria-label={`Eliminar categoría ${category}`}><Trash2 className="h-4 w-4" /></button>
+                </li>
+              );
+            })}
+          </ul> : <EmptyState icon={FolderOpen} title="Sin categorías" text={term ? 'No hay categorías que coincidan con la búsqueda.' : 'Crea la primera categoría del catálogo.'} />}
+        </section>
+
+        <section className="admin-card self-start p-5">
+          <h3 className="flex items-center gap-2 text-[15px]"><Plus className="h-4 w-4 text-[#0052cc]" /> Nueva categoría</h3>
+          <p className="mb-4 mt-1 text-xs text-slate-500">Entre 2 y 40 caracteres. No se permiten duplicados.</p>
+          <form onSubmit={event => void handleAddCat(event)} noValidate className="space-y-3">
+            <Field label="Nombre de la categoría" required error={catError}>
+              {props => <input {...props} value={newCat} maxLength={40} onChange={event => { setNewCat(event.target.value); setCatError(''); }} placeholder="Ej: Fibra óptica" className="admin-input" />}
+            </Field>
+            <button type="submit" disabled={isSavingSettings} className="admin-btn admin-btn-primary w-full">{isSavingSettings ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}Agregar categoría</button>
+          </form>
+        </section>
+      </div>
+
+      <div className="grid gap-5 xl:grid-cols-[minmax(0,1.6fr)_minmax(320px,.9fr)]">
+        <section className="admin-card min-w-0 overflow-hidden">
+          <div className="admin-card-header"><div><h3 className="text-[15px]">Marcas y proveedores</h3><p className="text-xs text-slate-500">{brands.length} marcas mostradas en la tienda</p></div></div>
+          {brands.length ? <ul className="grid gap-px bg-slate-100 sm:grid-cols-2">
+            {brands.map((brand, index) => (
+              <li key={`${brand.name}-${index}`} className="flex items-center justify-between gap-3 bg-white px-5 py-3.5">
+                <span className="flex min-w-0 items-center gap-3"><span className="admin-kpi-icon admin-tone-slate !h-9 !w-9"><Tag className="h-4 w-4" /></span><span className={`truncate text-sm font-extrabold ${brand.colorClass}`}>{brand.name}</span></span>
+                <button onClick={() => void handleDeleteBrand(index)} className="admin-action admin-action-danger" aria-label={`Eliminar marca ${brand.name}`} title="Eliminar marca"><Trash2 className="h-4 w-4" /></button>
+              </li>
             ))}
-          </div>
-        )}
-      </div>
+          </ul> : <EmptyState icon={Tag} title="No hay marcas configuradas" text="Agrega las marcas que distribuyes para mostrarlas en la tienda." />}
+        </section>
 
+        <section className="admin-card self-start p-5">
+          <h3 className="flex items-center gap-2 text-[15px]"><Plus className="h-4 w-4 text-[#0052cc]" /> Nueva marca</h3>
+          <form onSubmit={event => void handleAddBrand(event)} noValidate className="mt-4 space-y-4">
+            <Field label="Nombre de la marca" required error={brandError}>
+              {props => <input {...props} value={newBrand} maxLength={40} onChange={event => { setNewBrand(event.target.value); setBrandError(''); }} placeholder="Ej: Ubiquiti" className="admin-input" />}
+            </Field>
+            <div>
+              <p className="admin-label">Color distintivo</p>
+              <div className="flex flex-wrap gap-2.5" role="radiogroup" aria-label="Color de la marca">
+                {COLOR_OPTIONS.map(option => <button key={option.value} type="button" role="radio" aria-checked={newColor === option.value} aria-label={option.label} title={option.label} onClick={() => setNewColor(option.value)}
+                  className={`h-7 w-7 rounded-full ${option.preview} transition ${newColor === option.value ? 'scale-110 ring-2 ring-[#0052cc] ring-offset-2' : 'opacity-70 hover:opacity-100'}`} />)}
+              </div>
+              <p className="mt-3 rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-500">Vista previa: <span className={`text-sm font-extrabold ${newColor}`}>{newBrand.trim() || 'Marca'}</span></p>
+            </div>
+            <button type="submit" disabled={isSavingSettings} className="admin-btn admin-btn-primary w-full">{isSavingSettings ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}Agregar marca</button>
+          </form>
+        </section>
+      </div>
     </div>
   );
 }

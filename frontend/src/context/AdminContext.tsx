@@ -1,9 +1,9 @@
 import { createContext, useContext, type ReactNode, useEffect, useState, useRef } from 'react';
 import type { Product } from '../types';
 import { categories as initialCategories } from '../data/products';
-import { reviews as initialReviews } from '../data/reviews';
 import type { Review } from '../data/reviews';
 import { useLocalStorage } from '../hooks/useLocalStorage';
+import { useLocation } from 'react-router-dom';
 
 export interface Order {
   id: string;
@@ -118,6 +118,13 @@ interface AdminContextType {
   // Products (shared with store)
   products: Product[];
   productsError: string;
+  ordersError: string;
+  adminRecordsError: string;
+  /** Momento de la última sincronización correcta con el servidor. */
+  lastSync: Date | null;
+  syncOnline: boolean;
+  isDataLoading: boolean;
+  refreshAll: () => Promise<void>;
   addProduct: (p: Omit<Product, 'id'>) => Promise<void>;
   updateProduct: (p: Product) => Promise<void>;
   deleteProduct: (id: number) => Promise<void>;
@@ -134,20 +141,19 @@ interface AdminContextType {
   loadOrders: () => Promise<void>;
   // Customers
   customers: Customer[];
-  addCustomer: (c: Omit<Customer, 'id'>) => void;
-  updateCustomer: (c: Customer) => void;
-  deleteCustomer: (id: number) => void;
+  addCustomer: (c: Omit<Customer, 'id'>) => Promise<void>;
+  updateCustomer: (c: Customer) => Promise<void>;
+  deleteCustomer: (id: number) => Promise<void>;
   // Reviews
   reviews: Review[];
-  deleteReview: (id: number) => void;
-  approveReview: (id: number) => void;
+  deleteReview: (id: number) => Promise<void>;
+  approveReview: (id: number) => Promise<void>;
   // Coupons
   coupons: Coupon[];
-  addCoupon: (c: Omit<Coupon, 'id'>) => void;
-  updateCoupon: (c: Coupon) => void;
-  deleteCoupon: (id: number) => void;
-  applyCoupon: (code: string, total: number) => { valid: boolean; discount: number; message: string };
-  incrementCouponUse: (code: string) => void;
+  addCoupon: (c: Omit<Coupon, 'id'>) => Promise<void>;
+  updateCoupon: (c: Coupon) => Promise<void>;
+  deleteCoupon: (id: number) => Promise<void>;
+  applyCoupon: (code: string, total: number) => Promise<{ valid: boolean; discount: number; message: string }>;
 }
 
 const defaultSettings: StoreSettings = {
@@ -208,77 +214,19 @@ function makeApiCall() {
       },
     });
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.error || `Error ${response.status}`);
+      const errorData = await response.json().catch(() => ({})) as { error?: string; details?: { fieldErrors?: Record<string, string[]> } };
+      const fieldErrors = Object.entries(errorData.details?.fieldErrors ?? {}).map(([field, messages]) => `${field}: ${messages[0]}`);
+      if (response.status === 401) throw new Error('Tu sesión expiró. Vuelve a iniciar sesión.');
+      throw new Error([errorData.error || `Error ${response.status}`, ...fieldErrors].join(' · '));
     }
-    return response.json();
+    return response.status === 204 ? undefined as T : response.json();
   };
 }
-
-function generateInitialOrders(): Order[] {
-  const now = new Date();
-  const formatOrderDate = (daysAgo: number) => {
-    const d = new Date(now);
-    d.setDate(d.getDate() - daysAgo);
-    return d.toLocaleDateString('es-PE', { day: 'numeric', month: 'short', year: 'numeric' });
-  };
-  return [
-    { id: 'TR-001241', customer: 'Carlos Mendoza',   email: 'carlos@email.com',   phone: '+51 987 654 321', date: formatOrderDate(0), total: 2607.50, discount: 0, couponCode: '', status: 'Entregado',  city: 'Lima',          address: 'Av. Javier Prado 1234, San Isidro',    notes: '',                              items: [{ productId: 1, name: 'Switch Cisco Catalyst', qty: 1, price: 1820 }, { productId: 3, name: 'Cable UTP Cat6', qty: 1, price: 787.50 }] },
-    { id: 'TR-001240', customer: 'María González',   email: 'maria@email.com',    phone: '+51 956 789 012', date: formatOrderDate(1), total: 1927.50, discount: 0, couponCode: '', status: 'Enviado',    city: 'Arequipa',      address: 'Calle Mercaderes 234, Cercado',         notes: 'Entregar en recepción',         items: [{ productId: 4, name: 'Procesador Intel i7', qty: 1, price: 1458.75 }, { productId: 5, name: 'RAM Kingston 32GB', qty: 1, price: 468.75 }] },
-    { id: 'TR-001239', customer: 'Roberto Silva',    email: 'roberto@email.com',  phone: '+51 945 123 456', date: formatOrderDate(2), total: 787.50,  discount: 0, couponCode: '', status: 'Procesando', city: 'Trujillo',      address: 'Jr. Pizarro 456, Centro',              notes: '',                              items: [{ productId: 2, name: 'Router MikroTik', qty: 1, price: 787.50 }] },
-    { id: 'TR-001238', customer: 'Ana Rodríguez',    email: 'ana@email.com',      phone: '+51 934 567 890', date: formatOrderDate(3), total: 1458.75, discount: 0, couponCode: '', status: 'Pendiente',  city: 'Cusco',         address: 'Av. El Sol 789, Wanchaq',              notes: 'Llamar antes de entregar',      items: [{ productId: 4, name: 'Procesador Intel i7', qty: 1, price: 1458.75 }] },
-    { id: 'TR-001237', customer: 'Luis Pérez',       email: 'luis@email.com',     phone: '+51 923 456 789', date: formatOrderDate(4), total: 555.00,  discount: 0, couponCode: '', status: 'Entregado',  city: 'Piura',         address: 'Av. Grau 321, Piura',                  notes: '',                              items: [{ productId: 3, name: 'Cable UTP Cat6', qty: 1, price: 243.75 }, { productId: 10, name: 'Kit Herramientas', qty: 1, price: 168.75 }, { productId: 9, name: 'Switch TP-Link', qty: 1, price: 142.50 }] },
-    { id: 'TR-001236', customer: 'Sofia Torres',     email: 'sofia@email.com',    phone: '+51 912 345 678', date: formatOrderDate(8), total: 367.50,  discount: 0, couponCode: '', status: 'Cancelado',  city: 'Chiclayo',      address: 'Av. Balta 654, Chiclayo',              notes: 'Cliente canceló',               items: [{ productId: 6, name: 'SSD Samsung 970', qty: 1, price: 367.50 }] },
-    { id: 'TR-001235', customer: 'Diego Fernández',  email: 'diego@email.com',    phone: '+51 901 234 567', date: formatOrderDate(9), total: 2158.75, discount: 0, couponCode: '', status: 'Enviado',    city: 'Lima',          address: 'Av. La Marina 1500, San Miguel',        notes: '',                              items: [{ productId: 1, name: 'Switch Cisco', qty: 1, price: 1820 }, { productId: 10, name: 'Kit Herramientas', qty: 1, price: 168.75 }, { productId: 3, name: 'Cable UTP', qty: 1, price: 170 }] },
-  ];
-}
-
-const initialOrders: Order[] = generateInitialOrders();
-
-const initialCustomers: Customer[] = [
-  { id: 1, name: 'Carlos Mendoza',   email: 'carlos@email.com',   phone: '+51 987 654 321', city: 'Lima',      orders: 5,  totalSpent: 8775.00,  joined: 'Ene 2025', status: 'Activo' },
-  { id: 2, name: 'María González',   email: 'maria@email.com',    phone: '+51 956 789 012', city: 'Arequipa',  orders: 3,  totalSpent: 4687.50,  joined: 'Feb 2025', status: 'Activo' },
-  { id: 3, name: 'Roberto Silva',    email: 'roberto@email.com',  phone: '+51 945 123 456', city: 'Trujillo',  orders: 8,  totalSpent: 14587.50, joined: 'Mar 2024', status: 'Activo' },
-  { id: 4, name: 'Ana Rodríguez',    email: 'ana@email.com',      phone: '+51 934 567 890', city: 'Cusco',     orders: 1,  totalSpent: 1458.75,  joined: 'Abr 2026', status: 'Activo' },
-  { id: 5, name: 'Luis Pérez',       email: 'luis@email.com',     phone: '+51 923 456 789', city: 'Piura',     orders: 4,  totalSpent: 2925.00,  joined: 'Jun 2025', status: 'Activo' },
-  { id: 6, name: 'Sofia Torres',     email: 'sofia@email.com',    phone: '+51 912 345 678', city: 'Chiclayo',  orders: 2,  totalSpent: 787.50,   joined: 'Ago 2025', status: 'Inactivo' },
-  { id: 7, name: 'Diego Fernández',  email: 'diego@email.com',    phone: '+51 901 234 567', city: 'Lima',      orders: 12, totalSpent: 21262.50, joined: 'Dic 2023', status: 'Activo' },
-];
-
-const initialCoupons: Coupon[] = [
-  { id: 1, code: 'BIENVENIDO10', type: 'porcentaje', value: 10, minOrder: 200,  uses: 45, maxUses: 100, expiry: '2026-12-31', active: true },
-  { id: 2, code: 'REDES25',      type: 'porcentaje', value: 25, minOrder: 750,  uses: 12, maxUses: 50,  expiry: '2026-06-30', active: true },
-  { id: 3, code: 'DESCUENTO75',  type: 'fijo',       value: 75, minOrder: 375,  uses: 89, maxUses: 200, expiry: '2026-05-31', active: false },
-  { id: 4, code: 'TECH200',      type: 'fijo',       value: 200, minOrder: 1125, uses: 3, maxUses: 20,  expiry: '2026-08-15', active: true },
-];
-
-const initialAdministrators: Administrator[] = [
-  {
-    id: 1,
-    name: 'Administrador Principal',
-    username: 'admin',
-    email: 'admin@siscomred.pe',
-    role: 'admin',
-    isActive: true,
-    createdAt: '2025-01-01T00:00:00.000Z',
-  },
-  {
-    id: 2,
-    name: 'Soporte Técnico',
-    username: 'soporte',
-    email: 'soporte@siscomred.pe',
-    role: 'editor',
-    isActive: true,
-    createdAt: '2025-02-15T00:00:00.000Z',
-  },
-];
-
-// Add approved field to reviews
-const initialReviewsWithApproval = initialReviews.map(r => ({ ...r, approved: true }));
 
 const AdminContext = createContext<AdminContextType | undefined>(undefined);
 
 export function AdminProvider({ children }: { children: ReactNode }) {
+  const { pathname } = useLocation();
   const [isAuthenticated, setIsAuthenticated] = useLocalStorage('admin_auth', false);
   const [settings, setSettings]               = useLocalStorage<StoreSettings>('admin_settings', defaultSettings);
   const [isSettingsLoading, setIsSettingsLoading] = useState(true);
@@ -288,14 +236,18 @@ export function AdminProvider({ children }: { children: ReactNode }) {
   const settingsSaving = useRef(false);
   const [productList, setProductList]         = useState<Product[]>([]);
   const [productsError, setProductsError] = useState('');
+  const [ordersError, setOrdersError] = useState('');
+  const [adminRecordsError, setAdminRecordsError] = useState('');
   const categoryList = settings.categories;
-  const [orders, setOrders]                   = useLocalStorage<Order[]>('admin_orders', initialOrders);
-  const [customers, setCustomers]             = useLocalStorage<Customer[]>('admin_customers', initialCustomers);
-  const [reviewList, setReviewList]           = useLocalStorage<Review[]>('admin_reviews', initialReviewsWithApproval);
-  const [coupons, setCoupons]                 = useLocalStorage<Coupon[]>('admin_coupons', initialCoupons);
-  const [administrators, setAdministrators]   = useLocalStorage<Administrator[]>('admin_administrators', initialAdministrators);
-  const [isBackendAvailable, setIsBackendAvailable] = useState<boolean | null>(null);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [customers, setCustomers] = useState<Customer[]>([]);
+  const [reviewList, setReviewList] = useState<Review[]>([]);
+  const [coupons, setCoupons] = useState<Coupon[]>([]);
+  const [administrators, setAdministrators] = useState<Administrator[]>([]);
   const [isVerifying, setIsVerifying] = useState(() => isAuthenticated as boolean);
+  const [lastSync, setLastSync] = useState<Date | null>(null);
+  const [syncOnline, setSyncOnline] = useState(true);
+  const [isDataLoading, setIsDataLoading] = useState(true);
   const apiCall = makeApiCall();
   const ordersChannel = useRef<BroadcastChannel | null>(null);
 
@@ -316,7 +268,9 @@ export function AdminProvider({ children }: { children: ReactNode }) {
           setOrders(prev => prev.map(o => o.id === msg.order.id ? msg.order : o));
         }
       };
-    } catch {}
+    } catch {
+      // BroadcastChannel is optional; server polling remains available.
+    }
     return () => {
       ordersChannel.current?.close();
     };
@@ -324,23 +278,29 @@ export function AdminProvider({ children }: { children: ReactNode }) {
 
   // Polling automático en tiempo real de pedidos en el panel admin
   useEffect(() => {
-    const isOrdersOrAdmin = typeof window !== 'undefined' && window.location.pathname.startsWith('/admin');
-    if (!isOrdersOrAdmin) return;
+    if (!isAuthenticated || !pathname.startsWith('/admin')) return;
 
+    void Promise.all([fetchOrders(), loadAdminRecords()]).finally(() => setIsDataLoading(false));
     const interval = setInterval(() => {
       if (document.visibilityState === 'visible') {
         void fetchOrders();
+        void loadAdminRecords();
       }
-    }, 3500);
+    }, 5000);
     return () => clearInterval(interval);
-  }, []);
+  }, [isAuthenticated, pathname]);
 
-  // Al montar: verifica la sesión guardada y la disponibilidad del backend
+  // Al montar: verifica la sesión guardada y carga los datos del servidor.
   useEffect(() => {
     if (isAuthenticated) {
-      verifySession().then(() => checkBackend());
+      void verifySession().then(async () => {
+        await fetchProducts();
+        if (localStorage.getItem('admin_token')) {
+          await Promise.all([fetchOrders(), loadAdminRecords()]);
+        }
+      });
     } else {
-      checkBackend();
+      void fetchProducts();
     }
   }, []);
 
@@ -402,28 +362,17 @@ export function AdminProvider({ children }: { children: ReactNode }) {
     }
   }
 
-  async function checkBackend() {
-    try {
-      const response = await fetch(`${API_URL}/health`);
-      if (response.ok) {
-        setIsBackendAvailable(true);
-        await Promise.all([fetchOrders(), fetchProducts()]);
-      } else {
-        setIsBackendAvailable(false);
-      }
-    } catch {
-      setIsBackendAvailable(false);
-    }
-  }
-
   async function fetchOrders() {
     try {
       const data = await apiCall<{ data: Order[] }>('/orders');
-      if (Array.isArray(data?.data)) {
-        setOrders(data.data);
-      }
-    } catch {
-      // Mantiene pedidos locales sin sobreescribir eliminaciones
+      if (!Array.isArray(data?.data)) throw new Error('Respuesta de pedidos inválida');
+      setOrders(data.data);
+      setOrdersError('');
+      setLastSync(new Date());
+      setSyncOnline(true);
+    } catch (error) {
+      setSyncOnline(false);
+      setOrdersError(error instanceof Error ? error.message : 'No se pudieron cargar los pedidos');
     }
   }
 
@@ -434,8 +383,26 @@ export function AdminProvider({ children }: { children: ReactNode }) {
       setProductList(data.data);
       setProductsError('');
     } catch (error) {
-      setProductList([]);
       setProductsError(error instanceof Error ? error.message : 'No se pudo cargar el catálogo');
+    }
+  }
+
+  async function loadAdminRecords() {
+    try {
+      const [customerResult, couponResult, reviewResult] = await Promise.all([
+        apiCall<{ data: Customer[] }>('/admin-records/customer'),
+        apiCall<{ data: Coupon[] }>('/admin-records/coupon'),
+        apiCall<{ data: Review[] }>('/admin-records/review'),
+      ]);
+      setCustomers(customerResult.data);
+      setCoupons(couponResult.data);
+      setReviewList(reviewResult.data);
+      setAdminRecordsError('');
+      setLastSync(new Date());
+      setSyncOnline(true);
+    } catch (error) {
+      setSyncOnline(false);
+      setAdminRecordsError(error instanceof Error ? error.message : 'No se pudieron cargar los datos del panel');
     }
   }
 
@@ -446,7 +413,10 @@ export function AdminProvider({ children }: { children: ReactNode }) {
     return () => window.clearInterval(timer);
   }, []);
 
-  const login = () => setIsAuthenticated(true);
+  const login = () => {
+    setIsAuthenticated(true);
+    void Promise.all([fetchOrders(), loadAdminRecords()]);
+  };
   const logout = () => {
     setIsAuthenticated(false);
     localStorage.removeItem('admin_token');
@@ -461,23 +431,13 @@ export function AdminProvider({ children }: { children: ReactNode }) {
       if (s.adminPass !== undefined && s.adminPass !== settings.adminPass) {
         throw new Error('La contraseña se gestiona desde Administradores.');
       }
-      // Actualiza inmediatamente el estado y localStorage
-      const updated: StoreSettings = { ...settings, ...s };
-      setSettings(updated);
-
       const patch = Object.fromEntries(Object.entries(s).filter(([key]) =>
         !['apiKey', 'adminUser', 'adminPass'].includes(key)));
-
-      try {
-        const result = await apiCall<{ data: Partial<StoreSettings> }>('/settings', {
-          method: 'PATCH', body: JSON.stringify(patch),
-        });
-        if (result.data && Object.keys(result.data).length > 0) {
-          setSettings(prev => ({ ...prev, ...result.data }));
-        }
-      } catch (apiErr) {
-        console.warn('Ajustes guardados localmente (sin conexión con el backend):', apiErr);
-      }
+      const result = await apiCall<{ data: Partial<StoreSettings> }>('/settings', {
+        method: 'PATCH', body: JSON.stringify(patch),
+      });
+      if (!result.data) throw new Error('Respuesta de configuración inválida');
+      setSettings(prev => ({ ...prev, ...result.data }));
       return true;
     } catch (error) {
       setSettingsError(`No se guardaron los cambios: ${error instanceof Error ? error.message : 'sin conexión con el servidor'}`);
@@ -495,45 +455,25 @@ export function AdminProvider({ children }: { children: ReactNode }) {
       if (data?.data && Array.isArray(data.data)) {
         setAdministrators(data.data);
       }
-    } catch {
-      // Mantiene administradores locales
+    } catch (error) {
+      setAdministrators([]);
+      throw error;
     }
   };
 
   const addAdministrator = async (data: { name: string; username: string; email: string; password: string; role: Administrator['role'] }) => {
-    const newAdmin: Administrator = {
-      id: Date.now(),
-      name: data.name,
-      username: data.username,
-      email: data.email || null,
-      role: data.role,
-      isActive: true,
-      createdAt: new Date().toISOString(),
-    };
-    try {
-      await apiCall('/administrators', { method: 'POST', body: JSON.stringify(data) });
-      await loadAdministrators();
-    } catch {
-      setAdministrators(prev => [newAdmin, ...prev]);
-    }
+    await apiCall('/administrators', { method: 'POST', body: JSON.stringify(data) });
+    await loadAdministrators();
   };
 
   const updateAdministrator = async (id: number, data: { name: string; email: string; password?: string; role: Administrator['role']; isActive: boolean }) => {
-    try {
-      await apiCall(`/administrators/${id}`, { method: 'PUT', body: JSON.stringify(data) });
-      await loadAdministrators();
-    } catch {
-      setAdministrators(prev => prev.map(a => a.id === id ? { ...a, name: data.name, email: data.email || null, role: data.role, isActive: data.isActive } : a));
-    }
+    await apiCall(`/administrators/${id}`, { method: 'PUT', body: JSON.stringify(data) });
+    await loadAdministrators();
   };
 
   const deleteAdministrator = async (id: number) => {
-    try {
-      await apiCall(`/administrators/${id}`, { method: 'DELETE' });
-      await loadAdministrators();
-    } catch {
-      setAdministrators(prev => prev.filter(a => a.id !== id));
-    }
+    await apiCall(`/administrators/${id}`, { method: 'DELETE' });
+    await loadAdministrators();
   };
 
   const addProduct = async (p: Omit<Product, 'id'>): Promise<void> => {
@@ -559,137 +499,104 @@ export function AdminProvider({ children }: { children: ReactNode }) {
   const addCategory = (name: string) => saveSettings({ categories: [...categoryList, name] });
   const deleteCategory = (name: string) => saveSettings({ categories: categoryList.filter(c => c !== name) });
 
-  // Orders — CRUD en tiempo real con sincronización local, backend y BroadcastChannel
+  // Orders — server is the source of truth for every mutation.
   const addOrder = async (o: Omit<Order, 'id'> & { id?: string }): Promise<string> => {
     const id = o.id ?? `TR-${Date.now().toString().slice(-6)}`;
     const order: Order = { ...o, id };
-
-    // 1. Actualización local inmediata
-    setOrders(prev => [order, ...prev.filter(x => x.id !== id)]);
-
-    // 2. Transmisión multi-pestaña instantánea
-    try {
-      ordersChannel.current?.postMessage({ type: 'NEW_ORDER', order });
-    } catch {}
-
-    // 3. Persistencia en backend (público para clientes de la tienda)
-    try {
-      await fetch(`${API_URL}/orders`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(order),
-      });
-    } catch (err) {
-      console.warn('Pedido guardado localmente (servidor no disponible):', err);
-    }
-
+    const result = await apiCall<{ data: Order }>('/orders', { method: 'POST', body: JSON.stringify(order) });
+    setOrders(prev => [result.data, ...prev.filter(x => x.id !== id)]);
+    ordersChannel.current?.postMessage({ type: 'NEW_ORDER', order: result.data });
     return id;
   };
 
   const updateOrder = async (o: Order): Promise<void> => {
-    setOrders(prev => prev.map(x => x.id === o.id ? o : x));
-    try {
-      ordersChannel.current?.postMessage({ type: 'ORDER_UPDATED', order: o });
-    } catch {}
-
-    if (isBackendAvailable) {
-      try {
-        await apiCall(`/orders/${o.id}`, {
-          method: 'PUT',
-          body: JSON.stringify(o),
-        });
-      } catch {}
-    }
+    const result = await apiCall<{ data: Order }>(`/orders/${o.id}`, { method: 'PUT', body: JSON.stringify(o) });
+    setOrders(prev => prev.map(x => x.id === o.id ? result.data : x));
+    ordersChannel.current?.postMessage({ type: 'ORDER_UPDATED', order: result.data });
   };
 
   const updateOrderStatus = async (id: string, status: Order['status']): Promise<void> => {
+    await apiCall(`/orders/${id}/status`, { method: 'PATCH', body: JSON.stringify({ status }) });
     setOrders(prev => prev.map(o => o.id === id ? { ...o, status } : o));
-    try {
-      ordersChannel.current?.postMessage({ type: 'ORDER_STATUS', id, status });
-    } catch {}
-
-    if (isBackendAvailable) {
-      try {
-        await apiCall(`/orders/${id}/status`, {
-          method: 'PATCH',
-          body: JSON.stringify({ status }),
-        });
-      } catch {}
-    }
+    ordersChannel.current?.postMessage({ type: 'ORDER_STATUS', id, status });
   };
 
   const deleteOrder = async (id: string): Promise<void> => {
-    // 1. Elimina de inmediato de la memoria y localStorage del navegador
+    await apiCall(`/orders/${id}`, { method: 'DELETE' });
     setOrders(prev => prev.filter(o => o.id !== id));
-
-    // 2. Transmite la eliminación a todas las pestañas abiertas
-    try {
-      ordersChannel.current?.postMessage({ type: 'ORDER_DELETED', id });
-    } catch {}
-
-    // 3. Elimina definitivamente del backend
-    try {
-      await apiCall(`/orders/${id}`, { method: 'DELETE' });
-    } catch (err) {
-      console.warn('Eliminado localmente:', err);
-    }
+    ordersChannel.current?.postMessage({ type: 'ORDER_DELETED', id });
   };
 
   const loadOrders = async (): Promise<void> => {
-    if (isBackendAvailable) {
-      await fetchOrders();
-    }
+    await fetchOrders();
   };
 
-  // Customers
-  const addCustomer    = (c: Omit<Customer, 'id'>) => setCustomers(prev => [...prev, { ...c, id: Date.now() }]);
-  const updateCustomer = (c: Customer)              => setCustomers(prev => prev.map(x => x.id === c.id ? c : x));
-  const deleteCustomer = (id: number)               => setCustomers(prev => prev.filter(x => x.id !== id));
-
-  // Reviews
-  const deleteReview  = (id: number) => setReviewList(prev => prev.filter(r => r.id !== id));
-  const approveReview = (id: number) => setReviewList(prev => prev.map(r => r.id === id ? { ...r, approved: !((r as any).approved ?? true) } : r));
-
-  // Coupons
-  const addCoupon    = (c: Omit<Coupon, 'id'>) => setCoupons(prev => [...prev, { ...c, id: Date.now() }]);
-  const updateCoupon = (c: Coupon)              => setCoupons(prev => prev.map(x => x.id === c.id ? c : x));
-  const deleteCoupon = (id: number)             => setCoupons(prev => prev.filter(x => x.id !== id));
-
-  const applyCoupon = (code: string, total: number): { valid: boolean; discount: number; message: string } => {
-    const coupon = coupons.find(c => c.code.toUpperCase() === code.toUpperCase());
-    if (!coupon)          return { valid: false, discount: 0, message: 'Cupón no encontrado' };
-    if (!coupon.active)   return { valid: false, discount: 0, message: 'Este cupón no está activo' };
-    if (coupon.uses >= coupon.maxUses) return { valid: false, discount: 0, message: 'Cupón agotado' };
-    if (coupon.expiry && new Date(coupon.expiry) < new Date())
-      return { valid: false, discount: 0, message: 'Cupón expirado' };
-    if (total < coupon.minOrder)
-      return { valid: false, discount: 0, message: `Mínimo de compra: $${coupon.minOrder}` };
-    const discount = coupon.type === 'porcentaje'
-      ? Math.round((total * coupon.value / 100) * 100) / 100
-      : Math.min(coupon.value, total);
-    return { valid: true, discount, message: `¡Cupón aplicado! -$${discount.toFixed(2)}` };
+  const refreshAll = async (): Promise<void> => {
+    await Promise.all([fetchOrders(), loadAdminRecords(), fetchProducts()]);
   };
 
-  const incrementCouponUse = (code: string) =>
-    setCoupons(prev => prev.map(c => c.code.toUpperCase() === code.toUpperCase() ? { ...c, uses: c.uses + 1 } : c));
+  // Customers, coupons and reviews are persisted in MySQL.
+  const addCustomer = async (customer: Omit<Customer, 'id'>) => {
+    const result = await apiCall<{ data: Customer }>('/admin-records/customer', { method: 'POST', body: JSON.stringify(customer) });
+    setCustomers(prev => [result.data, ...prev]);
+  };
+  const updateCustomer = async (customer: Customer) => {
+    const result = await apiCall<{ data: Customer }>(`/admin-records/customer/${customer.id}`, { method: 'PUT', body: JSON.stringify(customer) });
+    setCustomers(prev => prev.map(item => item.id === customer.id ? result.data : item));
+  };
+  const deleteCustomer = async (id: number) => {
+    await apiCall(`/admin-records/customer/${id}`, { method: 'DELETE' });
+    setCustomers(prev => prev.filter(item => item.id !== id));
+  };
+
+  const deleteReview = async (id: number) => {
+    await apiCall(`/admin-records/review/${id}`, { method: 'DELETE' });
+    setReviewList(prev => prev.filter(item => item.id !== id));
+  };
+  const approveReview = async (id: number) => {
+    const review = reviewList.find(item => item.id === id);
+    if (!review) return;
+    const updated = { ...review, approved: !review.approved };
+    const result = await apiCall<{ data: Review }>(`/admin-records/review/${id}`, { method: 'PUT', body: JSON.stringify(updated) });
+    setReviewList(prev => prev.map(item => item.id === id ? result.data : item));
+  };
+
+  const addCoupon = async (coupon: Omit<Coupon, 'id'>) => {
+    const result = await apiCall<{ data: Coupon }>('/admin-records/coupon', { method: 'POST', body: JSON.stringify(coupon) });
+    setCoupons(prev => [result.data, ...prev]);
+  };
+  const updateCoupon = async (coupon: Coupon) => {
+    const result = await apiCall<{ data: Coupon }>(`/admin-records/coupon/${coupon.id}`, { method: 'PUT', body: JSON.stringify(coupon) });
+    setCoupons(prev => prev.map(item => item.id === coupon.id ? result.data : item));
+  };
+  const deleteCoupon = async (id: number) => {
+    await apiCall(`/admin-records/coupon/${id}`, { method: 'DELETE' });
+    setCoupons(prev => prev.filter(item => item.id !== id));
+  };
+
+  const applyCoupon = (code: string, total: number) =>
+    apiCall<{ valid: boolean; discount: number; message: string }>('/coupons/validate', {
+      method: 'POST', body: JSON.stringify({ code, subtotal: total }),
+    });
 
   return (
     <AdminContext.Provider value={{
       isAuthenticated, isVerifying, apiKey: localStorage.getItem('admin_token') ?? '', login, logout, settings, saveSettings,
       isSettingsLoading, isSavingSettings, settingsError,
       administrators, loadAdministrators, addAdministrator, updateAdministrator, deleteAdministrator,
-      products: productList, productsError, addProduct, updateProduct, deleteProduct,
+      products: productList, productsError, ordersError, adminRecordsError, lastSync, syncOnline, isDataLoading, refreshAll, addProduct, updateProduct, deleteProduct,
       categoryList, addCategory, deleteCategory,
       orders, addOrder, updateOrder, updateOrderStatus, deleteOrder, loadOrders,
       customers, addCustomer, updateCustomer, deleteCustomer,
       reviews: reviewList, deleteReview, approveReview,
-      coupons, addCoupon, updateCoupon, deleteCoupon, applyCoupon, incrementCouponUse,
+      coupons, addCoupon, updateCoupon, deleteCoupon, applyCoupon,
     }}>
       {children}
     </AdminContext.Provider>
   );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useAdmin() {
   const ctx = useContext(AdminContext);
   if (!ctx) throw new Error('useAdmin must be used within AdminProvider');

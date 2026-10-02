@@ -1,189 +1,121 @@
 import { useState } from 'react';
-import { Trash2, Search, X, Star, BadgeCheck, ThumbsUp, ThumbsDown } from 'lucide-react';
+import { BadgeCheck, Clock, MessageSquare, Star, ThumbsDown, ThumbsUp, Trash2 } from 'lucide-react';
 import { useAdmin } from '../../context/AdminContext';
+import { adminAlert } from '../../utils/adminAlerts';
+import { Badge, EmptyState, PageHeader, SearchInput, Segmented, StatCard } from '../../components/admin/AdminUI';
+import { initials } from '../../utils/adminFormat';
+
+type StatusFilter = 'all' | 'approved' | 'pending';
+type RatingFilter = '0' | '5' | '4' | '3' | '2' | '1';
+
+function Stars({ rating }: { rating: number }) {
+  return <span className="flex gap-0.5" aria-label={`${rating} de 5 estrellas`}>{[1, 2, 3, 4, 5].map(index => <Star key={index} className={`h-3.5 w-3.5 ${index <= rating ? 'fill-amber-400 text-amber-400' : 'fill-slate-200 text-slate-200'}`} />)}</span>;
+}
 
 export default function AdminReviews() {
   const { reviews, deleteReview, approveReview, products } = useAdmin();
   const [search, setSearch] = useState('');
-  const [filterRating, setFilterRating] = useState(0);
-  const [filterStatus, setFilterStatus] = useState<'all' | 'approved' | 'pending'>('all');
-  const [confirmDelete, setConfirmDelete] = useState<number | null>(null);
+  const [filterRating, setFilterRating] = useState<RatingFilter>('0');
+  const [filterStatus, setFilterStatus] = useState<StatusFilter>('all');
+  const [busy, setBusy] = useState<number | null>(null);
 
-  const filtered = reviews.filter(r => {
-    const product = products.find(p => p.id === r.productId);
-    const matchSearch =
-      r.author.toLowerCase().includes(search.toLowerCase()) ||
-      r.title.toLowerCase().includes(search.toLowerCase()) ||
-      (product?.name.toLowerCase().includes(search.toLowerCase()) ?? false);
-    const matchRating = filterRating === 0 || r.rating === filterRating;
-    const approved = r.approved ?? true;
+  const productById = new Map(products.map(product => [product.id, product]));
+  const isApproved = (approved?: boolean) => approved ?? true;
+  const approvedCount = reviews.filter(review => isApproved(review.approved)).length;
+  const pendingCount = reviews.length - approvedCount;
+  const average = reviews.length ? reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length : 0;
+
+  const term = search.trim().toLocaleLowerCase('es');
+  const filtered = reviews.filter(review => {
+    const product = productById.get(review.productId);
+    const matchSearch = !term || `${review.author} ${review.title} ${review.body} ${product?.name ?? ''}`.toLocaleLowerCase('es').includes(term);
+    const matchRating = filterRating === '0' || review.rating === Number(filterRating);
+    const approved = isApproved(review.approved);
     const matchStatus = filterStatus === 'all' || (filterStatus === 'approved' ? approved : !approved);
     return matchSearch && matchRating && matchStatus;
   });
 
+  const toggleApproval = async (id: number, approved: boolean) => {
+    setBusy(id);
+    try {
+      await approveReview(id);
+      void adminAlert.toast(approved ? 'Reseña ocultada de la tienda' : 'Reseña aprobada y publicada');
+    } catch (cause) {
+      void adminAlert.failure(cause, 'No se pudo actualizar la reseña');
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  const handleDelete = async (id: number, author: string) => {
+    if (!await adminAlert.confirmDelete('¿Eliminar reseña?', `La reseña de ${author} se eliminará y dejará de mostrarse en la tienda.`)) return;
+    try {
+      await deleteReview(id);
+      void adminAlert.success('Reseña eliminada');
+    } catch (cause) {
+      void adminAlert.failure(cause, 'No se pudo eliminar la reseña');
+    }
+  };
+
   return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">Reseñas y Valoraciones</h2>
-        <p className="text-slate-500 text-sm mt-0.5">
-          {reviews.length} opiniones registradas · {reviews.filter(r => r.approved !== false).length} aprobadas para mostrar en la tienda
-        </p>
+    <div className="space-y-5">
+      <PageHeader title="Reseñas" description="Modera las opiniones de los compradores antes de mostrarlas en la tienda." />
+
+      <section className="grid grid-cols-2 gap-3 xl:grid-cols-4">
+        <StatCard label="Reseñas" value={reviews.length} icon={MessageSquare} tone="blue" />
+        <StatCard label="Pendientes" value={pendingCount} icon={Clock} tone={pendingCount ? 'amber' : 'slate'} detail="Esperan moderación" />
+        <StatCard label="Aprobadas" value={approvedCount} icon={ThumbsUp} tone="green" />
+        <StatCard label="Calificación media" value={average ? average.toFixed(1) : '—'} icon={Star} tone="violet" detail={average ? <Stars rating={Math.round(average)} /> : 'Sin calificaciones'} />
+      </section>
+
+      <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
+        <div className="flex flex-wrap gap-2">
+          <Segmented label="Filtrar por estado" value={filterStatus} onChange={setFilterStatus} options={[
+            { value: 'all', label: 'Todas', count: reviews.length },
+            { value: 'pending', label: 'Pendientes', count: pendingCount },
+            { value: 'approved', label: 'Aprobadas', count: approvedCount },
+          ]} />
+          <Segmented label="Filtrar por estrellas" value={filterRating} onChange={setFilterRating} options={[
+            { value: '0', label: 'Todas ★' }, ...(['5', '4', '3', '2', '1'] as const).map(value => ({ value, label: `${value} ★` })),
+          ]} />
+        </div>
+        <SearchInput value={search} onChange={setSearch} placeholder="Buscar por cliente, título o producto" className="xl:w-80" />
       </div>
 
-      {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
-        <div className="relative w-full sm:w-80">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-          <input
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            placeholder="Buscar por cliente, título o producto..."
-            className="w-full pl-10 pr-10 py-2.5 bg-white border border-slate-200 rounded-xl text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 shadow-xs"
-          />
-          {search && (
-            <button onClick={() => setSearch('')} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
-              <X className="w-4 h-4" />
-            </button>
-          )}
-        </div>
-
-        <div className="flex gap-2 flex-wrap items-center">
-          {(['all', 'approved', 'pending'] as const).map(s => {
-            const isActive = filterStatus === s;
+      {filtered.length === 0 ? <div className="admin-card"><EmptyState icon={Star} title={reviews.length ? 'Sin resultados' : 'Aún no hay reseñas'} text={reviews.length ? 'No hay reseñas con los filtros seleccionados.' : 'Las opiniones de los clientes aparecerán aquí.'} /></div> : (
+        <div className="grid gap-3 lg:grid-cols-2">
+          {filtered.map(review => {
+            const product = productById.get(review.productId);
+            const approved = isApproved(review.approved);
             return (
-              <button
-                key={s}
-                onClick={() => setFilterStatus(s)}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all ${
-                  isActive
-                    ? 'gradient-brand text-white border-transparent shadow-xs'
-                    : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
-                }`}
-              >
-                {s === 'all' ? 'Todas' : s === 'approved' ? 'Aprobadas' : 'Pendientes'}
-              </button>
+              <article key={review.id} className={`admin-card flex flex-col p-5 ${approved ? '' : '!border-amber-300 ring-1 ring-amber-100'}`}>
+                <div className="flex items-start gap-3">
+                  <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-gradient-to-br from-[#0052cc] to-[#3b82f6] text-xs font-bold text-white">{review.avatar || initials(review.author)}</span>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                      <span className="text-sm font-bold text-slate-900">{review.author}</span>
+                      {review.verified && <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700"><BadgeCheck className="h-3.5 w-3.5" /> Compra verificada</span>}
+                    </div>
+                    <div className="mt-1 flex items-center gap-2"><Stars rating={review.rating} /><span className="text-[11px] text-slate-400">{review.date}</span></div>
+                  </div>
+                  <Badge tone={approved ? 'green' : 'amber'}>{approved ? 'Publicada' : 'Pendiente'}</Badge>
+                </div>
+                <h4 className="mt-3 text-sm font-bold text-slate-900">{review.title}</h4>
+                <p className="mt-1 line-clamp-3 text-[13px] leading-relaxed text-slate-600">{review.body}</p>
+                <div className="mt-4 flex items-center justify-between gap-3 border-t border-slate-100 pt-3">
+                  {product ? <span className="flex min-w-0 items-center gap-2"><img src={product.image} alt="" className="h-7 w-7 rounded border border-slate-200 bg-white object-contain p-0.5" /><span className="truncate text-xs font-medium text-slate-500">{product.name}</span></span> : <span className="text-xs text-slate-400">Producto no disponible</span>}
+                  <div className="flex shrink-0 gap-1.5">
+                    <button onClick={() => void toggleApproval(review.id, approved)} disabled={busy === review.id} className={`admin-btn admin-btn-sm ${approved ? 'admin-btn-secondary' : 'admin-btn-primary'}`}>
+                      {approved ? <><ThumbsDown className="h-3.5 w-3.5" /> Ocultar</> : <><ThumbsUp className="h-3.5 w-3.5" /> Aprobar</>}
+                    </button>
+                    <button onClick={() => void handleDelete(review.id, review.author)} className="admin-action admin-action-danger" aria-label={`Eliminar reseña de ${review.author}`} title="Eliminar"><Trash2 className="h-4 w-4" /></button>
+                  </div>
+                </div>
+              </article>
             );
           })}
-          <div className="h-4 w-px bg-slate-200 mx-1 hidden sm:block" />
-          {[5, 4, 3, 2, 1].map(r => (
-            <button
-              key={r}
-              onClick={() => setFilterRating(filterRating === r ? 0 : r)}
-              className={`px-2.5 py-1.5 rounded-xl text-xs font-bold border transition-all ${
-                filterRating === r
-                  ? 'bg-amber-500 text-white border-transparent'
-                  : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
-              }`}
-            >
-              ★ {r}
-            </button>
-          ))}
         </div>
-      </div>
-
-      {/* Review cards */}
-      <div className="space-y-3">
-        {filtered.map(review => {
-          const product = products.find(p => p.id === review.productId);
-          const approved = review.approved ?? true;
-          return (
-            <div
-              key={review.id}
-              className={`bg-white rounded-2xl p-4 sm:p-5 border shadow-xs transition-all ${
-                approved ? 'border-slate-200' : 'border-amber-300 bg-amber-50/20'
-              }`}
-            >
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex items-start gap-3.5 flex-1 min-w-0">
-                  <div className="w-10 h-10 rounded-full gradient-brand flex items-center justify-center text-white text-xs font-bold shrink-0 shadow-xs">
-                    {review.avatar}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex flex-wrap items-center gap-2 mb-1">
-                      <span className="text-slate-900 font-bold text-sm">{review.author}</span>
-                      {review.verified && (
-                        <span className="flex items-center gap-1 text-[11px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">
-                          <BadgeCheck className="w-3.5 h-3.5" /> Compra Verificada
-                        </span>
-                      )}
-                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
-                        approved ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-amber-50 text-amber-700 border-amber-200'
-                      }`}>
-                        {approved ? 'Aprobada' : 'Pendiente de moderación'}
-                      </span>
-                      <span className="text-slate-400 text-xs">{review.date}</span>
-                    </div>
-
-                    <div className="flex gap-0.5 mb-2">
-                      {[1, 2, 3, 4, 5].map(i => (
-                        <Star
-                          key={i}
-                          className={`w-3.5 h-3.5 ${i <= review.rating ? 'text-amber-400 fill-amber-400' : 'text-slate-200 fill-slate-200'}`}
-                        />
-                      ))}
-                    </div>
-
-                    <p className="text-slate-900 text-sm font-bold mb-1">{review.title}</p>
-                    <p className="text-slate-600 text-xs leading-relaxed line-clamp-2">{review.body}</p>
-
-                    {product && (
-                      <div className="flex items-center gap-2 mt-3 pt-2.5 border-t border-slate-100">
-                        <img src={product.image} alt={product.name} className="w-6 h-6 rounded object-contain bg-slate-50 border border-slate-100 p-0.5" />
-                        <span className="text-slate-500 text-xs font-semibold truncate">{product.name}</span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                <div className="flex flex-col gap-1.5 shrink-0">
-                  <button
-                    onClick={() => approveReview(review.id)}
-                    className={`p-2 rounded-xl border transition-colors ${
-                      approved
-                        ? 'border-slate-200 text-slate-500 hover:text-amber-600 hover:bg-amber-50'
-                        : 'border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
-                    }`}
-                    title={approved ? 'Ocultar / Desaprobar' : 'Aprobar reseña'}
-                  >
-                    {approved ? <ThumbsDown className="w-4 h-4" /> : <ThumbsUp className="w-4 h-4" />}
-                  </button>
-                  {confirmDelete === review.id ? (
-                    <div className="flex items-center gap-1 bg-rose-50 border border-rose-200 rounded-lg p-1">
-                      <button
-                        onClick={() => { deleteReview(review.id); setConfirmDelete(null); }}
-                        className="text-xs bg-rose-600 text-white px-1.5 py-0.5 rounded font-bold hover:bg-rose-700"
-                      >
-                        Sí
-                      </button>
-                      <button
-                        onClick={() => setConfirmDelete(null)}
-                        className="text-xs text-slate-500 hover:text-slate-700 px-1"
-                      >
-                        No
-                      </button>
-                    </div>
-                  ) : (
-                    <button
-                      onClick={() => setConfirmDelete(review.id)}
-                      className="p-2 rounded-xl text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
-                      title="Eliminar reseña"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  )}
-                </div>
-              </div>
-            </div>
-          );
-        })}
-
-        {filtered.length === 0 && (
-          <div className="text-center py-16 bg-white border border-slate-200 rounded-2xl">
-            <Star className="w-10 h-10 text-slate-300 mx-auto mb-2" />
-            <p className="text-slate-500 text-sm">No se encontraron reseñas con los filtros seleccionados.</p>
-          </div>
-        )}
-      </div>
+      )}
     </div>
   );
 }

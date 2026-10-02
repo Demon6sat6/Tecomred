@@ -5,6 +5,7 @@ import {
   type Order,
 } from "../types/order.js";
 import { ordersRepository } from "../data/ordersRepository.js";
+import { InvalidCouponError } from "../data/ordersRepository.js";
 
 export const ordersController = {
   list: async (_req: Request, res: Response) => {
@@ -33,6 +34,7 @@ export const ordersController = {
       await ordersRepository.createOrder(order);
       return res.status(201).json({ data: order });
     } catch (err) {
+      if (err instanceof InvalidCouponError) return res.status(400).json({ error: err.message });
       return res.status(500).json({ error: "Error al crear orden" });
     }
   },

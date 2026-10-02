@@ -1,78 +1,49 @@
 import { Link } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
+import LegalPage, { type LegalSection } from '../components/LegalPage';
+
+const sections: LegalSection[] = [
+  {
+    id: 'alcance',
+    title: 'Alcance de estas condiciones',
+    content: <p>Estas condiciones explican cómo se usa la tienda en línea de SiscomRed y cómo se gestionan las solicitudes de pedido. Puedes navegar y consultar el catálogo sin crear una cuenta ni asumir una obligación de compra.</p>,
+  },
+  {
+    id: 'catalogo',
+    title: 'Catálogo, disponibilidad y precios',
+    content: <><p>Mostramos productos, características y precios para ayudarte a preparar tu solicitud. La disponibilidad, el precio final, los descuentos aplicables y cualquier costo de entrega se confirman contigo antes de cerrar la compra.</p><p>Si algún dato del catálogo cambia o contiene un error, te informaremos durante esa coordinación para que decidas si deseas continuar.</p></>,
+  },
+  {
+    id: 'pedidos',
+    title: 'Cómo funciona un pedido',
+    content: <><p>Al finalizar el formulario, registramos una solicitud con los productos y datos de contacto que proporcionaste. El sitio prepara un mensaje de WhatsApp con el detalle para coordinar la compra con la tienda.</p><p>Revisa el mensaje antes de enviarlo. Registrar una solicitud no confirma por sí solo la disponibilidad, la fecha de entrega ni un cobro.</p></>,
+  },
+  {
+    id: 'pago-entrega',
+    title: 'Pago y entrega',
+    content: <p>El medio de pago, el importe definitivo, la forma de envío o recojo y la fecha estimada de entrega se acuerdan directamente durante la atención del pedido. El flujo actual del sitio no solicita datos de tarjeta ni procesa pagos en línea.</p>,
+  },
+  {
+    id: 'cambios',
+    title: 'Cambios, cancelaciones y devoluciones',
+    content: <p>Si necesitas modificar o cancelar una solicitud, o consultar una devolución, <Link to="/contacto">contáctanos</Link> e indica el número del pedido si lo tienes. Revisaremos el estado de la operación y las condiciones aplicables. Tus derechos como consumidor se mantienen conforme a la normativa vigente.</p>,
+  },
+  {
+    id: 'garantias',
+    title: 'Garantías y atención posterior',
+    content: <p>La cobertura y el procedimiento de garantía dependen del producto y de la información que se confirme al momento de la compra. Si aparece una falla o tienes una consulta posterior, comunícate con la tienda con los datos de tu pedido y el comprobante disponible.</p>,
+  },
+  {
+    id: 'cuenta',
+    title: 'Cuenta y uso del sitio',
+    content: <p>Si creas una cuenta, utiliza datos correctos y cuida tus credenciales. No uses el sitio para suplantar a otras personas, interferir con su funcionamiento o enviar contenido ilícito mediante los formularios.</p>,
+  },
+  {
+    id: 'contacto',
+    title: 'Consultas y reclamos',
+    content: <p>Para preguntas sobre una compra, estas condiciones o una incidencia, utiliza el <Link to="/contacto">formulario de contacto</Link>. Cuéntanos qué ocurrió y, si corresponde, incluye el número de pedido para poder ubicar tu solicitud.</p>,
+  },
+];
 
 export default function Terminos() {
-  return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
-      <Link to="/" className="inline-flex items-center gap-2 text-violet-600 hover:text-violet-700 font-medium text-sm mb-8 transition-colors">
-        <ArrowLeft className="w-4 h-4" /> Volver al inicio
-      </Link>
-
-      <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 mb-2">Términos y Condiciones</h1>
-      <p className="text-slate-500 text-sm mb-10">Última actualización: mayo 2026</p>
-
-      <div className="max-w-none space-y-8 text-slate-700 text-sm leading-relaxed">
-
-        <section className="bg-white border border-slate-200 rounded-2xl p-6 sm:p-8 shadow-xs">
-          <h2 className="text-slate-900 font-bold text-lg mb-4">1. Aceptación de los términos</h2>
-          <p>Al acceder y utilizar el sitio web de SiscomRed (<strong>siscomred.pe</strong>), usted acepta estar sujeto a estos Términos y Condiciones. Si no está de acuerdo con alguna parte de estos términos, no deberá utilizar nuestros servicios.</p>
-        </section>
-
-        <section className="bg-white border border-slate-200 rounded-2xl p-6 sm:p-8 shadow-xs">
-          <h2 className="text-slate-900 font-bold text-lg mb-4">2. Descripción del servicio</h2>
-          <p>SiscomRed es una tienda en línea especializada en la venta de sistemas, equipos de redes, componentes de cómputo y tecnología profesional, con operaciones en el Perú. Nos reservamos el derecho de modificar o discontinuar el servicio en cualquier momento.</p>
-        </section>
-
-        <section className="bg-white border border-slate-200 rounded-2xl p-6 sm:p-8 shadow-xs">
-          <h2 className="text-slate-900 font-bold text-lg mb-4">3. Precios y pagos</h2>
-          <ul className="list-disc list-inside space-y-2">
-            <li>Todos los precios están expresados en Soles Peruanos (PEN) e incluyen IGV.</li>
-            <li>Los precios pueden cambiar sin previo aviso hasta el momento de confirmar el pedido.</li>
-            <li>Aceptamos pagos con tarjeta de crédito/débito, transferencia bancaria y efectivo contra entrega.</li>
-            <li>El pago debe completarse antes del despacho del pedido.</li>
-          </ul>
-        </section>
-
-        <section className="bg-white border border-slate-200 rounded-2xl p-6 sm:p-8 shadow-xs">
-          <h2 className="text-slate-900 font-bold text-lg mb-4">4. Envíos y entregas</h2>
-          <ul className="list-disc list-inside space-y-2">
-            <li>Realizamos envíos a todo el Perú mediante empresas de courier de confianza.</li>
-            <li>El tiempo de entrega estimado es de 2 a 5 días hábiles para Lima y 3 a 7 días para provincias.</li>
-            <li>Los pedidos superiores a S/ 300 tienen envío gratis a Lima Metropolitana.</li>
-            <li>No somos responsables por retrasos ocasionados por la empresa de courier.</li>
-          </ul>
-        </section>
-
-        <section className="bg-white border border-slate-200 rounded-2xl p-6 sm:p-8 shadow-xs">
-          <h2 className="text-slate-900 font-bold text-lg mb-4">5. Devoluciones y garantías</h2>
-          <ul className="list-disc list-inside space-y-2">
-            <li>Todos los productos cuentan con garantía del fabricante.</li>
-            <li>Aceptamos devoluciones dentro de los 7 días calendario de recibido el producto, siempre que esté en su embalaje original y sin uso.</li>
-            <li>Productos dañados por mal uso no aplican para devolución.</li>
-            <li>Para iniciar una devolución, contáctanos a través del formulario de contacto.</li>
-          </ul>
-        </section>
-
-        <section className="bg-white border border-slate-200 rounded-2xl p-6 sm:p-8 shadow-xs">
-          <h2 className="text-slate-900 font-bold text-lg mb-4">6. Limitación de responsabilidad</h2>
-          <p>SiscomRed no será responsable por daños indirectos, incidentales o consecuentes que resulten del uso o la imposibilidad de usar nuestros productos o servicios. Nuestra responsabilidad máxima se limita al valor del producto adquirido.</p>
-        </section>
-
-        <section className="bg-white border border-slate-200 rounded-2xl p-6 sm:p-8 shadow-xs">
-          <h2 className="text-slate-900 font-bold text-lg mb-4">7. Propiedad intelectual</h2>
-          <p>Todo el contenido del sitio web, incluyendo textos, imágenes, logotipos y diseños, son propiedad de SiscomRed y están protegidos por las leyes de propiedad intelectual del Perú. No está permitida su reproducción sin autorización expresa.</p>
-        </section>
-
-        <section className="bg-white border border-slate-200 rounded-2xl p-6 sm:p-8 shadow-xs">
-          <h2 className="text-slate-900 font-bold text-lg mb-4">8. Ley aplicable</h2>
-          <p>Estos términos se rigen por las leyes de la República del Perú. Cualquier disputa será sometida a la jurisdicción de los tribunales de Lima, Perú.</p>
-        </section>
-
-        <section className="bg-white border border-slate-200 rounded-2xl p-6 sm:p-8 shadow-xs">
-          <h2 className="text-slate-900 font-bold text-lg mb-4">9. Contacto</h2>
-          <p>Para consultas sobre estos términos, comuníquese con nosotros a través de nuestro <Link to="/contacto" className="text-violet-600 hover:text-violet-700 font-medium transition-colors">formulario de contacto</Link>.</p>
-        </section>
-      </div>
-    </div>
-  );
+  return <LegalPage eyebrow="Siscomred · Información de compra" title="Términos y condiciones" introduction="Una explicación clara de cómo funciona el catálogo, cómo se registra tu solicitud y qué se coordina antes de completar una compra." sections={sections} related={{ to: '/privacidad', label: 'Leer la política de privacidad' }} />;
 }

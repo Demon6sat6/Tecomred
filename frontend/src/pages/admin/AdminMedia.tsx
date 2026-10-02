@@ -1,6 +1,8 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
-import { Upload, Trash2, Copy, Check, Search, X, ImageIcon, Loader2 } from 'lucide-react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { Check, Copy, HardDrive, ImageIcon, Loader2, Pencil, Trash2, Upload, UploadCloud } from 'lucide-react';
 import { useAdmin } from '../../context/AdminContext';
+import { adminAlert } from '../../utils/adminAlerts';
+import { EmptyState, PageHeader, SearchInput, StatCard } from '../../components/admin/AdminUI';
 
 interface MediaFile {
   id: number;
@@ -13,7 +15,10 @@ interface MediaFile {
   created_at: string;
 }
 
-const API_URL = '/api';
+const API_URL = (import.meta.env.VITE_API_URL as string | undefined) || '/api';
+const MAX_MB = 10;
+const MAX_FILES = 10;
+const IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/svg+xml', 'image/avif'];
 
 function formatBytes(bytes: number) {
   if (bytes < 1024) return `${bytes} B`;
@@ -28,255 +33,169 @@ export default function AdminMedia() {
   const [uploading, setUploading] = useState(false);
   const [search, setSearch] = useState('');
   const [copiedId, setCopiedId] = useState<number | null>(null);
-  const [deleteId, setDeleteId] = useState<number | null>(null);
   const [dragOver, setDragOver] = useState(false);
-  const [uploadError, setUploadError] = useState('');
+  const [loadError, setLoadError] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const headers = { Authorization: `Bearer ${apiKey}` };
 
   const fetchFiles = useCallback(async () => {
     try {
-      const res = await fetch(`${API_URL}/media`, { headers });
-      if (!res.ok) throw new Error('Error al cargar archivos');
+      const res = await fetch(`${API_URL}/media`, { headers: { Authorization: `Bearer ${apiKey}` }, cache: 'no-store' });
+      if (!res.ok) throw new Error('No se pudo cargar la biblioteca de medios');
       const json = await res.json();
       setFiles(json.data ?? []);
-    } catch {
-      setFiles([]);
+      setLoadError('');
+    } catch (cause) {
+      setLoadError(cause instanceof Error ? cause.message : 'No se pudo cargar la biblioteca de medios');
     } finally {
       setLoading(false);
     }
   }, [apiKey]);
 
-  useEffect(() => { fetchFiles(); }, [fetchFiles]);
+  useEffect(() => {
+    // Sincroniza con el servidor (sistema externo); el estado se actualiza tras la respuesta.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    void fetchFiles();
+    const timer = window.setInterval(() => { if (document.visibilityState === 'visible') void fetchFiles(); }, 10000);
+    return () => window.clearInterval(timer);
+  }, [fetchFiles]);
 
   const uploadFiles = async (selected: FileList | File[]) => {
     const fileArr = Array.from(selected);
-    if (fileArr.length === 0) return;
+    if (!fileArr.length) return;
+    const problems = [
+      ...(fileArr.length > MAX_FILES ? [`Puedes subir hasta ${MAX_FILES} archivos a la vez`] : []),
+      ...fileArr.filter(file => !IMAGE_TYPES.includes(file.type)).map(file => `${file.name}: formato no permitido`),
+      ...fileArr.filter(file => file.size > MAX_MB * 1024 * 1024).map(file => `${file.name}: supera ${MAX_MB} MB`),
+    ];
+    if (problems.length) { void adminAlert.validation(problems); return; }
 
-    const MAX_MB = 10;
-    const oversized = fileArr.filter(f => f.size > MAX_MB * 1024 * 1024);
-    if (oversized.length > 0) {
-      setUploadError(`Archivos muy grandes (máx ${MAX_MB} MB): ${oversized.map(f => f.name).join(', ')}`);
-      return;
-    }
-
-    setUploadError('');
     setUploading(true);
     const form = new FormData();
-    fileArr.forEach(f => form.append('files', f));
-
+    fileArr.forEach(file => form.append('files', file));
     try {
-      const res = await fetch(`${API_URL}/media/upload`, { method: 'POST', headers, body: form });
+      const res = await fetch(`${API_URL}/media/upload`, { method: 'POST', headers: { Authorization: `Bearer ${apiKey}` }, body: form });
       if (!res.ok) {
-        const err = await res.json();
+        const err = await res.json().catch(() => ({}));
         throw new Error(err.error || 'Error al subir archivos');
       }
       await fetchFiles();
-    } catch (err: any) {
-      setUploadError(err.message || 'Error al subir archivos');
+      void adminAlert.success(fileArr.length === 1 ? 'Imagen subida' : `${fileArr.length} imágenes subidas`);
+    } catch (cause) {
+      void adminAlert.failure(cause, 'Error al subir archivos');
     } finally {
       setUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
     }
   };
 
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
+  const handleDrop = (event: React.DragEvent) => {
+    event.preventDefault();
     setDragOver(false);
-    uploadFiles(e.dataTransfer.files);
+    void uploadFiles(event.dataTransfer.files);
   };
 
-  const copyUrl = (file: MediaFile) => {
-    navigator.clipboard.writeText(file.url).then(() => {
-      setCopiedId(file.id);
-      setTimeout(() => setCopiedId(null), 1800);
-    });
-  };
-
-  const confirmDelete = async () => {
-    if (deleteId === null) return;
+  const copyUrl = async (file: MediaFile) => {
     try {
-      await fetch(`${API_URL}/media/${deleteId}`, { method: 'DELETE', headers });
-      setFiles(prev => prev.filter(f => f.id !== deleteId));
-    } finally {
-      setDeleteId(null);
+      await navigator.clipboard.writeText(new URL(file.url, window.location.origin).href);
+      setCopiedId(file.id);
+      window.setTimeout(() => setCopiedId(null), 1800);
+      void adminAlert.toast('URL copiada');
+    } catch {
+      void adminAlert.error('El navegador no permitió copiar al portapapeles.');
     }
   };
 
-  const filtered = files.filter(f =>
-    (f.original_name || f.filename).toLowerCase().includes(search.toLowerCase()) ||
-    (f.alt_text || '').toLowerCase().includes(search.toLowerCase())
-  );
+  const editAlt = async (file: MediaFile) => {
+    const value = await adminAlert.prompt('Texto alternativo', {
+      value: file.alt_text, label: 'Describe la imagen para accesibilidad y SEO', placeholder: 'Ej: Switch Cisco de 24 puertos', maxLength: 255,
+      validator: text => text.trim().length > 255 ? 'Máximo 255 caracteres' : /[<>]/.test(text) ? 'No uses los caracteres < o >' : null,
+    });
+    if (value === null) return;
+    try {
+      const res = await fetch(`${API_URL}/media/${file.id}/alt`, { method: 'PATCH', headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ alt_text: value }) });
+      if (!res.ok) throw new Error('No se pudo actualizar el texto alternativo');
+      setFiles(current => current.map(item => item.id === file.id ? { ...item, alt_text: value } : item));
+      void adminAlert.toast('Texto alternativo guardado');
+    } catch (cause) {
+      void adminAlert.failure(cause, 'No se pudo actualizar el texto alternativo');
+    }
+  };
+
+  const confirmDelete = async (file: MediaFile) => {
+    if (!await adminAlert.confirmDelete('¿Eliminar imagen?', `${file.original_name || file.filename} se eliminará del almacenamiento. Los productos que la usen dejarán de mostrarla.`)) return;
+    try {
+      const response = await fetch(`${API_URL}/media/${file.id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${apiKey}` } });
+      if (!response.ok) throw new Error('No se pudo eliminar el archivo');
+      setFiles(current => current.filter(item => item.id !== file.id));
+      void adminAlert.success('Imagen eliminada');
+    } catch (cause) {
+      void adminAlert.failure(cause, 'No se pudo eliminar el archivo');
+    }
+  };
+
+  const term = search.trim().toLocaleLowerCase('es');
+  const filtered = files.filter(file => `${file.original_name || file.filename} ${file.alt_text || ''}`.toLocaleLowerCase('es').includes(term));
+  const totalSize = files.reduce((sum, file) => sum + (file.size_bytes || 0), 0);
+  const withoutAlt = files.filter(file => !file.alt_text).length;
 
   return (
-    <div className="space-y-6">
-      {/* Top Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div>
-          <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">Biblioteca de Medios</h2>
-          <p className="text-slate-500 text-sm mt-0.5">
-            Imágenes limpias, sin hashes y sincronizadas en tiempo real con la base de datos MySQL
-          </p>
-        </div>
-        <button
-          onClick={() => fileInputRef.current?.click()}
-          disabled={uploading}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl gradient-brand text-white text-sm font-bold hover:opacity-90 active:scale-95 transition-all shadow-md shadow-blue-600/20 disabled:opacity-60 self-start sm:self-auto"
-        >
-          {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
-          {uploading ? 'Subiendo imágenes...' : 'Subir imágenes'}
-        </button>
-        <input
-          ref={fileInputRef}
-          type="file"
-          multiple
-          accept="image/*"
-          className="hidden"
-          onChange={e => e.target.files && uploadFiles(e.target.files)}
-        />
-      </div>
+    <div className="space-y-5">
+      <PageHeader title="Biblioteca de medios" description="Imágenes del catálogo almacenadas en el servidor."
+        actions={<button onClick={() => fileInputRef.current?.click()} disabled={uploading} className="admin-btn admin-btn-primary">{uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}{uploading ? 'Subiendo…' : 'Subir imágenes'}</button>} />
+      <input ref={fileInputRef} type="file" multiple accept={IMAGE_TYPES.join(',')} className="sr-only" onChange={event => event.target.files && void uploadFiles(event.target.files)} />
 
-      {/* Drag & Drop Upload Zone */}
+      <section className="grid grid-cols-2 gap-3 xl:grid-cols-3">
+        <StatCard label="Imágenes" value={files.length} icon={ImageIcon} tone="blue" />
+        <StatCard label="Espacio usado" value={formatBytes(totalSize)} icon={HardDrive} tone="violet" />
+        <StatCard label="Sin texto alternativo" value={withoutAlt} icon={Pencil} tone={withoutAlt ? 'amber' : 'green'} detail="Mejora la accesibilidad y el SEO" />
+      </section>
+
       <div
-        onDrop={handleDrop}
-        onDragOver={e => { e.preventDefault(); setDragOver(true); }}
+        onDragOver={event => { event.preventDefault(); setDragOver(true); }}
         onDragLeave={() => setDragOver(false)}
+        onDrop={handleDrop}
         onClick={() => !uploading && fileInputRef.current?.click()}
-        className={`border-2 border-dashed rounded-2xl p-8 text-center cursor-pointer transition-all duration-200 bg-white ${
-          dragOver ? 'border-blue-500 bg-blue-50/50' : 'border-slate-300 hover:border-blue-400 hover:bg-slate-50/50'
-        } ${uploading ? 'pointer-events-none opacity-60' : ''}`}
+        role="button"
+        tabIndex={0}
+        onKeyDown={event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); fileInputRef.current?.click(); } }}
+        className={`flex cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed px-6 py-8 text-center transition ${dragOver ? 'border-[#0052cc] bg-blue-50' : 'border-slate-300 bg-white hover:border-[#0052cc]/50 hover:bg-slate-50'}`}
+        aria-label="Arrastra imágenes aquí o haz clic para seleccionarlas"
       >
-        {uploading ? (
-          <div className="flex flex-col items-center gap-2">
-            <Loader2 className="w-9 h-9 text-blue-600 animate-spin" />
-            <p className="text-slate-800 text-sm font-bold">Procesando y guardando archivos en MySQL...</p>
-            <p className="text-slate-400 text-xs">Asignando nombres limpios y legibles para SEO</p>
-          </div>
-        ) : (
-          <div className="flex flex-col items-center gap-2">
-            <div className="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center mb-1">
-              <Upload className="w-6 h-6" />
-            </div>
-            <p className="text-slate-800 text-sm font-bold">Arrastra imágenes aquí o haz clic para subir</p>
-            <p className="text-slate-400 text-xs">JPG, PNG, WebP, GIF, SVG — Nombres limpios automáticos para e-commerce</p>
-          </div>
-        )}
+        {uploading ? <Loader2 className="h-8 w-8 animate-spin text-[#0052cc]" /> : <UploadCloud className={`h-8 w-8 ${dragOver ? 'text-[#0052cc]' : 'text-slate-400'}`} />}
+        <p className="mt-2 text-sm font-semibold text-slate-800">{uploading ? 'Subiendo imágenes…' : 'Arrastra imágenes aquí o haz clic para seleccionarlas'}</p>
+        <p className="mt-1 text-xs text-slate-500">JPG, PNG, WEBP, GIF, SVG o AVIF · máx. {MAX_MB} MB por archivo · hasta {MAX_FILES} a la vez</p>
       </div>
 
-      {uploadError && (
-        <div className="flex items-center gap-2 p-3.5 bg-rose-50 border border-rose-200 rounded-xl text-rose-700 text-sm font-medium">
-          <X className="w-4 h-4 shrink-0 text-rose-500" />
-          <span>{uploadError}</span>
-          <button onClick={() => setUploadError('')} className="ml-auto text-rose-500 hover:text-rose-700">
-            <X className="w-4 h-4" />
-          </button>
-        </div>
-      )}
+      {loadError && <p role="alert" className="admin-alert admin-alert-error">{loadError}</p>}
 
-      {/* Search Input */}
-      <div className="relative">
-        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-        <input
-          type="text"
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          placeholder="Buscar imagen por nombre legible o descripción..."
-          className="w-full pl-10 pr-10 py-2.5 bg-white border border-slate-200 rounded-xl text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all shadow-xs"
-        />
-        {search && (
-          <button onClick={() => setSearch('')} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
-            <X className="w-4 h-4" />
-          </button>
-        )}
+      <div className="admin-card overflow-hidden">
+        <div className="admin-card-header">
+          <div><h3 className="text-[15px]">Archivos</h3><p className="text-xs text-slate-500">{filtered.length} de {files.length} imágenes</p></div>
+          <SearchInput value={search} onChange={setSearch} placeholder="Buscar por nombre o texto alternativo" className="w-full sm:w-72" />
+        </div>
+        <div className="p-4 sm:p-5">
+          {loading ? <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-6">{Array.from({ length: 12 }, (_, index) => <div key={index} className="admin-skeleton aspect-[4/5]" />)}</div>
+            : filtered.length === 0 ? <EmptyState icon={ImageIcon} title={files.length ? 'Sin resultados' : 'La biblioteca está vacía'} text={files.length ? 'Ninguna imagen coincide con la búsqueda.' : 'Sube imágenes para usarlas en tus productos.'} />
+              : <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-6">
+                {filtered.map(file => (
+                  <figure key={file.id} className="group overflow-hidden rounded-xl border border-slate-200 bg-white transition hover:border-blue-200 hover:shadow-md">
+                    <div className="relative aspect-square bg-slate-50 p-3">
+                      <img src={file.url} alt={file.alt_text || file.original_name} className="h-full w-full object-contain" loading="lazy" />
+                      <div className="absolute inset-x-2 bottom-2 flex justify-center gap-1 opacity-100 transition sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100">
+                        <button onClick={() => void copyUrl(file)} className="grid h-8 w-8 place-items-center rounded-lg bg-white/95 text-slate-700 shadow hover:text-[#0052cc]" title="Copiar URL" aria-label={`Copiar URL de ${file.original_name}`}>{copiedId === file.id ? <Check className="h-4 w-4 text-emerald-600" /> : <Copy className="h-4 w-4" />}</button>
+                        <button onClick={() => void editAlt(file)} className="grid h-8 w-8 place-items-center rounded-lg bg-white/95 text-slate-700 shadow hover:text-[#0052cc]" title="Editar texto alternativo" aria-label={`Editar texto alternativo de ${file.original_name}`}><Pencil className="h-4 w-4" /></button>
+                        <button onClick={() => void confirmDelete(file)} className="grid h-8 w-8 place-items-center rounded-lg bg-white/95 text-slate-700 shadow hover:text-rose-600" title="Eliminar" aria-label={`Eliminar ${file.original_name}`}><Trash2 className="h-4 w-4" /></button>
+                      </div>
+                    </div>
+                    <figcaption className="border-t border-slate-100 px-3 py-2">
+                      <p className="truncate text-xs font-semibold text-slate-800" title={file.original_name}>{file.original_name || file.filename}</p>
+                      <p className="mt-0.5 flex items-center justify-between gap-2 text-[11px] text-slate-400"><span>{formatBytes(file.size_bytes)}</span>{!file.alt_text && <span className="font-semibold text-amber-600">Sin alt</span>}</p>
+                    </figcaption>
+                  </figure>
+                ))}
+              </div>}
+        </div>
       </div>
-
-      {/* Grid of Images */}
-      {loading ? (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-          {Array.from({ length: 10 }).map((_, i) => (
-            <div key={i} className="aspect-square bg-slate-200/70 rounded-2xl animate-pulse" />
-          ))}
-        </div>
-      ) : filtered.length === 0 ? (
-        <div className="text-center py-20 bg-white border border-slate-200 rounded-2xl p-8">
-          <ImageIcon className="w-12 h-12 mx-auto mb-3 text-slate-300" />
-          <p className="text-slate-700 font-bold text-sm">
-            {files.length === 0 ? 'No hay imágenes almacenadas aún' : 'No se encontraron coincidencias'}
-          </p>
-          <p className="text-slate-400 text-xs mt-1">Sube tus fotos de productos con nombres limpios y legibles</p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-          {filtered.map(file => (
-            <div key={file.id} className="bg-white border border-slate-200 rounded-2xl overflow-hidden group shadow-xs hover:shadow-md hover:border-slate-300 transition-all relative flex flex-col">
-              <div className="aspect-square bg-slate-50 relative flex items-center justify-center p-2 overflow-hidden border-b border-slate-100">
-                <img
-                  src={file.url}
-                  alt={file.alt_text || file.original_name}
-                  className="w-full h-full object-contain"
-                  loading="lazy"
-                />
-                {/* Hover overlay with action buttons */}
-                <div className="absolute inset-0 bg-slate-900/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 backdrop-blur-[2px]">
-                  <button
-                    onClick={() => copyUrl(file)}
-                    className="p-2.5 rounded-xl bg-white text-slate-800 hover:bg-blue-600 hover:text-white shadow-md transition-colors"
-                    title="Copiar ruta unhashed"
-                  >
-                    {copiedId === file.id ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4" />}
-                  </button>
-                  <button
-                    onClick={() => setDeleteId(file.id)}
-                    className="p-2.5 rounded-xl bg-white text-rose-600 hover:bg-rose-600 hover:text-white shadow-md transition-colors"
-                    title="Eliminar de servidor y BD"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-              <div className="p-3 bg-white flex-1 flex flex-col justify-between">
-                <p className="text-slate-800 text-xs font-bold truncate" title={file.filename}>
-                  {file.filename}
-                </p>
-                <div className="flex items-center justify-between text-[11px] text-slate-400 mt-1">
-                  <span>{formatBytes(file.size_bytes)}</span>
-                  <span className="font-mono text-[10px] text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded">BD #{file.id}</span>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Delete Confirmation Modal */}
-      {deleteId !== null && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
-          <div className="bg-white rounded-2xl w-full max-w-sm p-6 shadow-2xl border border-slate-200 text-center animate-fade-in">
-            <div className="w-14 h-14 rounded-full bg-rose-50 border border-rose-100 flex items-center justify-center mx-auto mb-4">
-              <Trash2 className="w-7 h-7 text-rose-600" />
-            </div>
-            <h3 className="text-slate-900 font-extrabold text-lg mb-2">¿Eliminar imagen?</h3>
-            <p className="text-slate-500 text-sm mb-6">
-              El archivo se eliminará de forma permanente del almacenamiento físico y del registro de la base de datos MySQL.
-            </p>
-            <div className="flex gap-3">
-              <button
-                onClick={() => setDeleteId(null)}
-                className="flex-1 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-semibold transition-colors"
-              >
-                Cancelar
-              </button>
-              <button
-                onClick={confirmDelete}
-                className="flex-1 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-sm font-bold shadow-md shadow-rose-600/20 active:scale-95 transition-all"
-              >
-                Eliminar
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

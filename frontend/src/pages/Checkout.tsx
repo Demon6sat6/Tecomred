@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Check, CreditCard, Truck, ArrowLeft, AlertCircle, Package, Clock, MapPin, Tag, X } from 'lucide-react';
+import { Check, ShoppingBag, Truck, ArrowLeft, AlertCircle, Package, Clock, MapPin, Tag, X } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useCurrency } from '../hooks/useCurrency';
 import { useAdmin } from '../context/AdminContext';
@@ -27,13 +27,16 @@ function Field({ label, name, value, onChange, placeholder, type = 'text', input
 
 export default function Checkout() {
   const { items, totalPrice, clearCart } = useCart();
-  const { addOrder, applyCoupon, incrementCouponUse, settings } = useAdmin();
+  const { addOrder, applyCoupon, settings } = useAdmin();
   const { formatShort } = useCurrency();
 
   const whatsappUrl = `https://wa.me/${(settings.storePhone || '').replace(/\D/g, '')}`;
 
   const [step, setStep] = useState<Step>('envio');
   const [errors, setErrors] = useState<FormErrors>({});
+  const [orderError, setOrderError] = useState('');
+  const [confirmedWhatsappUrl, setConfirmedWhatsappUrl] = useState('');
+  const [submitting, setSubmitting] = useState(false);
   const [confirmedOrder, setConfirmedOrder] = useState<{
     id: string;
     items: typeof items;
@@ -52,7 +55,6 @@ export default function Checkout() {
   const [form, setForm] = useState({
     nombre: '', apellido: '', email: '', telefono: '',
     direccion: '', ciudad: '', pais: 'Lima', codigo: '',
-    cardName: '', cardNumber: '', cardExpiry: '', cardCvv: '',
   });
 
   if (items.length === 0 && step !== 'confirmacion') {
@@ -68,24 +70,24 @@ export default function Checkout() {
     );
   }
 
-  const formatCard   = (v: string) => v.replace(/\D/g, '').slice(0, 16).replace(/(.{4})/g, '$1 ').trim();
-  const formatExpiry = (v: string) => { const d = v.replace(/\D/g, '').slice(0, 4); return d.length >= 3 ? `${d.slice(0, 2)}/${d.slice(2)}` : d; };
-
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    let { name, value } = e.target;
-    if (name === 'cardNumber') value = formatCard(value);
-    if (name === 'cardExpiry') value = formatExpiry(value);
-    if (name === 'cardCvv')    value = value.replace(/\D/g, '').slice(0, 4);
+    const { name } = e.target;
+    const { value } = e.target;
     setForm(f => ({ ...f, [name]: value }));
     if (errors[name]) setErrors(prev => { const n = { ...prev }; delete n[name]; return n; });
   };
 
-  const handleApplyCoupon = () => {
+  const handleApplyCoupon = async () => {
     if (!couponInput.trim()) return;
-    const result = applyCoupon(couponInput.trim(), totalPrice);
-    setCouponMsg({ text: result.message, ok: result.valid });
-    if (result.valid) setAppliedCoupon({ code: couponInput.trim().toUpperCase(), discount: result.discount });
-    else setAppliedCoupon(null);
+    try {
+      const result = await applyCoupon(couponInput.trim(), totalPrice);
+      setCouponMsg({ text: result.message, ok: result.valid });
+      if (result.valid) setAppliedCoupon({ code: couponInput.trim().toUpperCase(), discount: result.discount });
+      else setAppliedCoupon(null);
+    } catch (cause) {
+      setCouponMsg({ text: cause instanceof Error ? cause.message : 'No se pudo validar el cupón', ok: false });
+      setAppliedCoupon(null);
+    }
   };
 
   const removeCoupon = () => { setAppliedCoupon(null); setCouponInput(''); setCouponMsg(null); };
@@ -103,21 +105,14 @@ export default function Checkout() {
     return Object.keys(e).length === 0;
   };
 
-  const validatePayment = (): boolean => {
-    const e: FormErrors = {};
-    if (!form.cardName.trim())  e.cardName   = 'El nombre es requerido';
-    if (form.cardNumber.replace(/\s/g, '').length < 16) e.cardNumber = 'Número de tarjeta inválido (16 dígitos)';
-    if (!/^\d{2}\/\d{2}$/.test(form.cardExpiry)) e.cardExpiry = 'Formato MM/AA requerido';
-    if (form.cardCvv.length < 3) e.cardCvv   = 'CVV inválido (3-4 dígitos)';
-    setErrors(e);
-    return Object.keys(e).length === 0;
-  };
-
   const handleNextShipping = () => { if (validateShipping()) setStep('pago'); };
 
-  const handleOrder = () => {
-    if (!validatePayment()) return;
-    const orderId = `TR-${Date.now().toString().slice(-6)}`;
+  const handleOrder = async () => {
+    if (!validateShipping() || submitting) return;
+    const whatsappWindow = window.open('', '_blank');
+    setSubmitting(true);
+    setOrderError('');
+    const orderId = `TR-${crypto.randomUUID().slice(0, 12).toUpperCase()}`;
     const checkoutItems = items.map(({ product, quantity }) => ({
       productId: product.id,
       name: product.name,
@@ -126,11 +121,13 @@ export default function Checkout() {
     }));
     const discount = appliedCoupon?.discount ?? 0;
     const couponCode = appliedCoupon?.code ?? '';
-    const whatsappLines = checkoutItems.map(item => `• ${item.name} x${item.qty} - ${formatShort(item.price * item.qty)}`).join('\n');
-    const whatsappMessage = `Hola, quiero realizar el pedido ${orderId}.\n\nCliente: ${form.nombre} ${form.apellido}\nTeléfono: ${form.telefono}\nCorreo: ${form.email}\nDirección: ${form.direccion}, ${form.ciudad}, ${form.pais}\n\nProductos:\n${whatsappLines}\n\nTotal: ${formatShort(finalTotal)}${couponCode ? `\nCupón: ${couponCode}` : ''}`;
+    const whatsappLines = checkoutItems.map((item, index) => `${index + 1}. ${item.name} x${item.qty} — ${formatShort(item.price * item.qty)}`).join('\n');
+    const whatsappMessage = `*Hola, Siscomred. Quiero coordinar mi pedido* 🛒\n\n*Número:* ${orderId}\n*Cliente:* ${form.nombre} ${form.apellido}\n*Teléfono:* ${form.telefono}\n*Correo:* ${form.email}\n*Entrega:* ${form.direccion}, ${form.ciudad}, ${form.pais}\n\n*Productos*\n${whatsappLines}\n\n${couponCode ? `*Cupón:* ${couponCode}\n` : ''}*Total referencial:* ${formatShort(finalTotal)}\n\n¿Podrían confirmarme disponibilidad, precio final y forma de entrega? ¡Gracias!`;
+    const orderWhatsappUrl = `${whatsappUrl}?text=${encodeURIComponent(whatsappMessage)}`;
 
     // Register order in admin
-    addOrder({
+    try {
+      await addOrder({
       id: orderId,
       customer: `${form.nombre} ${form.apellido}`,
       email: form.email,
@@ -144,7 +141,13 @@ export default function Checkout() {
       address: `${form.direccion}, ${form.ciudad}, ${form.pais}`,
       notes: '',
       items: checkoutItems,
-    });
+      });
+    } catch (cause) {
+      whatsappWindow?.close();
+      setOrderError(cause instanceof Error ? cause.message : 'No se pudo registrar el pedido. Inténtalo de nuevo.');
+      setSubmitting(false);
+      return;
+    }
     setConfirmedOrder({
       id: orderId,
       items: items.map(item => ({ ...item })),
@@ -152,24 +155,25 @@ export default function Checkout() {
       discount,
       couponCode,
     });
-    if (appliedCoupon) incrementCouponUse(appliedCoupon.code);
     clearCart();
-    window.open(`${whatsappUrl}?text=${encodeURIComponent(whatsappMessage)}`, '_blank', 'noopener,noreferrer');
+    setConfirmedWhatsappUrl(orderWhatsappUrl);
+    if (whatsappWindow) {
+      whatsappWindow.opener = null;
+      whatsappWindow.location.href = orderWhatsappUrl;
+    }
     setStep('confirmacion');
+    setSubmitting(false);
   };
 
   const steps = [
     { id: 'envio',        label: 'Envío',        icon: Truck },
-    { id: 'pago',         label: 'Pago',         icon: CreditCard },
+    { id: 'pago',         label: 'Revisión',     icon: ShoppingBag },
     { id: 'confirmacion', label: 'Confirmación', icon: Check },
   ];
 
-  const estimatedDate = new Date();
-  estimatedDate.setDate(estimatedDate.getDate() + 2);
-  const dateStr = estimatedDate.toLocaleDateString('es', { weekday: 'long', day: 'numeric', month: 'long' });
-
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
+      {orderError && <p role="alert" className="mb-4 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">{orderError}</p>}
       <Link to="/carrito" className="inline-flex items-center gap-2 text-violet-600 hover:text-violet-700 font-medium text-sm mb-6 transition-colors">
         <ArrowLeft className="w-4 h-4" /> Volver al carrito
       </Link>
@@ -209,8 +213,8 @@ export default function Checkout() {
             </div>
             <div className="absolute inset-0 rounded-full bg-emerald-500/10 animate-ping" />
           </div>
-          <h2 className="text-3xl font-extrabold text-slate-900 mb-2">¡Pedido confirmado!</h2>
-          <p className="text-slate-600 mb-6">Gracias por tu compra en SiscomRed.</p>
+          <h2 className="text-3xl font-extrabold text-slate-900 mb-2">¡Solicitud registrada!</h2>
+          <p className="text-slate-600 mb-6">Envía el detalle por WhatsApp para confirmar disponibilidad y precio final.</p>
           <div className="bg-white border border-slate-200 rounded-2xl p-6 text-left space-y-4 mb-8 shadow-xs">
             <div className="flex items-center justify-between pb-4 border-b border-slate-200">
               <span className="text-slate-500 text-sm">Número de orden</span>
@@ -221,8 +225,8 @@ export default function Checkout() {
                 <Clock className="w-5 h-5 text-violet-600" />
               </div>
               <div>
-                <p className="text-slate-900 text-sm font-semibold">Entrega estimada</p>
-                <p className="text-slate-600 text-xs capitalize">{dateStr}</p>
+                <p className="text-slate-900 text-sm font-semibold">Entrega por coordinar</p>
+                <p className="text-slate-600 text-xs">La tienda te confirmará la fecha por WhatsApp.</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
@@ -250,14 +254,12 @@ export default function Checkout() {
                 </div>
               )}
               <div className="flex justify-between pt-3 border-t border-slate-200 font-bold">
-                <span className="text-slate-900">Total pagado</span>
+                <span className="text-slate-900">Total referencial</span>
                 <span className="gradient-text text-lg">{formatShort(confirmedOrder?.total ?? 0)}</span>
               </div>
             </div>
           </div>
-          <p className="text-slate-500 text-sm mb-6">
-            Recibirás un correo en <span className="text-slate-900 font-semibold">{form.email}</span>
-          </p>
+          {confirmedWhatsappUrl && <a href={confirmedWhatsappUrl} target="_blank" rel="noopener noreferrer" className="mb-6 inline-flex items-center justify-center rounded-xl bg-[#0052cc] px-6 py-3 font-bold text-white hover:bg-[#0042a6]">Abrir pedido en WhatsApp</a>}
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Link to="/" className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl gradient-brand text-white font-semibold hover:opacity-90 active:scale-95 transition-all shadow-md shadow-violet-500/20">Volver al inicio</Link>
             <Link to="/productos" className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-slate-100 border border-slate-200 text-slate-700 font-semibold hover:bg-slate-200 transition-colors">Seguir comprando</Link>
@@ -292,55 +294,32 @@ export default function Checkout() {
                 </div>
                 <button onClick={handleNextShipping}
                   className="mt-6 w-full min-h-[46px] py-3 rounded-xl gradient-brand text-white font-bold hover:opacity-90 active:scale-95 transition-all shadow-md shadow-violet-500/20 touch-manipulation">
-                  Continuar al pago
+                  Revisar pedido
                 </button>
               </div>
             )}
 
-            {/* Payment */}
+            {/* Review before sending the order to the store */}
             {step === 'pago' && (
               <div className="bg-white border border-slate-200 rounded-2xl p-5 sm:p-6 shadow-xs">
-                <h2 className="text-slate-900 font-bold text-lg mb-6 flex items-center gap-2">
-                  <CreditCard className="w-5 h-5 text-violet-600" /> Información de pago
+                <h2 className="text-slate-900 font-bold text-lg mb-3 flex items-center gap-2">
+                  <ShoppingBag className="w-5 h-5 text-blue-600" /> Revisa tu solicitud
                 </h2>
-                {/* Card preview */}
-                <div className="relative h-40 rounded-2xl gradient-brand p-5 mb-6 overflow-hidden shadow-lg shadow-violet-500/20">
-                  <div className="absolute inset-0 opacity-10">
-                    <div className="absolute -top-10 -right-10 w-40 h-40 bg-white rounded-full" />
-                    <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-white rounded-full" />
-                  </div>
-                  <div className="relative">
-                    <div className="flex justify-between items-start mb-6">
-                      <div className="w-10 h-7 bg-yellow-400/80 rounded-md" />
-                      <span className="text-white/60 text-xs font-mono">VISA</span>
-                    </div>
-                    <p className="text-white font-mono text-lg tracking-widest mb-3">{form.cardNumber || '•••• •••• •••• ••••'}</p>
-                    <div className="flex justify-between">
-                      <span className="text-white/70 text-xs">{form.cardName || 'NOMBRE APELLIDO'}</span>
-                      <span className="text-white/70 text-xs">{form.cardExpiry || 'MM/AA'}</span>
-                    </div>
-                  </div>
-                </div>
-                <div className="space-y-4">
-                  <Field name="cardName"   label="Nombre en la tarjeta *" value={form.cardName}   onChange={handleChange} placeholder="JUAN PEREZ"          error={errors.cardName} />
-                  <Field name="cardNumber" label="Número de tarjeta *"    value={form.cardNumber} onChange={handleChange} placeholder="1234 5678 9012 3456" inputMode="numeric" error={errors.cardNumber} />
-                  <div className="grid grid-cols-2 gap-4">
-                    <Field name="cardExpiry" label="Vencimiento *" value={form.cardExpiry} onChange={handleChange} placeholder="MM/AA" inputMode="numeric" error={errors.cardExpiry} />
-                    <Field name="cardCvv"    label="CVV *"         value={form.cardCvv}    onChange={handleChange} placeholder="123"   inputMode="numeric" error={errors.cardCvv} />
-                  </div>
-                </div>
-                <div className="flex items-center gap-2 mt-4 p-3 bg-emerald-50 border border-emerald-200 rounded-xl">
-                  <Check className="w-4 h-4 text-emerald-600 shrink-0" />
-                  <p className="text-emerald-700 text-xs font-medium">Pago 100% seguro. Tus datos están encriptados.</p>
+                <p className="text-slate-600 text-sm leading-relaxed">Registraremos tu pedido y abriremos WhatsApp con el detalle para coordinar disponibilidad y pago directamente con la tienda.</p>
+                <div className="mt-5 rounded-xl border border-blue-100 bg-blue-50 p-4 text-sm text-slate-700 space-y-1">
+                  <p className="font-bold text-slate-900">{form.nombre} {form.apellido}</p>
+                  <p>{form.email} · {form.telefono}</p>
+                  <p>{form.direccion}, {form.ciudad}, {form.pais}</p>
+                  <p className="pt-2 font-extrabold text-blue-700">Total de referencia: {formatShort(finalTotal)}</p>
                 </div>
                 <div className="flex gap-3 mt-6">
                   <button onClick={() => { setErrors({}); setStep('envio'); }}
                     className="px-5 py-3 min-h-[46px] rounded-xl bg-slate-100 border border-slate-200 text-slate-700 font-semibold hover:bg-slate-200 transition-colors touch-manipulation">
                     Atrás
                   </button>
-                  <button onClick={handleOrder}
-                    className="flex-1 min-h-[46px] py-3 rounded-xl gradient-brand text-white font-bold hover:opacity-90 active:scale-95 transition-all shadow-md shadow-violet-500/20 touch-manipulation">
-                    Confirmar pedido - {formatShort(finalTotal)}
+                  <button onClick={handleOrder} disabled={submitting}
+                    className="flex-1 min-h-[46px] py-3 rounded-xl gradient-brand text-white font-bold hover:opacity-90 disabled:opacity-60 transition-all shadow-md touch-manipulation">
+                    {submitting ? 'Registrando…' : 'Enviar pedido por WhatsApp'}
                   </button>
                 </div>
               </div>
@@ -382,7 +361,7 @@ export default function Checkout() {
                 <div className="flex gap-2">
                   <input value={couponInput} onChange={e => { setCouponInput(e.target.value.toUpperCase()); setCouponMsg(null); }}
                     placeholder="CODIGO" onKeyDown={e => e.key === 'Enter' && handleApplyCoupon()}
-                    className="flex-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 text-xs placeholder-slate-400 focus:outline-none focus:bg-white focus:border-violet-500 font-mono uppercase" />
+                    className="min-w-0 flex-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 text-xs placeholder-slate-400 focus:outline-none focus:bg-white focus:border-violet-500 font-mono uppercase" />
                   <button onClick={handleApplyCoupon}
                     className="px-3 py-2 rounded-xl gradient-brand text-white text-xs font-bold hover:opacity-90 transition-opacity shadow-xs">
                     Aplicar

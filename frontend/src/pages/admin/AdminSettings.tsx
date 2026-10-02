@@ -1,176 +1,149 @@
-import { useState, useEffect } from 'react';
-import { Check, Store, Mail, Phone, MapPin, Globe, Save, Clock } from 'lucide-react';
+import { useEffect, useRef, useState, type ElementType } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Clock, Globe, Loader2, LogOut, Mail, MapPin, Phone, RotateCcw, Save, SlidersHorizontal, Store, Wallet } from 'lucide-react';
 import { useAdmin, type StoreSettings } from '../../context/AdminContext';
 import { useCurrency } from '../../hooks/useCurrency';
+import { adminAlert } from '../../utils/adminAlerts';
+import { settingsSchema, validate, type FieldErrors } from '../../utils/adminValidation';
+import { Field, PageHeader, Switch } from '../../components/admin/AdminUI';
 
-function InputField({ label, name, value, icon: Icon, type = 'text', onChange }: {
-  label: string;
-  name: keyof StoreSettings;
-  value: string;
-  icon: React.ElementType;
-  type?: string;
-  onChange: (name: keyof StoreSettings, value: string) => void;
-}) {
-  return (
-    <div>
-      <label className="block text-xs text-slate-600 mb-1 font-semibold">{label}</label>
-      <div className="relative">
-        <Icon className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-        <input
-          type={type}
-          value={value}
-          onChange={e => onChange(name, e.target.value)}
-          className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 text-sm focus:bg-white focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all"
-        />
-      </div>
-    </div>
-  );
-}
+type TextKey = 'storeName' | 'storeEmail' | 'storePhone' | 'storeAddress' | 'supportHours' | 'storeWebsite' | 'freeShippingMin' | 'taxRate' | 'currency';
+type ToggleKey = 'maintenanceMode' | 'showOutOfStock' | 'allowReviews' | 'showAnnouncementBar';
+type SettingsForm = Record<TextKey, string> & Record<ToggleKey, boolean>;
 
-function Toggle({ label, desc, name, value, onChange }: {
-  label: string;
-  desc: string;
-  name: keyof StoreSettings;
-  value: boolean;
-  onChange: (name: keyof StoreSettings, value: boolean) => void;
-}) {
+const textKeys: TextKey[] = ['storeName', 'storeEmail', 'storePhone', 'storeAddress', 'supportHours', 'storeWebsite', 'freeShippingMin', 'taxRate', 'currency'];
+const toggles: { key: ToggleKey; label: string; desc: string }[] = [
+  { key: 'maintenanceMode', label: 'Modo mantenimiento', desc: 'Muestra un aviso de mantenimiento a los visitantes.' },
+  { key: 'showOutOfStock', label: 'Mostrar productos sin stock', desc: "Los productos agotados siguen visibles con la etiqueta 'Agotado'." },
+  { key: 'allowReviews', label: 'Reseñas de clientes', desc: 'Permite que los compradores califiquen los productos.' },
+  { key: 'showAnnouncementBar', label: 'Barra de promociones', desc: 'Activa el cintillo de promociones en la cabecera.' },
+];
+
+const pick = (settings: StoreSettings): SettingsForm => ({
+  ...Object.fromEntries(textKeys.map(key => [key, String(settings[key] ?? '')])) as Record<TextKey, string>,
+  ...Object.fromEntries(toggles.map(({ key }) => [key, Boolean(settings[key])])) as Record<ToggleKey, boolean>,
+});
+const sameForm = (a: SettingsForm, b: SettingsForm) => (Object.keys(a) as (keyof SettingsForm)[]).every(key => a[key] === b[key]);
+
+function Section({ icon: Icon, title, description, children }: { icon: ElementType; title: string; description: string; children: React.ReactNode }) {
   return (
-    <div className="flex items-center justify-between py-3.5 border-b border-slate-100 last:border-0">
+    <section className="admin-card grid gap-5 p-5 sm:p-6 lg:grid-cols-[240px_minmax(0,1fr)]">
       <div>
-        <p className="text-slate-900 text-sm font-bold">{label}</p>
-        <p className="text-slate-500 text-xs mt-0.5">{desc}</p>
+        <span className="admin-kpi-icon admin-tone-blue !h-10 !w-10"><Icon className="h-5 w-5" /></span>
+        <h3 className="mt-3 text-[15px]">{title}</h3>
+        <p className="mt-1 text-xs leading-relaxed text-slate-500">{description}</p>
       </div>
-      <button
-        type="button"
-        onClick={() => onChange(name, !value)}
-        className={`relative w-11 h-6 rounded-full transition-all shrink-0 ${value ? 'gradient-brand' : 'bg-slate-300'}`}
-      >
-        <span className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-all ${value ? 'left-5.5' : 'left-0.5'}`} />
-      </button>
-    </div>
+      <div className="grid min-w-0 gap-4 sm:grid-cols-2">{children}</div>
+    </section>
   );
 }
 
 export default function AdminSettings() {
-  const { settings, saveSettings, logout } = useAdmin();
+  const { settings, saveSettings, logout, isSavingSettings } = useAdmin();
   const { symbol } = useCurrency();
-  const [saved, setSaved] = useState(false);
-  const [form, setForm] = useState<StoreSettings>({ ...settings });
+  const navigate = useNavigate();
+  const [form, setForm] = useState<SettingsForm>(() => pick(settings));
+  const [errors, setErrors] = useState<FieldErrors>({});
+  const dirty = !sameForm(form, pick(settings));
+  const dirtyRef = useRef(dirty);
+  useEffect(() => { dirtyRef.current = dirty; });
+
+  // Sincroniza cambios llegados del servidor solo si no hay ediciones pendientes.
+  useEffect(() => { if (!dirtyRef.current) setForm(pick(settings)); }, [settings]);
 
   useEffect(() => {
-    setForm({ ...settings });
-  }, [settings]);
+    if (!dirty) return;
+    const warn = (event: BeforeUnloadEvent) => { event.preventDefault(); };
+    window.addEventListener('beforeunload', warn);
+    return () => window.removeEventListener('beforeunload', warn);
+  }, [dirty]);
 
-  const handleSave = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const ok = await saveSettings(form);
-    if (ok) {
-      setSaved(true);
-      setTimeout(() => setSaved(false), 2500);
+  const update = <K extends keyof SettingsForm>(key: K, value: SettingsForm[K]) => {
+    setForm(current => ({ ...current, [key]: value }));
+    setErrors(current => { if (!current[key]) return current; const next = { ...current }; delete next[key]; return next; });
+  };
+
+  const handleSave = async (event: React.SyntheticEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const result = validate(settingsSchema, form);
+    if (!result.ok) {
+      setErrors(result.errors);
+      void adminAlert.validation(result.messages);
+      return;
     }
+    const ok = await saveSettings({ ...form, ...(result.data as Partial<StoreSettings>) });
+    if (ok) void adminAlert.success('Configuración guardada', 'Los cambios ya se aplican en la tienda.');
+    else void adminAlert.error('No se pudieron guardar los cambios. Revisa la conexión con el servidor.');
   };
 
-  const handleInputChange = (name: keyof StoreSettings, value: string) => {
-    setForm(s => ({ ...s, [name]: value }));
+  const discard = () => { setForm(pick(settings)); setErrors({}); };
+
+  const handleLogout = async () => {
+    if (!await adminAlert.confirm('¿Cerrar sesión?', 'Saldrás del panel de administración en este navegador.', 'Cerrar sesión')) return;
+    logout();
+    navigate('/cuenta');
   };
 
-  const handleToggleChange = (name: keyof StoreSettings, value: boolean) => {
-    setForm(s => ({ ...s, [name]: value }));
-  };
+  const textField = (key: TextKey, label: string, Icon: ElementType, options: { type?: string; placeholder?: string; hint?: string; required?: boolean; wide?: boolean; maxLength?: number } = {}) => (
+    <Field label={label} required={options.required} error={errors[key]} hint={options.hint} className={options.wide ? 'sm:col-span-2' : ''}>
+      {props => <div className="relative">
+        <Icon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+        <input {...props} type={options.type ?? 'text'} value={form[key]} maxLength={options.maxLength ?? 200} placeholder={options.placeholder} onChange={event => update(key, event.target.value)} className="admin-input !pl-9" />
+      </div>}
+    </Field>
+  );
 
   return (
-    <div className="space-y-6 max-w-3xl">
-      <div>
-        <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">Ajustes de la Tienda</h2>
-        <p className="text-slate-500 text-sm mt-0.5">Parámetros generales de contacto, moneda y operatividad</p>
-      </div>
+    <div className="space-y-5 pb-20">
+      <PageHeader title="Configuración" description="Datos de contacto, políticas comerciales y comportamiento de la tienda." />
 
-      <form onSubmit={handleSave} className="space-y-6">
-        {/* Store info */}
-        <div className="bg-white border border-slate-200 rounded-2xl p-5 sm:p-6 shadow-xs space-y-4">
-          <h3 className="text-slate-900 font-extrabold text-base flex items-center gap-2">
-            <Store className="w-4 h-4 text-blue-600" /> Información Comercial
-          </h3>
-          <InputField label="Nombre de la Tienda" name="storeName" value={form.storeName} icon={Store} onChange={handleInputChange} />
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <InputField label="Correo Electrónico de Ventas" name="storeEmail" value={form.storeEmail} icon={Mail} onChange={handleInputChange} />
-            <InputField label="Teléfono / WhatsApp de Soporte" name="storePhone" value={form.storePhone} icon={Phone} onChange={handleInputChange} />
-          </div>
-          <InputField label="Dirección Física de la Tienda" name="storeAddress" value={form.storeAddress} icon={MapPin} onChange={handleInputChange} />
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <InputField label="Horario de Atención" name="supportHours" value={form.supportHours} icon={Clock} onChange={handleInputChange} />
-            <InputField label="URL Dominio Web" name="storeWebsite" value={form.storeWebsite} icon={Globe} onChange={handleInputChange} />
-          </div>
-        </div>
+      <form id="settings-form" onSubmit={event => void handleSave(event)} noValidate className="space-y-5">
+        <Section icon={Store} title="Información comercial" description="Se muestra en el pie de página, la página de contacto y los mensajes de WhatsApp.">
+          {textField('storeName', 'Nombre de la tienda', Store, { required: true, wide: true, maxLength: 60 })}
+          {textField('storeEmail', 'Correo de ventas', Mail, { type: 'email', required: true, maxLength: 254 })}
+          {textField('storePhone', 'Teléfono / WhatsApp', Phone, { type: 'tel', required: true, maxLength: 20, hint: 'Se usa para recibir los pedidos por WhatsApp' })}
+          {textField('storeAddress', 'Dirección física', MapPin, { required: true, wide: true })}
+          {textField('supportHours', 'Horario de atención', Clock, { required: true, maxLength: 80, placeholder: 'Lun-Vie 9am-7pm' })}
+          {textField('storeWebsite', 'Sitio web', Globe, { type: 'url', placeholder: 'https://siscomred.pe' })}
+        </Section>
 
-        {/* Commerce */}
-        <div className="bg-white border border-slate-200 rounded-2xl p-5 sm:p-6 shadow-xs space-y-4">
-          <h3 className="text-slate-900 font-extrabold text-base">Políticas de Comercio y Precios</h3>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div>
-              <label className="block text-xs text-slate-600 mb-1 font-semibold">Moneda Principal</label>
-              <select
-                value={form.currency}
-                onChange={e => handleInputChange('currency', e.target.value)}
-                className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 text-sm focus:bg-white focus:outline-none focus:border-blue-500"
-              >
-                {['PEN', 'USD', 'EUR', 'COP', 'MXN'].map(c => <option key={c} value={c}>{c}</option>)}
-              </select>
-            </div>
-            <div>
-              <label className="block text-xs text-slate-600 mb-1 font-semibold">Envío Gratis Desde</label>
-              <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm font-bold">{symbol}</span>
-                <input
-                  type="number"
-                  value={form.freeShippingMin}
-                  onChange={e => handleInputChange('freeShippingMin', e.target.value)}
-                  className="w-full pl-8 pr-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 text-sm focus:bg-white focus:outline-none focus:border-blue-500"
-                />
+        <Section icon={Wallet} title="Comercio y precios" description="Moneda, impuestos y el monto desde el que el envío es gratuito.">
+          <Field label="Moneda principal" error={errors.currency}>
+            {props => <select {...props} value={form.currency} onChange={event => update('currency', event.target.value)} className="admin-input">{['PEN', 'USD', 'EUR', 'COP', 'MXN'].map(currency => <option key={currency} value={currency}>{currency}</option>)}</select>}
+          </Field>
+          <Field label={`Envío gratis desde (${symbol})`} required error={errors.freeShippingMin} hint="0 = siempre gratis">
+            {props => <input {...props} type="number" inputMode="decimal" min="0" step="0.01" value={form.freeShippingMin} onChange={event => update('freeShippingMin', event.target.value)} className="admin-input tabular" />}
+          </Field>
+          <Field label="Impuesto IGV / IVA (%)" required error={errors.taxRate} hint="Entre 0 y 100">
+            {props => <input {...props} type="number" inputMode="decimal" min="0" max="100" step="0.01" value={form.taxRate} onChange={event => update('taxRate', event.target.value)} className="admin-input tabular" />}
+          </Field>
+        </Section>
+
+        <Section icon={SlidersHorizontal} title="Comportamiento" description="Activa o desactiva funciones visibles para los clientes.">
+          <div className="divide-y divide-slate-100 sm:col-span-2">
+            {toggles.map(toggle => (
+              <div key={toggle.key} className="flex items-center justify-between gap-4 py-3 first:pt-0 last:pb-0">
+                <div><p className="text-sm font-semibold text-slate-900">{toggle.label}</p><p className="text-xs text-slate-500">{toggle.desc}</p></div>
+                <Switch checked={form[toggle.key]} onChange={value => update(toggle.key, value)} label={toggle.label} />
               </div>
-            </div>
-            <div>
-              <label className="block text-xs text-slate-600 mb-1 font-semibold">Impuesto IGV / IVA (%)</label>
-              <input
-                type="number"
-                value={form.taxRate}
-                onChange={e => handleInputChange('taxRate', e.target.value)}
-                className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 text-sm focus:bg-white focus:outline-none focus:border-blue-500"
-              />
-            </div>
+            ))}
           </div>
-        </div>
-
-        {/* Toggles */}
-        <div className="bg-white border border-slate-200 rounded-2xl p-5 sm:p-6 shadow-xs">
-          <h3 className="text-slate-900 font-extrabold text-base mb-3">Comportamiento de la Tienda</h3>
-          <Toggle label="Modo mantenimiento" desc="Muestra aviso de mantenimiento a los clientes visitantes" name="maintenanceMode" value={form.maintenanceMode} onChange={handleToggleChange} />
-          <Toggle label="Mostrar productos sin stock" desc="Los productos agotados siguen visibles con etiqueta 'Agotado'" name="showOutOfStock" value={form.showOutOfStock} onChange={handleToggleChange} />
-          <Toggle label="Habilitar reseñas de clientes" desc="Permite a los usuarios dejar calificaciones en los productos" name="allowReviews" value={form.allowReviews} onChange={handleToggleChange} />
-          <Toggle label="Barra superior de promociones" desc="Activa el cintillo con promociones en la cabecera" name="showAnnouncementBar" value={Boolean(form.showAnnouncementBar)} onChange={handleToggleChange} />
-        </div>
-
-        <button
-          type="submit"
-          className={`flex items-center justify-center gap-2 px-6 py-3 rounded-xl text-white font-bold transition-all active:scale-95 shadow-md ${
-            saved ? 'bg-emerald-600 shadow-emerald-600/20' : 'gradient-brand shadow-blue-600/20 hover:opacity-95'
-          }`}
-        >
-          {saved ? <><Check className="w-5 h-5" /> ¡Ajustes Guardados con Éxito!</> : <><Save className="w-5 h-5" /> Guardar Todos los Cambios</>}
-        </button>
+        </Section>
       </form>
 
-      {/* Danger zone */}
-      <div className="bg-white border border-rose-200 rounded-2xl p-5 shadow-xs">
-        <h3 className="text-rose-700 font-extrabold text-sm mb-1">Cierre de Sesión Seguro</h3>
-        <p className="text-slate-500 text-xs mb-4">Cierra la sesión activa del panel de control en este navegador.</p>
-        <button
-          type="button"
-          onClick={logout}
-          className="px-4 py-2.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-bold hover:bg-rose-100 transition-colors"
-        >
-          Cerrar Sesión de Administrador
-        </button>
+      <section className="admin-card flex flex-col gap-3 !border-rose-200 p-5 sm:flex-row sm:items-center sm:justify-between">
+        <div><h3 className="text-[15px] !text-rose-700">Cerrar sesión</h3><p className="text-xs text-slate-500">Cierra la sesión activa del panel en este navegador.</p></div>
+        <button type="button" onClick={() => void handleLogout()} className="admin-btn admin-btn-secondary text-rose-600 hover:!bg-rose-50"><LogOut className="h-4 w-4" /> Cerrar sesión</button>
+      </section>
+
+      <div className={`fixed bottom-4 left-1/2 z-40 w-[min(640px,calc(100%-2rem))] -translate-x-1/2 transition-all duration-200 ${dirty ? 'translate-y-0 opacity-100' : 'pointer-events-none translate-y-6 opacity-0'}`} aria-hidden={!dirty}>
+        <div className="flex items-center justify-between gap-3 rounded-2xl bg-slate-900 px-4 py-3 text-white shadow-2xl">
+          <p className="text-sm font-medium">Tienes cambios sin guardar</p>
+          <div className="flex gap-2">
+            <button type="button" onClick={discard} tabIndex={dirty ? 0 : -1} className="admin-btn admin-btn-sm text-slate-200 hover:bg-white/10"><RotateCcw className="h-3.5 w-3.5" /> Descartar</button>
+            <button type="submit" form="settings-form" tabIndex={dirty ? 0 : -1} disabled={isSavingSettings} className="admin-btn admin-btn-primary admin-btn-sm">{isSavingSettings ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-3.5 w-3.5" />}Guardar cambios</button>
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -16,8 +16,10 @@
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
     "react-router-dom": "^7.14.1",
+    "sweetalert2": "^11.26.25",
     "tailwindcss": "^4.2.2",
-    "tecomred-workspace": "file:.."
+    "tecomred-workspace": "file:..",
+    "zod": "^4.6.5"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.4",

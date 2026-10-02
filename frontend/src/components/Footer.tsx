@@ -45,7 +45,7 @@ function NewsletterForm() {
 
   return (
     <form className="flex flex-col gap-2 w-full sm:w-auto" onSubmit={handleSubmit} noValidate>
-      <div className="flex gap-2">
+      <div className="flex min-w-0 gap-2">
         <input
           type="email"
           value={email}
@@ -53,7 +53,7 @@ function NewsletterForm() {
           placeholder="tu@correo.com"
           aria-label="Correo electrónico para newsletter"
           disabled={status === 'loading'}
-          className={`flex-1 sm:w-64 px-3 sm:px-4 py-2 sm:py-2.5 bg-white border rounded-lg sm:rounded-xl text-xs sm:text-sm text-slate-800 placeholder-slate-400 focus:outline-none transition-colors disabled:opacity-50 ${
+          className={`min-w-0 flex-1 sm:w-64 px-3 sm:px-4 py-2 sm:py-2.5 bg-white border rounded-lg sm:rounded-xl text-xs sm:text-sm text-slate-800 placeholder-slate-400 focus:outline-none transition-colors disabled:opacity-50 ${
             error ? 'border-red-400' : 'border-slate-300 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20'
           }`}
         />
